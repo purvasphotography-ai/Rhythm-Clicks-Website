@@ -522,7 +522,7 @@ header.scrolled .logo img {
   width: 100%;
   height: 100%;
   background-size: cover;
-  background-position: center 25%;
+  background-position: center 37.5%;
   opacity: 0;
   transition: opacity 1.5s ease-in-out;
 }
