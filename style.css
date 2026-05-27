@@ -795,7 +795,7 @@ header.scrolled .logo img {
   border: 1px solid var(--accent-gold-light);
 }
 
-.feature-text h4 {
+.feature-text .feature-title {
   font-family: var(--font-sans);
   font-size: 1rem;
   font-weight: 600;
@@ -1165,7 +1165,7 @@ header.scrolled .logo img {
   box-shadow: var(--box-shadow);
 }
 
-.client-info h4 {
+.client-info .client-name {
   font-family: var(--font-sans);
   font-size: 1rem;
   font-weight: 600;
@@ -1385,7 +1385,7 @@ textarea {
   flex-shrink: 0;
 }
 
-.info-content h4 {
+.info-content .info-title {
   font-family: var(--font-sans);
   font-size: 0.95rem;
   text-transform: uppercase;
@@ -1478,7 +1478,7 @@ textarea {
   border-top: 4px solid var(--text-primary);
 }
 
-.map-card h4 {
+.map-card .map-title {
   font-family: var(--font-sans);
   font-weight: 700;
   font-size: 1.15rem;
@@ -1733,7 +1733,7 @@ footer {
 }
 
 .footer-col h3, 
-.footer-col h4 {
+.footer-col .footer-title {
   color: #fff;
   margin-bottom: var(--spacing-md);
 }
@@ -1743,7 +1743,7 @@ footer {
   letter-spacing: 0.05em;
 }
 
-.footer-col h4 {
+.footer-col .footer-title {
   font-family: var(--font-sans);
   font-size: 0.85rem;
   font-weight: 700;
