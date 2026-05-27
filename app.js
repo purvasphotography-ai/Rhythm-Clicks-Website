@@ -1,8 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Load directly on the contact form page instead of home page
+  // Force scroll to the top (first page) on fresh load / refresh, disabling browser scroll restoration
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+  
   if (!window.location.hash) {
-    window.location.replace('#contact');
+    window.scrollTo(0, 0);
+  } else {
+    // If they explicitly loaded with a hash, scroll to that section
+    const targetSection = document.querySelector(window.location.hash);
+    if (targetSection) {
+      setTimeout(() => {
+        targetSection.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
   }
 
   /* ==========================================================================
