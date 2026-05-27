@@ -431,9 +431,10 @@ document.addEventListener('DOMContentLoaded', () => {
         showInputValidity(formName, true);
       }
 
-      // Validate Email
+      // Validate Email (Optional)
+      const emailVal = formEmail.value.trim();
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formEmail.value.trim())) {
+      if (emailVal && !emailRegex.test(emailVal)) {
         showInputValidity(formEmail, false);
         formIsValid = false;
       } else {
@@ -462,7 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Construct WhatsApp message and open link
       const waName = formName.value.trim();
-      const waEmail = formEmail.value.trim();
+      const waEmail = formEmail.value.trim() || 'Not specified';
       const waPhone = formPhone.value.trim();
       const waSession = formSession.options[formSession.selectedIndex].text;
       const formDate = document.getElementById('form-date');

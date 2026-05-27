@@ -32,12 +32,6 @@ const GALLERY_DATA = [
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A8630.jpg",
-    "caption": " A2A8630",
-    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
-  },
-  {
-    "category": "maternity",
     "src": "assets/gallery/maternity/_RCS0208.jpg",
     "caption": " Rcs0208",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
@@ -82,6 +76,12 @@ const GALLERY_DATA = [
     "category": "maternity",
     "src": "assets/gallery/maternity/_RCS0946.jpg",
     "caption": " Rcs0946",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/sleeping maternity.jpg",
+    "caption": "Sleeping Maternity",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
@@ -338,122 +338,332 @@ const GALLERY_DATA = [
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_1.jpg",
-    "caption": "Master Edit 1",
+    "src": "assets/gallery/master-edits/_A2A1112 (2).jpg",
+    "caption": " A2A1112 (2)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_130.jpg",
-    "caption": "Master Edit 130",
+    "src": "assets/gallery/master-edits/_A2A1122.jpg",
+    "caption": " A2A1122",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_14.jpg",
-    "caption": "Master Edit 14",
+    "src": "assets/gallery/master-edits/_A2A1162_1.jpg",
+    "caption": " A2A1162 1",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_145.jpg",
-    "caption": "Master Edit 145",
+    "src": "assets/gallery/master-edits/_A2A5808 (3).jpg",
+    "caption": " A2A5808 (3)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_24.jpg",
-    "caption": "Master Edit 24",
+    "src": "assets/gallery/master-edits/_A2A7542.jpg",
+    "caption": " A2A7542",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_29.jpg",
-    "caption": "Master Edit 29",
+    "src": "assets/gallery/master-edits/_A2A7827 (1).jpg",
+    "caption": " A2A7827 (1)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_32.jpg",
-    "caption": "Master Edit 32",
+    "src": "assets/gallery/master-edits/_A2A8425.jpg",
+    "caption": " A2A8425",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_37.jpg",
-    "caption": "Master Edit 37",
+    "src": "assets/gallery/master-edits/_A2A9404 (1).jpg",
+    "caption": " A2A9404 (1)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_38.jpg",
-    "caption": "Master Edit 38",
+    "src": "assets/gallery/master-edits/_A2A9438.jpg",
+    "caption": " A2A9438",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_4.jpg",
-    "caption": "Master Edit 4",
+    "src": "assets/gallery/master-edits/_CS_1361.jpg",
+    "caption": " Cs 1361",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_41.jpg",
-    "caption": "Master Edit 41",
+    "src": "assets/gallery/master-edits/_RCS0087 (1).jpg",
+    "caption": " Rcs0087 (1)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_42.jpg",
-    "caption": "Master Edit 42",
+    "src": "assets/gallery/master-edits/_RCS0324.jpg",
+    "caption": " Rcs0324",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_43.jpg",
-    "caption": "Master Edit 43",
+    "src": "assets/gallery/master-edits/_RCS0788.jpg",
+    "caption": " Rcs0788",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_5.jpg",
-    "caption": "Master Edit 5",
+    "src": "assets/gallery/master-edits/_RCS0947.jpg",
+    "caption": " Rcs0947",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_53.jpg",
-    "caption": "Master Edit 53",
+    "src": "assets/gallery/master-edits/_RCS1085.jpg",
+    "caption": " Rcs1085",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_6.jpg",
-    "caption": "Master Edit 6",
+    "src": "assets/gallery/master-edits/_RCS8506 (1).jpg",
+    "caption": " Rcs8506 (1)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_63.jpg",
-    "caption": "Master Edit 63",
+    "src": "assets/gallery/master-edits/_RCS9863.jpg",
+    "caption": " Rcs9863",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_7.jpg",
-    "caption": "Master Edit 7",
+    "src": "assets/gallery/master-edits/_master edit.jpg",
+    "caption": " Master Edit",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_8.jpg",
-    "caption": "Master Edit 8",
+    "src": "assets/gallery/master-edits/blue master edit.jpg",
+    "caption": "Blue Master Edit",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master_edit_89.jpg",
-    "caption": "Master Edit 89",
+    "src": "assets/gallery/master-edits/master (1).jpg",
+    "caption": "Master (1)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edi 2.jpg",
+    "caption": "Master Edi 2",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (13).jpg",
+    "caption": "Master Edit (13)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (14).jpg",
+    "caption": "Master Edit (14)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (15).jpg",
+    "caption": "Master Edit (15)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (16).jpg",
+    "caption": "Master Edit (16)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (17).jpg",
+    "caption": "Master Edit (17)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (18).jpg",
+    "caption": "Master Edit (18)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (19).jpg",
+    "caption": "Master Edit (19)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (20).jpg",
+    "caption": "Master Edit (20)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (21).jpg",
+    "caption": "Master Edit (21)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (22).jpg",
+    "caption": "Master Edit (22)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (23).jpg",
+    "caption": "Master Edit (23)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (24).jpg",
+    "caption": "Master Edit (24)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (25).jpg",
+    "caption": "Master Edit (25)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit (26).jpg",
+    "caption": "Master Edit (26)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit 1 (4).jpg",
+    "caption": "Master Edit 1 (4)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit 1 (5).jpg",
+    "caption": "Master Edit 1 (5)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit 1 (6).jpg",
+    "caption": "Master Edit 1 (6)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit 1 (7).jpg",
+    "caption": "Master Edit 1 (7)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit 1 new (1).jpg",
+    "caption": "Master Edit 1 New (1)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit 2 (10).jpg",
+    "caption": "Master Edit 2 (10)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit 2 (11).jpg",
+    "caption": "Master Edit 2 (11)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit 2 (6).jpg",
+    "caption": "Master Edit 2 (6)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit 2 (7).jpg",
+    "caption": "Master Edit 2 (7)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit 2 (8).jpg",
+    "caption": "Master Edit 2 (8)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit 2 (9).jpg",
+    "caption": "Master Edit 2 (9)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit 3 (3).jpg",
+    "caption": "Master Edit 3 (3)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit 4 (3).jpg",
+    "caption": "Master Edit 4 (3)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit `1 (1).jpg",
+    "caption": "Master Edit `1 (1)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit new 2 (1).jpg",
+    "caption": "Master Edit New 2 (1)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit re edit.jpg",
+    "caption": "Master Edit Re Edit",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/master edit(4) (1).jpg",
+    "caption": "Master Edit(4) (1)",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/music newborn.jpg",
+    "caption": "Music Newborn",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/rhythmclicksstudio_newborn_digital_background__baby_girl_in_a_o_cfec9c6b-4c9c-4374-80b5-bfe2c4b09362.jpg",
+    "caption": "Rhythmclicksstudio Newborn Digital Background  Baby Girl In A O Cfec9C6B 4C9C 4374 80B5 Bfe2C4B09362",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/rhythmclicksstudio_newborn_realistic_background_baby_girl_sleep_da6b09df-5b0b-4b1b-b7dd-420a0370b81f.jpg",
+    "caption": "Rhythmclicksstudio Newborn Realistic Background Baby Girl Sleep Da6B09Df 5B0B 4B1B B7Dd 420A0370B81F",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   }
 ];
