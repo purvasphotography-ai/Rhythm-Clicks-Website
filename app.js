@@ -69,19 +69,37 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ==========================================================================
-     3. Hero Slideshow Rotating Background
+     3. Hero Slideshow Rotating Background (Lazy Loaded)
      ========================================================================== */
   const slides = document.querySelectorAll('.hero-slide');
   let currentSlide = 0;
   const slideInterval = 5000; // 5 seconds
 
+  const loadSlideBg = (slide) => {
+    if (slide && slide.dataset.src && !slide.style.backgroundImage) {
+      slide.style.backgroundImage = `url('${slide.dataset.src}')`;
+    }
+  };
+
   const nextSlide = () => {
     slides[currentSlide].classList.remove('active');
     currentSlide = (currentSlide + 1) % slides.length;
+    
+    // Load next slide background image before showing it
+    loadSlideBg(slides[currentSlide]);
+    
+    // Preload the next-next slide background image for a smooth transition
+    const nextNextIdx = (currentSlide + 1) % slides.length;
+    loadSlideBg(slides[nextNextIdx]);
+    
     slides[currentSlide].classList.add('active');
   };
 
   if (slides.length > 1) {
+    // Delay loading the second slide slightly to prioritize initial critical path load
+    setTimeout(() => {
+      loadSlideBg(slides[1]);
+    }, 1500);
     setInterval(nextSlide, slideInterval);
   }
 
