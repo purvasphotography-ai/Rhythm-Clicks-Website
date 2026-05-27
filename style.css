@@ -1842,14 +1842,17 @@ footer {
 }
 
 .whatsapp-icon {
-  width: 26px;
-  height: 26px;
-  fill: #25D366 !important;
-  display: block;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .whatsapp-float .whatsapp-icon {
-  fill: #ffffff !important;
+  width: 32px;
+  height: 32px;
+}
+
+.whatsapp-float .whatsapp-icon .wa-bg {
+  display: none;
 }
 
 /* Master Edits Signature Section Styles */
