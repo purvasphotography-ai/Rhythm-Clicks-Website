@@ -1822,30 +1822,34 @@ footer {
   right: 30px;
   width: 56px;
   height: 56px;
-  background-color: var(--text-primary);
-  color: var(--bg-primary);
+  background-color: #25D366;
+  color: #ffffff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.25);
   z-index: 999;
   transition: all var(--transition-medium);
   cursor: pointer;
 }
 
 .whatsapp-float:hover {
-  background-color: #25D366;
+  background-color: #20ba5a;
   color: #ffffff;
   transform: translateY(-5px) scale(1.05);
-  box-shadow: 0 12px 30px rgba(37, 211, 102, 0.35);
+  box-shadow: 0 12px 30px rgba(37, 211, 102, 0.45);
 }
 
 .whatsapp-icon {
   width: 26px;
   height: 26px;
-  fill: currentColor;
+  fill: #25D366 !important;
   display: block;
+}
+
+.whatsapp-float .whatsapp-icon {
+  fill: #ffffff !important;
 }
 
 /* Master Edits Signature Section Styles */
