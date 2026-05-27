@@ -11,3 +11,4 @@ echo "You can refresh your browser now."
 echo "--------------------------------------------------"
 # Wait for user input so the window doesn't close immediately
 read -p "Press Enter to close this window..."
+Done
