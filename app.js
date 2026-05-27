@@ -505,5 +505,47 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* ==========================================================================
+     9. FAQ Accordion & Category Tab Switching
+     ========================================================================== */
+  const faqTabButtons = document.querySelectorAll('.faq-tab-btn');
+  const faqPanels = document.querySelectorAll('.faq-panel');
+
+  faqTabButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      faqTabButtons.forEach(button => button.classList.remove('active'));
+      faqPanels.forEach(panel => panel.classList.remove('active'));
+
+      e.target.classList.add('active');
+      const cat = e.target.getAttribute('data-faq-cat');
+      const activePanel = document.getElementById(`faq-${cat}`);
+      if (activePanel) activePanel.classList.add('active');
+    });
+  });
+
+  const faqAccordion = document.querySelector('.faq-content');
+  if (faqAccordion) {
+    faqAccordion.addEventListener('click', (e) => {
+      const question = e.target.closest('.faq-question');
+      if (question) {
+        const item = question.closest('.faq-item');
+        const answer = item.querySelector('.faq-answer');
+        const isActive = item.classList.contains('active');
+
+        // Close all other items in the active panel
+        const activePanel = question.closest('.faq-panel');
+        const allItems = activePanel.querySelectorAll('.faq-item');
+        allItems.forEach(i => {
+          i.classList.remove('active');
+          i.querySelector('.faq-answer').style.maxHeight = null;
+        });
+
+        if (!isActive) {
+          item.classList.add('active');
+          answer.style.maxHeight = answer.scrollHeight + 'px';
+        }
+      }
+    });
+  }
 
 });
