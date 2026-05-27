@@ -1,5 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+  // Load directly on the contact form page instead of home page
+  if (!window.location.hash) {
+    window.location.replace('#contact');
+  }
+
   /* ==========================================================================
      1. Navigation Scroll Effect & Active States
      ========================================================================== */
@@ -448,11 +453,25 @@ document.addEventListener('DOMContentLoaded', () => {
         return; // stop execution if form not filled correctly
       }
 
-      // Success Path! Construct custom greeting message
-      const userName = formName.value.trim().split(' ')[0]; // First name
-      const sessionSelection = formSession.options[formSession.selectedIndex].text;
+      // Construct WhatsApp message and open link
+      const waName = formName.value.trim();
+      const waEmail = formEmail.value.trim();
+      const waPhone = formPhone.value.trim();
+      const waSession = formSession.options[formSession.selectedIndex].text;
+      const formDate = document.getElementById('form-date');
+      const formMessage = document.getElementById('form-message');
+      const waDate = (formDate && formDate.value) ? formDate.value : 'Not specified';
+      const waMsg = (formMessage && formMessage.value.trim()) ? formMessage.value.trim() : 'None';
 
-      successMsgText.innerHTML = `Thank you, <strong>${userName}</strong>! We have received your inquiry for the <strong>${sessionSelection}</strong>. Our studio manager will review availability and contact you at <strong>${formPhone.value}</strong> or via email within 24 hours. Let's create beautiful memories together!`;
+      const waMessageText = `Hello Rhythm Clicks Studio!\n\nI would like to book a photography session. Here are my details:\n\n• *Name:* ${waName}\n• *Email:* ${waEmail}\n• *Phone:* ${waPhone}\n• *Session:* ${waSession}\n• *Preferred Date:* ${waDate}\n• *Details/Milestones:* ${waMsg}`;
+      const waUrl = `https://wa.me/919712701002?text=${encodeURIComponent(waMessageText)}`;
+      
+      // Open WhatsApp in a new tab
+      window.open(waUrl, '_blank');
+
+      // Success Path! Construct custom greeting message
+      const userName = waName.split(' ')[0]; // First name
+      successMsgText.innerHTML = `Thank you, <strong>${userName}</strong>! We have opened WhatsApp to send your inquiry for the <strong>${waSession}</strong> directly to our team. Let's create beautiful memories together!`;
       
       // Open Success Modal
       successModal.classList.add('active');
