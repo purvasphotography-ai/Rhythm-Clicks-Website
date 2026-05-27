@@ -5,16 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     history.scrollRestoration = 'manual';
   }
   
-  if (!window.location.hash) {
-    window.scrollTo(0, 0);
-  } else {
-    // If they explicitly loaded with a hash, scroll to that section
-    const targetSection = document.querySelector(window.location.hash);
-    if (targetSection) {
-      setTimeout(() => {
-        targetSection.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    }
+  window.scrollTo(0, 0);
+  
+  // Clear any hash on load so it doesn't scroll on next reload
+  if (window.location.hash) {
+    history.replaceState("", document.title, window.location.pathname + window.location.search);
   }
 
   /* ==========================================================================
