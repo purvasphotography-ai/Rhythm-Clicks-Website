@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rhythmclicks.in/sitemap.xml
+Sitemap: https://rhythmclicksstudio.com/sitemap.xml
