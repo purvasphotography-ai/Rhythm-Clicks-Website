@@ -19,8 +19,44 @@ document.addEventListener('DOMContentLoaded', () => {
   const sections = document.querySelectorAll('section');
   const navLinks = document.querySelectorAll('.nav-menu .nav-link, .mobile-nav .nav-link');
 
+  // Sliding Liquid Glass Pill Indicator for Navigation Menu
+  const navMenuUl = document.querySelector('.nav-menu ul');
+  let indicator = null;
+  
+  if (navMenuUl) {
+    indicator = document.createElement('li');
+    indicator.className = 'nav-indicator-pill';
+    navMenuUl.appendChild(indicator);
+  }
+
+  const updateIndicator = () => {
+    if (!indicator || !navMenuUl) return;
+    const activeLink = document.querySelector('.nav-menu .nav-link.active');
+    if (activeLink) {
+      const activeRect = activeLink.getBoundingClientRect();
+      const parentRect = navMenuUl.getBoundingClientRect();
+      
+      indicator.style.opacity = '1';
+      indicator.style.left = `${activeRect.left - parentRect.left}px`;
+      indicator.style.width = `${activeRect.width}px`;
+      indicator.style.height = `${activeRect.height}px`;
+      indicator.style.top = `${activeRect.top - parentRect.top}px`;
+      
+      console.log('Active Link Position:', {
+        text: activeLink.textContent,
+        left: indicator.style.left,
+        width: indicator.style.width,
+        height: indicator.style.height
+      });
+    } else {
+      indicator.style.opacity = '0';
+      console.log('No active link found for navigation indicator.');
+    }
+  };
+
+  // Run on scroll, resize and initial load
   window.addEventListener('scroll', () => {
-    // Header Glassmorphism Toggle
+    // Header Scroll State Toggle
     if (window.scrollY > 50) {
       header.classList.add('scrolled');
     } else {
@@ -39,11 +75,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     navLinks.forEach(link => {
       link.classList.remove('active');
-      if (link.getAttribute('href').substring(1) === current) {
+      if (
+        link.getAttribute('href').substring(1) === current ||
+        (current === 'home' && link.getAttribute('href') === '#')
+      ) {
         link.classList.add('active');
       }
     });
+
+    // Update sliding pill position
+    updateIndicator();
   });
+
+  window.addEventListener('resize', updateIndicator);
+  
+  // Set initial active state and pill position after browser layout finishes
+  setTimeout(() => {
+    // Manually run highlighting once on load
+    let current = '';
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop - 120;
+      const sectionHeight = section.clientHeight;
+      if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
+        current = section.getAttribute('id');
+      }
+    });
+    if (!current) current = 'home'; // default active is home
+
+    navLinks.forEach(link => {
+      if (
+        link.getAttribute('href').substring(1) === current ||
+        (current === 'home' && link.getAttribute('href') === '#')
+      ) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+    updateIndicator();
+  }, 200);
 
   /* ==========================================================================
      2. Mobile Drawer Navigation
