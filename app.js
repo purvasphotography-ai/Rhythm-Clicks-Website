@@ -267,6 +267,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 200);
   };
 
+  const interleaveCategories = (items) => {
+    const groups = {};
+    items.forEach(item => {
+      if (!groups[item.category]) {
+        groups[item.category] = [];
+      }
+      groups[item.category].push(item);
+    });
+
+    const categories = Object.keys(groups);
+    const mixed = [];
+    let maxLen = 0;
+    
+    categories.forEach(cat => {
+      if (groups[cat].length > maxLen) {
+        maxLen = groups[cat].length;
+      }
+    });
+
+    for (let i = 0; i < maxLen; i++) {
+      categories.forEach(cat => {
+        if (i < groups[cat].length) {
+          mixed.push(groups[cat][i]);
+        }
+      });
+    }
+    return mixed;
+  };
+
   const renderGallery = (appendOnly = false) => {
     if (!portfolioContainer) return;
     
@@ -282,7 +311,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const filteredData = data.filter(item => currentFilter === 'all' || item.category === currentFilter);
+    let filteredData = [];
+    if (currentFilter === 'all') {
+      filteredData = interleaveCategories(data);
+    } else {
+      filteredData = data.filter(item => item.category === currentFilter);
+    }
     const totalMatching = filteredData.length;
 
     let startIdx = 0;
