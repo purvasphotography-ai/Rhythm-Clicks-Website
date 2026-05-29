@@ -8,6 +8,48 @@ const GALLERY_DATA = [
   },
   {
     "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A0017_result.webp",
+    "caption": " A2A0017 Result",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A0301_result.webp",
+    "caption": " A2A0301 Result",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A1868_result.webp",
+    "caption": " A2A1868 Result",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A1875_result.webp",
+    "caption": " A2A1875 Result",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A1892_result.webp",
+    "caption": " A2A1892 Result",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A1896_result.webp",
+    "caption": " A2A1896 Result",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A1933_result.webp",
+    "caption": " A2A1933 Result",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
     "src": "assets/gallery/maternity/_A2A2933.jpg",
     "caption": " A2A2933",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
@@ -20,14 +62,56 @@ const GALLERY_DATA = [
   },
   {
     "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A4422_result.webp",
+    "caption": " A2A4422 Result",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A4436 (1)_result.webp",
+    "caption": " A2A4436 (1) Result",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
     "src": "assets/gallery/maternity/_A2A4436.jpg",
     "caption": " A2A4436",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
     "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A4457_result.webp",
+    "caption": " A2A4457 Result",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A4522_result.webp",
+    "caption": " A2A4522 Result",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A4542_result.webp",
+    "caption": " A2A4542 Result",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A4585 (1)_result.webp",
+    "caption": " A2A4585 (1) Result",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
     "src": "assets/gallery/maternity/_A2A4585.jpg",
     "caption": " A2A4585",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A9615_result.webp",
+    "caption": " A2A9615 Result",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
@@ -92,6 +176,60 @@ const GALLERY_DATA = [
   },
   {
     "category": "newborn",
+    "src": "assets/gallery/newborn/_A2A4699_result.webp",
+    "caption": " A2A4699 Result",
+    "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
+  },
+  {
+    "category": "newborn",
+    "src": "assets/gallery/newborn/_A2A5370_result.webp",
+    "caption": " A2A5370 Result",
+    "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
+  },
+  {
+    "category": "newborn",
+    "src": "assets/gallery/newborn/_A2A5380_result.webp",
+    "caption": " A2A5380 Result",
+    "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
+  },
+  {
+    "category": "newborn",
+    "src": "assets/gallery/newborn/_A2A5656_result.webp",
+    "caption": " A2A5656 Result",
+    "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
+  },
+  {
+    "category": "newborn",
+    "src": "assets/gallery/newborn/_A2A5663_result.webp",
+    "caption": " A2A5663 Result",
+    "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
+  },
+  {
+    "category": "newborn",
+    "src": "assets/gallery/newborn/_A2A5683_result.webp",
+    "caption": " A2A5683 Result",
+    "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
+  },
+  {
+    "category": "newborn",
+    "src": "assets/gallery/newborn/_A2A7379_result.webp",
+    "caption": " A2A7379 Result",
+    "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
+  },
+  {
+    "category": "newborn",
+    "src": "assets/gallery/newborn/_A2A7573_result.webp",
+    "caption": " A2A7573 Result",
+    "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
+  },
+  {
+    "category": "newborn",
+    "src": "assets/gallery/newborn/_A2A9754_result.webp",
+    "caption": " A2A9754 Result",
+    "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
+  },
+  {
+    "category": "newborn",
     "src": "assets/gallery/newborn/_RCS0027.jpg",
     "caption": " Rcs0027",
     "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
@@ -136,6 +274,90 @@ const GALLERY_DATA = [
     "category": "toddler",
     "src": "assets/gallery/toddler/Toddler.jpg",
     "caption": "Toddler",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A0085_result.webp",
+    "caption": " A2A0085 Result",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A0551_result.webp",
+    "caption": " A2A0551 Result",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A1029_result.webp",
+    "caption": " A2A1029 Result",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A1208a_result.webp",
+    "caption": " A2A1208A Result",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A5146_result.webp",
+    "caption": " A2A5146 Result",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A6754_result.webp",
+    "caption": " A2A6754 Result",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A6780 (1)_result.webp",
+    "caption": " A2A6780 (1) Result",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A6780_result.webp",
+    "caption": " A2A6780 Result",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A6801 (1)_result.webp",
+    "caption": " A2A6801 (1) Result",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A6801_result.webp",
+    "caption": " A2A6801 Result",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A7067_result.webp",
+    "caption": " A2A7067 Result",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A7192_result.webp",
+    "caption": " A2A7192 Result",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A9490_result.webp",
+    "caption": " A2A9490 Result",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A9979_result.webp",
+    "caption": " A2A9979 Result",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
   {
@@ -206,6 +428,30 @@ const GALLERY_DATA = [
   },
   {
     "category": "kids",
+    "src": "assets/gallery/kids/_A2A0155_result.webp",
+    "caption": " A2A0155 Result",
+    "desc": "Minimalist premium kid portraits with soft editorial studio lighting."
+  },
+  {
+    "category": "kids",
+    "src": "assets/gallery/kids/_A2A0180_result.webp",
+    "caption": " A2A0180 Result",
+    "desc": "Minimalist premium kid portraits with soft editorial studio lighting."
+  },
+  {
+    "category": "kids",
+    "src": "assets/gallery/kids/_A2A8984_result.webp",
+    "caption": " A2A8984 Result",
+    "desc": "Minimalist premium kid portraits with soft editorial studio lighting."
+  },
+  {
+    "category": "kids",
+    "src": "assets/gallery/kids/_A2A9002_result.webp",
+    "caption": " A2A9002 Result",
+    "desc": "Minimalist premium kid portraits with soft editorial studio lighting."
+  },
+  {
+    "category": "kids",
     "src": "assets/gallery/kids/_RCS0121.jpg",
     "caption": " Rcs0121",
     "desc": "Minimalist premium kid portraits with soft editorial studio lighting."
@@ -248,6 +494,18 @@ const GALLERY_DATA = [
   },
   {
     "category": "family",
+    "src": "assets/gallery/family/_A2A1097_result.webp",
+    "caption": " A2A1097 Result",
+    "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
+  },
+  {
+    "category": "family",
+    "src": "assets/gallery/family/_A2A1185_result.webp",
+    "caption": " A2A1185 Result",
+    "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
+  },
+  {
+    "category": "family",
     "src": "assets/gallery/family/_A2A9150.jpg",
     "caption": " A2A9150",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
@@ -262,6 +520,12 @@ const GALLERY_DATA = [
     "category": "family",
     "src": "assets/gallery/family/_RCS0200.jpg",
     "caption": " Rcs0200",
+    "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
+  },
+  {
+    "category": "family",
+    "src": "assets/gallery/family/_RCS0200_result.webp",
+    "caption": " Rcs0200 Result",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
@@ -286,6 +550,18 @@ const GALLERY_DATA = [
     "category": "family",
     "src": "assets/gallery/family/_RCS0433.jpg",
     "caption": " Rcs0433",
+    "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
+  },
+  {
+    "category": "family",
+    "src": "assets/gallery/family/_RCS0664_result.webp",
+    "caption": " Rcs0664 Result",
+    "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
+  },
+  {
+    "category": "family",
+    "src": "assets/gallery/family/_RCS0687_result.webp",
+    "caption": " Rcs0687 Result",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
@@ -326,6 +602,12 @@ const GALLERY_DATA = [
   },
   {
     "category": "family",
+    "src": "assets/gallery/family/_RCS1167_result.webp",
+    "caption": " Rcs1167 Result",
+    "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
+  },
+  {
+    "category": "family",
     "src": "assets/gallery/family/_RCS1244.jpg",
     "caption": " Rcs1244",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
@@ -352,6 +634,12 @@ const GALLERY_DATA = [
     "category": "master-edits",
     "src": "assets/gallery/master-edits/_A2A1162_1.jpg",
     "caption": " A2A1162 1",
+    "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
+  },
+  {
+    "category": "master-edits",
+    "src": "assets/gallery/master-edits/_A2A1994_result.webp",
+    "caption": " A2A1994 Result",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
