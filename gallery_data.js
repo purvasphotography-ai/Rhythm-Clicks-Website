@@ -20,20 +20,8 @@ const GALLERY_DATA = [
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A1868_result.webp",
-    "caption": " A2A1868 Result",
-    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
-  },
-  {
-    "category": "maternity",
     "src": "assets/gallery/maternity/_A2A1875_result.webp",
     "caption": " A2A1875 Result",
-    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
-  },
-  {
-    "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A1892_result.webp",
-    "caption": " A2A1892 Result",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
@@ -265,12 +253,6 @@ const GALLERY_DATA = [
     "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
   },
   {
-    "category": "newborn",
-    "src": "assets/gallery/newborn/master edit.webp",
-    "caption": "Master Edit",
-    "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
-  },
-  {
     "category": "toddler",
     "src": "assets/gallery/toddler/Toddler.webp",
     "caption": "Toddler",
@@ -320,20 +302,8 @@ const GALLERY_DATA = [
   },
   {
     "category": "toddler",
-    "src": "assets/gallery/toddler/_A2A6780_result.webp",
-    "caption": " A2A6780 Result",
-    "desc": "Joyful children milestone portraits capturing natural play and expressions."
-  },
-  {
-    "category": "toddler",
     "src": "assets/gallery/toddler/_A2A6801 (1)_result.webp",
     "caption": " A2A6801 (1) Result",
-    "desc": "Joyful children milestone portraits capturing natural play and expressions."
-  },
-  {
-    "category": "toddler",
-    "src": "assets/gallery/toddler/_A2A6801_result.webp",
-    "caption": " A2A6801 Result",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
   {
@@ -520,12 +490,6 @@ const GALLERY_DATA = [
     "category": "family",
     "src": "assets/gallery/family/_RCS0200.webp",
     "caption": " Rcs0200",
-    "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
-  },
-  {
-    "category": "family",
-    "src": "assets/gallery/family/_RCS0200_result.webp",
-    "caption": " Rcs0200 Result",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {

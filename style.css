@@ -71,6 +71,18 @@ html {
   font-size: 16px;
 }
 
+@media (max-width: 991px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 575px) {
+  html {
+    font-size: 14px;
+  }
+}
+
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -2209,6 +2221,126 @@ footer {
 
 .insta-post-mock:hover .insta-overlay {
   opacity: 1;
+}
+
+/* --- Mobile Bottom Navigation --- */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  max-width: 460px;
+  height: 66px;
+  background: rgba(255, 255, 255, 0.45);
+  -webkit-backdrop-filter: blur(2px) saturate(180%);
+  backdrop-filter: blur(2px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 40px;
+  box-shadow: 
+    0 16px 36px rgba(0, 0, 0, 0.08), 
+    0 4px 12px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.40);
+  z-index: 1002; /* Sit above header (1000) and below lightbox (1100+) */
+  display: none;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.mobile-bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  width: 80px;
+  border-radius: 25px;
+  color: var(--text-light);
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  gap: 3px;
+  border: 1px solid transparent;
+  position: relative;
+  z-index: 2; /* Sit above the sliding pill */
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.mobile-bottom-nav-icon {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  transition: stroke var(--transition-fast);
+}
+
+.mobile-bottom-nav-item.active {
+  color: var(--text-primary);
+}
+
+/* Sliding Liquid Glass Indicator Pill for Mobile bottom nav */
+.mobile-nav-indicator-pill {
+  position: absolute;
+  z-index: 1;
+  display: block !important;
+  border-radius: 25px;
+  pointer-events: none; /* Ignore mouse interactions */
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  transition: 
+    left 0.45s cubic-bezier(0.25, 1.25, 0.35, 1), 
+    width 0.45s cubic-bezier(0.25, 1.25, 0.35, 1), 
+    top 0.45s cubic-bezier(0.25, 1.25, 0.35, 1), 
+    height 0.45s cubic-bezier(0.25, 1.25, 0.35, 1), 
+    opacity 0.3s ease;
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  will-change: left, width, top, height;
+}
+
+.mobile-bottom-nav-item:active {
+  transform: scale(0.95);
+}
+
+/* Mobile Layout Overrides & Adjustments */
+@media (max-width: 991px) {
+  .mobile-bottom-nav {
+    display: flex;
+  }
+  
+  .hamburger, .mobile-nav {
+    display: none !important;
+  }
+  
+  .nav-container {
+    justify-content: center; /* Center the logo on mobile header */
+  }
+  
+  body {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0));
+  }
+  
+  .whatsapp-float {
+    bottom: calc(100px + env(safe-area-inset-bottom, 0)) !important;
+    right: 20px !important;
+    width: 48px !important;
+    height: 48px !important;
+  }
+  
+  .whatsapp-float .whatsapp-icon {
+    width: 26px !important;
+    height: 26px !important;
+  }
 }
 
 

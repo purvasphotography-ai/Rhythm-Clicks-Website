@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
      ========================================================================== */
   const header = document.getElementById('header');
   const sections = document.querySelectorAll('section');
-  const navLinks = document.querySelectorAll('.nav-menu .nav-link, .mobile-nav .nav-link');
+  const navLinks = document.querySelectorAll('.nav-menu .nav-link, .mobile-nav .nav-link, .mobile-bottom-nav-item');
 
   // Cache section bounds to prevent forced reflows during scroll
   let cachedSections = [];
@@ -42,28 +42,49 @@ document.addEventListener('DOMContentLoaded', () => {
     navMenuUl.appendChild(indicator);
   }
 
+  // Sliding Liquid Glass Pill Indicator for Mobile Bottom Navigation
+  const mobileBottomNav = document.querySelector('.mobile-bottom-nav');
+  let mobileIndicator = null;
+
+  if (mobileBottomNav) {
+    mobileIndicator = document.createElement('div');
+    mobileIndicator.className = 'mobile-nav-indicator-pill';
+    mobileBottomNav.appendChild(mobileIndicator);
+  }
+
   const updateIndicator = () => {
-    if (!indicator || !navMenuUl) return;
-    const activeLink = document.querySelector('.nav-menu .nav-link.active');
-    if (activeLink) {
-      const activeRect = activeLink.getBoundingClientRect();
-      const parentRect = navMenuUl.getBoundingClientRect();
-      
-      indicator.style.opacity = '1';
-      indicator.style.left = `${activeRect.left - parentRect.left}px`;
-      indicator.style.width = `${activeRect.width}px`;
-      indicator.style.height = `${activeRect.height}px`;
-      indicator.style.top = `${activeRect.top - parentRect.top}px`;
-      
-      console.log('Active Link Position:', {
-        text: activeLink.textContent,
-        left: indicator.style.left,
-        width: indicator.style.width,
-        height: indicator.style.height
-      });
-    } else {
-      indicator.style.opacity = '0';
-      console.log('No active link found for navigation indicator.');
+    // 1. Desktop indicator
+    if (indicator && navMenuUl) {
+      const activeLink = document.querySelector('.nav-menu .nav-link.active');
+      if (activeLink) {
+        const activeRect = activeLink.getBoundingClientRect();
+        const parentRect = navMenuUl.getBoundingClientRect();
+        
+        indicator.style.opacity = '1';
+        indicator.style.left = `${activeRect.left - parentRect.left}px`;
+        indicator.style.width = `${activeRect.width}px`;
+        indicator.style.height = `${activeRect.height}px`;
+        indicator.style.top = `${activeRect.top - parentRect.top}px`;
+      } else {
+        indicator.style.opacity = '0';
+      }
+    }
+
+    // 2. Mobile bottom nav indicator
+    if (mobileIndicator && mobileBottomNav) {
+      const activeMobileLink = document.querySelector('.mobile-bottom-nav-item.active');
+      if (activeMobileLink) {
+        const activeRect = activeMobileLink.getBoundingClientRect();
+        const parentRect = mobileBottomNav.getBoundingClientRect();
+        
+        mobileIndicator.style.opacity = '1';
+        mobileIndicator.style.left = `${activeRect.left - parentRect.left}px`;
+        mobileIndicator.style.width = `${activeRect.width}px`;
+        mobileIndicator.style.height = `${activeRect.height}px`;
+        mobileIndicator.style.top = `${activeRect.top - parentRect.top}px`;
+      } else {
+        mobileIndicator.style.opacity = '0';
+      }
     }
   };
 
