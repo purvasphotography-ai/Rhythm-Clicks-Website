@@ -2,7 +2,7 @@
 const GALLERY_DATA = [
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/Maternity.jpg",
+    "src": "assets/gallery/maternity/Maternity.webp",
     "caption": "Maternity",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
@@ -50,13 +50,13 @@ const GALLERY_DATA = [
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A2933.jpg",
+    "src": "assets/gallery/maternity/_A2A2933.webp",
     "caption": " A2A2933",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A2955.jpg",
+    "src": "assets/gallery/maternity/_A2A2955.webp",
     "caption": " A2A2955",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
@@ -74,7 +74,7 @@ const GALLERY_DATA = [
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A4436.jpg",
+    "src": "assets/gallery/maternity/_A2A4436.webp",
     "caption": " A2A4436",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
@@ -104,7 +104,7 @@ const GALLERY_DATA = [
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A4585.jpg",
+    "src": "assets/gallery/maternity/_A2A4585.webp",
     "caption": " A2A4585",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
@@ -116,61 +116,61 @@ const GALLERY_DATA = [
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_RCS0208.jpg",
+    "src": "assets/gallery/maternity/_RCS0208.webp",
     "caption": " Rcs0208",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_RCS0310.jpg",
+    "src": "assets/gallery/maternity/_RCS0310.webp",
     "caption": " Rcs0310",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_RCS0702.jpg",
+    "src": "assets/gallery/maternity/_RCS0702.webp",
     "caption": " Rcs0702",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_RCS0752.jpg",
+    "src": "assets/gallery/maternity/_RCS0752.webp",
     "caption": " Rcs0752",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_RCS0782.jpg",
+    "src": "assets/gallery/maternity/_RCS0782.webp",
     "caption": " Rcs0782",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_RCS0882_1.jpg",
+    "src": "assets/gallery/maternity/_RCS0882_1.webp",
     "caption": " Rcs0882 1",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_RCS0910.jpg",
+    "src": "assets/gallery/maternity/_RCS0910.webp",
     "caption": " Rcs0910",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_RCS0946.jpg",
+    "src": "assets/gallery/maternity/_RCS0946.webp",
     "caption": " Rcs0946",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/sleeping maternity.jpg",
+    "src": "assets/gallery/maternity/sleeping maternity.webp",
     "caption": "Sleeping Maternity",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
     "category": "newborn",
-    "src": "assets/gallery/newborn/Newborn.jpg",
+    "src": "assets/gallery/newborn/Newborn.webp",
     "caption": "Newborn",
     "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
   },
@@ -230,49 +230,49 @@ const GALLERY_DATA = [
   },
   {
     "category": "newborn",
-    "src": "assets/gallery/newborn/_RCS0027.jpg",
+    "src": "assets/gallery/newborn/_RCS0027.webp",
     "caption": " Rcs0027",
     "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
   },
   {
     "category": "newborn",
-    "src": "assets/gallery/newborn/_RCS0091.jpg",
+    "src": "assets/gallery/newborn/_RCS0091.webp",
     "caption": " Rcs0091",
     "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
   },
   {
     "category": "newborn",
-    "src": "assets/gallery/newborn/_RCS0105.jpg",
+    "src": "assets/gallery/newborn/_RCS0105.webp",
     "caption": " Rcs0105",
     "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
   },
   {
     "category": "newborn",
-    "src": "assets/gallery/newborn/_RCS0111.jpg",
+    "src": "assets/gallery/newborn/_RCS0111.webp",
     "caption": " Rcs0111",
     "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
   },
   {
     "category": "newborn",
-    "src": "assets/gallery/newborn/_RCS0189.jpg",
+    "src": "assets/gallery/newborn/_RCS0189.webp",
     "caption": " Rcs0189",
     "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
   },
   {
     "category": "newborn",
-    "src": "assets/gallery/newborn/_RCS0207.jpg",
+    "src": "assets/gallery/newborn/_RCS0207.webp",
     "caption": " Rcs0207",
     "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
   },
   {
     "category": "newborn",
-    "src": "assets/gallery/newborn/master edit.jpg",
+    "src": "assets/gallery/newborn/master edit.webp",
     "caption": "Master Edit",
     "desc": "Safe, gentle, and timeless physiological newborn posing in our boutique studio."
   },
   {
     "category": "toddler",
-    "src": "assets/gallery/toddler/Toddler.jpg",
+    "src": "assets/gallery/toddler/Toddler.webp",
     "caption": "Toddler",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
@@ -362,67 +362,67 @@ const GALLERY_DATA = [
   },
   {
     "category": "toddler",
-    "src": "assets/gallery/toddler/_RCS0037.jpg",
+    "src": "assets/gallery/toddler/_RCS0037.webp",
     "caption": " Rcs0037",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
   {
     "category": "toddler",
-    "src": "assets/gallery/toddler/_RCS0062.jpg",
+    "src": "assets/gallery/toddler/_RCS0062.webp",
     "caption": " Rcs0062",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
   {
     "category": "toddler",
-    "src": "assets/gallery/toddler/_RCS0072.jpg",
+    "src": "assets/gallery/toddler/_RCS0072.webp",
     "caption": " Rcs0072",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
   {
     "category": "toddler",
-    "src": "assets/gallery/toddler/_RCS0126.jpg",
+    "src": "assets/gallery/toddler/_RCS0126.webp",
     "caption": " Rcs0126",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
   {
     "category": "toddler",
-    "src": "assets/gallery/toddler/_RCS0158.jpg",
+    "src": "assets/gallery/toddler/_RCS0158.webp",
     "caption": " Rcs0158",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
   {
     "category": "toddler",
-    "src": "assets/gallery/toddler/_RCS0195.jpg",
+    "src": "assets/gallery/toddler/_RCS0195.webp",
     "caption": " Rcs0195",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
   {
     "category": "toddler",
-    "src": "assets/gallery/toddler/_RCS0238.jpg",
+    "src": "assets/gallery/toddler/_RCS0238.webp",
     "caption": " Rcs0238",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
   {
     "category": "toddler",
-    "src": "assets/gallery/toddler/_RCS0318.jpg",
+    "src": "assets/gallery/toddler/_RCS0318.webp",
     "caption": " Rcs0318",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
   {
     "category": "toddler",
-    "src": "assets/gallery/toddler/_RCS0620.jpg",
+    "src": "assets/gallery/toddler/_RCS0620.webp",
     "caption": " Rcs0620",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
   {
     "category": "toddler",
-    "src": "assets/gallery/toddler/_RCS0663.jpg",
+    "src": "assets/gallery/toddler/_RCS0663.webp",
     "caption": " Rcs0663",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
   {
     "category": "toddler",
-    "src": "assets/gallery/toddler/_RCS0670.jpg",
+    "src": "assets/gallery/toddler/_RCS0670.webp",
     "caption": " Rcs0670",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
@@ -452,43 +452,43 @@ const GALLERY_DATA = [
   },
   {
     "category": "kids",
-    "src": "assets/gallery/kids/_RCS0121.jpg",
+    "src": "assets/gallery/kids/_RCS0121.webp",
     "caption": " Rcs0121",
     "desc": "Minimalist premium kid portraits with soft editorial studio lighting."
   },
   {
     "category": "kids",
-    "src": "assets/gallery/kids/_RCS0149.jpg",
+    "src": "assets/gallery/kids/_RCS0149.webp",
     "caption": " Rcs0149",
     "desc": "Minimalist premium kid portraits with soft editorial studio lighting."
   },
   {
     "category": "kids",
-    "src": "assets/gallery/kids/_RCS0650.jpg",
+    "src": "assets/gallery/kids/_RCS0650.webp",
     "caption": " Rcs0650",
     "desc": "Minimalist premium kid portraits with soft editorial studio lighting."
   },
   {
     "category": "kids",
-    "src": "assets/gallery/kids/_RCS0681.jpg",
+    "src": "assets/gallery/kids/_RCS0681.webp",
     "caption": " Rcs0681",
     "desc": "Minimalist premium kid portraits with soft editorial studio lighting."
   },
   {
     "category": "kids",
-    "src": "assets/gallery/kids/_RCS0784.jpg",
+    "src": "assets/gallery/kids/_RCS0784.webp",
     "caption": " Rcs0784",
     "desc": "Minimalist premium kid portraits with soft editorial studio lighting."
   },
   {
     "category": "kids",
-    "src": "assets/gallery/kids/_RCS1112.jpg",
+    "src": "assets/gallery/kids/_RCS1112.webp",
     "caption": " Rcs1112",
     "desc": "Minimalist premium kid portraits with soft editorial studio lighting."
   },
   {
     "category": "kids",
-    "src": "assets/gallery/kids/kids.jpg",
+    "src": "assets/gallery/kids/kids.webp",
     "caption": "Kids",
     "desc": "Minimalist premium kid portraits with soft editorial studio lighting."
   },
@@ -506,19 +506,19 @@ const GALLERY_DATA = [
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_A2A9150.jpg",
+    "src": "assets/gallery/family/_A2A9150.webp",
     "caption": " A2A9150",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS0113.jpg",
+    "src": "assets/gallery/family/_RCS0113.webp",
     "caption": " Rcs0113",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS0200.jpg",
+    "src": "assets/gallery/family/_RCS0200.webp",
     "caption": " Rcs0200",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
@@ -530,25 +530,25 @@ const GALLERY_DATA = [
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS0234.jpg",
+    "src": "assets/gallery/family/_RCS0234.webp",
     "caption": " Rcs0234",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS0267.jpg",
+    "src": "assets/gallery/family/_RCS0267.webp",
     "caption": " Rcs0267",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS0320.jpg",
+    "src": "assets/gallery/family/_RCS0320.webp",
     "caption": " Rcs0320",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS0433.jpg",
+    "src": "assets/gallery/family/_RCS0433.webp",
     "caption": " Rcs0433",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
@@ -566,37 +566,37 @@ const GALLERY_DATA = [
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS0859.jpg",
+    "src": "assets/gallery/family/_RCS0859.webp",
     "caption": " Rcs0859",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS0975.jpg",
+    "src": "assets/gallery/family/_RCS0975.webp",
     "caption": " Rcs0975",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS0993.jpg",
+    "src": "assets/gallery/family/_RCS0993.webp",
     "caption": " Rcs0993",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS1010.jpg",
+    "src": "assets/gallery/family/_RCS1010.webp",
     "caption": " Rcs1010",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS1055.jpg",
+    "src": "assets/gallery/family/_RCS1055.webp",
     "caption": " Rcs1055",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS1167.jpg",
+    "src": "assets/gallery/family/_RCS1167.webp",
     "caption": " Rcs1167",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
@@ -608,31 +608,31 @@ const GALLERY_DATA = [
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS1244.jpg",
+    "src": "assets/gallery/family/_RCS1244.webp",
     "caption": " Rcs1244",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_RCS1278.jpg",
+    "src": "assets/gallery/family/_RCS1278.webp",
     "caption": " Rcs1278",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_A2A1112 (2).jpg",
+    "src": "assets/gallery/master-edits/_A2A1112 (2).webp",
     "caption": " A2A1112 (2)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_A2A1122.jpg",
+    "src": "assets/gallery/master-edits/_A2A1122.webp",
     "caption": " A2A1122",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_A2A1162_1.jpg",
+    "src": "assets/gallery/master-edits/_A2A1162_1.webp",
     "caption": " A2A1162 1",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
@@ -644,313 +644,313 @@ const GALLERY_DATA = [
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_A2A5808 (3).jpg",
+    "src": "assets/gallery/master-edits/_A2A5808 (3).webp",
     "caption": " A2A5808 (3)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_A2A7542.jpg",
+    "src": "assets/gallery/master-edits/_A2A7542.webp",
     "caption": " A2A7542",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_A2A7827 (1).jpg",
+    "src": "assets/gallery/master-edits/_A2A7827 (1).webp",
     "caption": " A2A7827 (1)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_A2A8425.jpg",
+    "src": "assets/gallery/master-edits/_A2A8425.webp",
     "caption": " A2A8425",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_A2A9404 (1).jpg",
+    "src": "assets/gallery/master-edits/_A2A9404 (1).webp",
     "caption": " A2A9404 (1)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_A2A9438.jpg",
+    "src": "assets/gallery/master-edits/_A2A9438.webp",
     "caption": " A2A9438",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_CS_1361.jpg",
+    "src": "assets/gallery/master-edits/_CS_1361.webp",
     "caption": " Cs 1361",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_RCS0087 (1).jpg",
+    "src": "assets/gallery/master-edits/_RCS0087 (1).webp",
     "caption": " Rcs0087 (1)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_RCS0324.jpg",
+    "src": "assets/gallery/master-edits/_RCS0324.webp",
     "caption": " Rcs0324",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_RCS0788.jpg",
+    "src": "assets/gallery/master-edits/_RCS0788.webp",
     "caption": " Rcs0788",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_RCS0947.jpg",
+    "src": "assets/gallery/master-edits/_RCS0947.webp",
     "caption": " Rcs0947",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_RCS1085.jpg",
+    "src": "assets/gallery/master-edits/_RCS1085.webp",
     "caption": " Rcs1085",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_RCS8506 (1).jpg",
+    "src": "assets/gallery/master-edits/_RCS8506 (1).webp",
     "caption": " Rcs8506 (1)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_RCS9863.jpg",
+    "src": "assets/gallery/master-edits/_RCS9863.webp",
     "caption": " Rcs9863",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/_master edit.jpg",
+    "src": "assets/gallery/master-edits/_master edit.webp",
     "caption": " Master Edit",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/blue master edit.jpg",
+    "src": "assets/gallery/master-edits/blue master edit.webp",
     "caption": "Blue Master Edit",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master (1).jpg",
+    "src": "assets/gallery/master-edits/master (1).webp",
     "caption": "Master (1)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edi 2.jpg",
+    "src": "assets/gallery/master-edits/master edi 2.webp",
     "caption": "Master Edi 2",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (13).jpg",
+    "src": "assets/gallery/master-edits/master edit (13).webp",
     "caption": "Master Edit (13)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (14).jpg",
+    "src": "assets/gallery/master-edits/master edit (14).webp",
     "caption": "Master Edit (14)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (15).jpg",
+    "src": "assets/gallery/master-edits/master edit (15).webp",
     "caption": "Master Edit (15)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (16).jpg",
+    "src": "assets/gallery/master-edits/master edit (16).webp",
     "caption": "Master Edit (16)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (17).jpg",
+    "src": "assets/gallery/master-edits/master edit (17).webp",
     "caption": "Master Edit (17)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (18).jpg",
+    "src": "assets/gallery/master-edits/master edit (18).webp",
     "caption": "Master Edit (18)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (19).jpg",
+    "src": "assets/gallery/master-edits/master edit (19).webp",
     "caption": "Master Edit (19)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (20).jpg",
+    "src": "assets/gallery/master-edits/master edit (20).webp",
     "caption": "Master Edit (20)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (21).jpg",
+    "src": "assets/gallery/master-edits/master edit (21).webp",
     "caption": "Master Edit (21)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (22).jpg",
+    "src": "assets/gallery/master-edits/master edit (22).webp",
     "caption": "Master Edit (22)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (23).jpg",
+    "src": "assets/gallery/master-edits/master edit (23).webp",
     "caption": "Master Edit (23)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (24).jpg",
+    "src": "assets/gallery/master-edits/master edit (24).webp",
     "caption": "Master Edit (24)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (25).jpg",
+    "src": "assets/gallery/master-edits/master edit (25).webp",
     "caption": "Master Edit (25)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit (26).jpg",
+    "src": "assets/gallery/master-edits/master edit (26).webp",
     "caption": "Master Edit (26)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit 1 (4).jpg",
+    "src": "assets/gallery/master-edits/master edit 1 (4).webp",
     "caption": "Master Edit 1 (4)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit 1 (5).jpg",
+    "src": "assets/gallery/master-edits/master edit 1 (5).webp",
     "caption": "Master Edit 1 (5)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit 1 (6).jpg",
+    "src": "assets/gallery/master-edits/master edit 1 (6).webp",
     "caption": "Master Edit 1 (6)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit 1 (7).jpg",
+    "src": "assets/gallery/master-edits/master edit 1 (7).webp",
     "caption": "Master Edit 1 (7)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit 1 new (1).jpg",
+    "src": "assets/gallery/master-edits/master edit 1 new (1).webp",
     "caption": "Master Edit 1 New (1)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit 2 (10).jpg",
+    "src": "assets/gallery/master-edits/master edit 2 (10).webp",
     "caption": "Master Edit 2 (10)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit 2 (11).jpg",
+    "src": "assets/gallery/master-edits/master edit 2 (11).webp",
     "caption": "Master Edit 2 (11)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit 2 (6).jpg",
+    "src": "assets/gallery/master-edits/master edit 2 (6).webp",
     "caption": "Master Edit 2 (6)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit 2 (7).jpg",
+    "src": "assets/gallery/master-edits/master edit 2 (7).webp",
     "caption": "Master Edit 2 (7)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit 2 (8).jpg",
+    "src": "assets/gallery/master-edits/master edit 2 (8).webp",
     "caption": "Master Edit 2 (8)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit 2 (9).jpg",
+    "src": "assets/gallery/master-edits/master edit 2 (9).webp",
     "caption": "Master Edit 2 (9)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit 3 (3).jpg",
+    "src": "assets/gallery/master-edits/master edit 3 (3).webp",
     "caption": "Master Edit 3 (3)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit 4 (3).jpg",
+    "src": "assets/gallery/master-edits/master edit 4 (3).webp",
     "caption": "Master Edit 4 (3)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit `1 (1).jpg",
+    "src": "assets/gallery/master-edits/master edit `1 (1).webp",
     "caption": "Master Edit `1 (1)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit new 2 (1).jpg",
+    "src": "assets/gallery/master-edits/master edit new 2 (1).webp",
     "caption": "Master Edit New 2 (1)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit re edit.jpg",
+    "src": "assets/gallery/master-edits/master edit re edit.webp",
     "caption": "Master Edit Re Edit",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/master edit(4) (1).jpg",
+    "src": "assets/gallery/master-edits/master edit(4) (1).webp",
     "caption": "Master Edit(4) (1)",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/music newborn.jpg",
+    "src": "assets/gallery/master-edits/music newborn.webp",
     "caption": "Music Newborn",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/rhythmclicksstudio_newborn_digital_background__baby_girl_in_a_o_cfec9c6b-4c9c-4374-80b5-bfe2c4b09362.jpg",
+    "src": "assets/gallery/master-edits/rhythmclicksstudio_newborn_digital_background__baby_girl_in_a_o_cfec9c6b-4c9c-4374-80b5-bfe2c4b09362.webp",
     "caption": "Rhythmclicksstudio Newborn Digital Background  Baby Girl In A O Cfec9C6B 4C9C 4374 80B5 Bfe2C4B09362",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   },
   {
     "category": "master-edits",
-    "src": "assets/gallery/master-edits/rhythmclicksstudio_newborn_realistic_background_baby_girl_sleep_da6b09df-5b0b-4b1b-b7dd-420a0370b81f.jpg",
+    "src": "assets/gallery/master-edits/rhythmclicksstudio_newborn_realistic_background_baby_girl_sleep_da6b09df-5b0b-4b1b-b7dd-420a0370b81f.webp",
     "caption": "Rhythmclicksstudio Newborn Realistic Background Baby Girl Sleep Da6B09Df 5B0B 4B1B B7Dd 420A0370B81F",
     "desc": "Exclusive pixel-by-pixel signature painterly composite fine-art edit."
   }

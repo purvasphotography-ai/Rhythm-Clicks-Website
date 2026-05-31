@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const catClean = item.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
       html += `
         <div class="portfolio-item fade-in" data-index="${globalIndex}">
-          <img src="${item.src}" alt="${item.caption}" class="portfolio-image" loading="lazy">
+          <img src="${item.src}" alt="${item.caption}" class="portfolio-image" width="400" height="500" loading="lazy">
           <div class="portfolio-overlay">
             <div class="portfolio-info">
               <span>${catClean}</span>
