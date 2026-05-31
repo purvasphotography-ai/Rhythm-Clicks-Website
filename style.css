@@ -737,7 +737,7 @@ header.scrolled.theme-dark .nav-indicator-pill {
   /* Large Logo Outside the Capsule */
   .logo img,
   header.scrolled .logo img {
-    height: 105px;
+    height: 150px;
     width: auto;
     position: static;
     transform: none;
@@ -745,7 +745,7 @@ header.scrolled.theme-dark .nav-indicator-pill {
   }
   
   header.scrolled .logo img {
-    height: 85px;
+    height: 120px;
   }
 
   /* CTA Button styling */
