@@ -21,12 +21,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Cache section bounds to prevent forced reflows during scroll
   let cachedSections = [];
+  let cachedHeroBounds = { top: 0, bottom: 0 };
+  let cachedFooterTop = 0;
+
   const cacheSectionBounds = () => {
     cachedSections = Array.from(sections).map(section => ({
       id: section.getAttribute('id'),
       top: section.offsetTop - 120,
       height: section.clientHeight
     }));
+
+    const hero = document.getElementById('home');
+    if (hero) {
+      cachedHeroBounds.top = hero.offsetTop;
+      cachedHeroBounds.bottom = cachedHeroBounds.top + hero.clientHeight;
+    }
+
+    const footer = document.querySelector('footer');
+    if (footer) {
+      cachedFooterTop = footer.offsetTop;
+    }
   };
 
   // Run initial cache
@@ -101,6 +115,42 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       if (header.classList.contains('scrolled')) {
         header.classList.remove('scrolled');
+      }
+    }
+
+    // Dynamic Theme Toggling based on cached section backgrounds (Dark vs Light)
+    const isDarkBackgroundAt = (yPosition) => {
+      // Hero section check
+      if (yPosition >= cachedHeroBounds.top && yPosition < cachedHeroBounds.bottom) {
+        return true;
+      }
+      // Footer check
+      if (yPosition >= cachedFooterTop) {
+        return true;
+      }
+      return false;
+    };
+
+    const headerIsDark = isDarkBackgroundAt(scrollY + 40);
+    const bottomNavIsDark = isDarkBackgroundAt(scrollY + window.innerHeight - 50);
+
+    // Apply header theme class
+    if (headerIsDark) {
+      header.classList.add('theme-dark');
+      header.classList.remove('theme-light');
+    } else {
+      header.classList.add('theme-light');
+      header.classList.remove('theme-dark');
+    }
+
+    // Apply bottom nav theme class
+    if (mobileBottomNav) {
+      if (bottomNavIsDark) {
+        mobileBottomNav.classList.add('theme-dark');
+        mobileBottomNav.classList.remove('theme-light');
+      } else {
+        mobileBottomNav.classList.add('theme-light');
+        mobileBottomNav.classList.remove('theme-dark');
       }
     }
 
