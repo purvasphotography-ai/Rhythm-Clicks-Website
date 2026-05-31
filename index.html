@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preload" as="image" href="assets/Hero.webp" type="image/webp" fetchpriority="high">
   <meta name="google-site-verification" content="LbAuRZjhlCo3IKSQvk7MekFJ8sC1VqUsUbkaLsBL0Gs">
   <title>Rhythm Clicks Studio | Newborn & Maternity Photography</title>
   <meta name="description" content="Capture precious milestones with Rhythm Clicks Studio in Gandhinagar & Ahmedabad. Specializing in fine-art newborn, maternity, kids & family photography.">
@@ -87,8 +88,8 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="assets/Hero.webp" type="image/webp">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"></noscript>
   <link rel="stylesheet" href="style.css">
   <script src="gallery_data.js" defer></script>
   <script src="app.js" defer></script>
@@ -143,10 +144,10 @@
   <section class="hero" id="home">
     <div class="hero-bg-slider" id="hero-slider">
       <!-- Slides will toggle active via JS, referencing generated images -->
-      <div class="hero-slide active" style="background-image: url('assets/Hero.webp'); background-position: center 80%;"></div>
-      <div class="hero-slide" data-src="assets/Maternity.webp" style="background-position: center 50%;"></div>
-      <div class="hero-slide" data-src="assets/Newborn.webp"></div>
-      <div class="hero-slide" data-src="assets/Toddler.webp"></div>
+      <img class="hero-slide active" src="assets/Hero.webp" alt="Premium fine-art baby photography" fetchpriority="high" style="object-position: center 80%;">
+      <img class="hero-slide" data-src="assets/Maternity.webp" alt="Premium fine-art maternity photography" style="object-position: center 50%;">
+      <img class="hero-slide" data-src="assets/Newborn.webp" alt="Boutique newborn studio photography">
+      <img class="hero-slide" data-src="assets/Toddler.webp" alt="Toddler outdoor and studio portraits">
     </div>
     <div class="hero-overlay"></div>
     

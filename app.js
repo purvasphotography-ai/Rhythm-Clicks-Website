@@ -19,6 +19,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const sections = document.querySelectorAll('section');
   const navLinks = document.querySelectorAll('.nav-menu .nav-link, .mobile-nav .nav-link');
 
+  // Cache section bounds to prevent forced reflows during scroll
+  let cachedSections = [];
+  const cacheSectionBounds = () => {
+    cachedSections = Array.from(sections).map(section => ({
+      id: section.getAttribute('id'),
+      top: section.offsetTop - 120,
+      height: section.clientHeight
+    }));
+  };
+
+  // Run initial cache
+  cacheSectionBounds();
+
   // Sliding Liquid Glass Pill Indicator for Navigation Menu
   const navMenuUl = document.querySelector('.nav-menu ul');
   let indicator = null;
@@ -55,65 +68,67 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Run on scroll, resize and initial load
+  let activeLinkClass = '';
   window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+
     // Header Scroll State Toggle
-    if (window.scrollY > 50) {
-      header.classList.add('scrolled');
+    if (scrollY > 50) {
+      if (!header.classList.contains('scrolled')) {
+        header.classList.add('scrolled');
+      }
     } else {
-      header.classList.remove('scrolled');
+      if (header.classList.contains('scrolled')) {
+        header.classList.remove('scrolled');
+      }
     }
 
-    // Dynamic Navigation Highlighting
+    // Dynamic Navigation Highlighting from cached bounds
     let current = '';
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop - 120;
-      const sectionHeight = section.clientHeight;
-      if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
-        current = section.getAttribute('id');
+    for (let i = 0; i < cachedSections.length; i++) {
+      const s = cachedSections[i];
+      if (scrollY >= s.top && scrollY < s.top + s.height) {
+        current = s.id;
       }
-    });
+    }
+    if (!current && scrollY < 100) {
+      current = 'home';
+    }
 
-    navLinks.forEach(link => {
-      link.classList.remove('active');
-      if (
-        link.getAttribute('href').substring(1) === current ||
-        (current === 'home' && link.getAttribute('href') === '#')
-      ) {
-        link.classList.add('active');
-      }
-    });
+    // Only update DOM classes and pill indicator if active section changed
+    if (activeLinkClass !== current) {
+      activeLinkClass = current;
 
-    // Update sliding pill position
-    updateIndicator();
+      navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        const isMatch = (href.substring(1) === current) || (current === 'home' && href === '#');
+        if (isMatch) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+
+      updateIndicator();
+    }
   });
 
-  window.addEventListener('resize', updateIndicator);
+  window.addEventListener('resize', () => {
+    cacheSectionBounds();
+    updateIndicator();
+  });
   
   // Set initial active state and pill position after browser layout finishes
   setTimeout(() => {
-    // Manually run highlighting once on load
-    let current = '';
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop - 120;
-      const sectionHeight = section.clientHeight;
-      if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
-        current = section.getAttribute('id');
-      }
-    });
-    if (!current) current = 'home'; // default active is home
-
-    navLinks.forEach(link => {
-      if (
-        link.getAttribute('href').substring(1) === current ||
-        (current === 'home' && link.getAttribute('href') === '#')
-      ) {
-        link.classList.add('active');
-      } else {
-        link.classList.remove('active');
-      }
-    });
-    updateIndicator();
+    cacheSectionBounds();
+    window.dispatchEvent(new Event('scroll'));
   }, 200);
+
+  // Recalculate bounds once window completely loads (inc. delayed images)
+  window.addEventListener('load', () => {
+    cacheSectionBounds();
+    window.dispatchEvent(new Event('scroll'));
+  });
 
   /* ==========================================================================
      2. Mobile Drawer Navigation
@@ -146,8 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const slideInterval = 5000; // 5 seconds
 
   const loadSlideBg = (slide) => {
-    if (slide && slide.dataset.src && !slide.style.backgroundImage) {
-      slide.style.backgroundImage = `url('${slide.dataset.src}')`;
+    if (slide && slide.dataset.src && !slide.src) {
+      slide.src = slide.dataset.src;
     }
   };
 
