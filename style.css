@@ -333,8 +333,8 @@ header {
 
 header.scrolled {
   padding: 0.45rem 0;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
@@ -2247,8 +2247,8 @@ footer {
   width: calc(100% - 24px);
   max-width: 460px;
   height: 66px;
-  -webkit-backdrop-filter: blur(25px) saturate(180%);
-  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(2px) saturate(180%);
+  backdrop-filter: blur(2px) saturate(180%);
   border-radius: 40px;
   z-index: 1002; /* Sit above header (1000) and below lightbox (1100+) */
   display: none;
@@ -2331,8 +2331,8 @@ footer {
   display: block !important;
   border-radius: 25px;
   pointer-events: none; /* Ignore mouse interactions */
-  -webkit-backdrop-filter: blur(15px);
-  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
   transition: 
     left 0.45s cubic-bezier(0.25, 1.25, 0.35, 1), 
     width 0.45s cubic-bezier(0.25, 1.25, 0.35, 1), 
