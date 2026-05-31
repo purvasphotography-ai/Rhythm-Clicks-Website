@@ -111,10 +111,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (scrollY > 50) {
       if (!header.classList.contains('scrolled')) {
         header.classList.add('scrolled');
+        updateIndicator();
       }
     } else {
       if (header.classList.contains('scrolled')) {
         header.classList.remove('scrolled');
+        updateIndicator();
       }
     }
 

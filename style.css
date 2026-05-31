@@ -637,6 +637,107 @@ header.scrolled.theme-dark .nav-indicator-pill {
   .hamburger, .mobile-nav {
     display: none;
   }
+
+  /* --- Floating Glass Capsule Header for Desktop --- */
+  header {
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 48px);
+    max-width: 1100px;
+    border-radius: 40px;
+    padding: 0.6rem 2rem;
+    border: 1px solid transparent;
+    transition: 
+      top 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      padding 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+      background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+      backdrop-filter 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      -webkit-backdrop-filter 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+      border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    
+    /* Always clear glass on desktop */
+    -webkit-backdrop-filter: blur(2px) saturate(180%);
+    backdrop-filter: blur(2px) saturate(180%);
+  }
+
+  header.scrolled {
+    top: 12px;
+    padding: 0.45rem 2rem;
+  }
+
+  header .nav-container {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  /* Light Theme Floating Header */
+  header.theme-light,
+  header.scrolled.theme-light {
+    background-color: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Dark Theme Floating Header */
+  header.theme-dark,
+  header.scrolled.theme-dark {
+    background-color: rgba(17, 17, 17, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Desktop Logo scaling inside capsule */
+  .logo img,
+  header.scrolled .logo img {
+    height: 50px;
+  }
+  
+  header.scrolled .logo img {
+    height: 44px;
+  }
+
+  /* Compact button styling inside capsule */
+  .nav-cta .btn {
+    padding: 0.5rem 1.4rem;
+    font-size: 0.78rem;
+  }
+
+  /* Desktop spring-like transition override for indicator */
+  .nav-indicator-pill {
+    transition: 
+      left 0.45s cubic-bezier(0.25, 1.25, 0.35, 1), 
+      width 0.45s cubic-bezier(0.25, 1.25, 0.35, 1), 
+      top 0.45s cubic-bezier(0.25, 1.25, 0.35, 1), 
+      height 0.45s cubic-bezier(0.25, 1.25, 0.35, 1), 
+      opacity 0.3s ease;
+  }
+
+  /* Desktop Indicator pill theme overrides */
+  header.theme-light .nav-indicator-pill,
+  header.scrolled.theme-light .nav-indicator-pill {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 
+      0 2px 6px rgba(0, 0, 0, 0.02),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+  }
+
+  header.theme-dark .nav-indicator-pill,
+  header.scrolled.theme-dark .nav-indicator-pill {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+  }
 }
 
 /* --- Hero Section --- */
