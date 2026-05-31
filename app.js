@@ -145,12 +145,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Apply bottom nav theme class
     if (mobileBottomNav) {
+      const wrapper = document.querySelector('.mobile-bottom-wrapper');
       if (bottomNavIsDark) {
         mobileBottomNav.classList.add('theme-dark');
         mobileBottomNav.classList.remove('theme-light');
+        if (wrapper) {
+          wrapper.classList.add('theme-dark');
+          wrapper.classList.remove('theme-light');
+        }
       } else {
         mobileBottomNav.classList.add('theme-light');
         mobileBottomNav.classList.remove('theme-dark');
+        if (wrapper) {
+          wrapper.classList.add('theme-light');
+          wrapper.classList.remove('theme-dark');
+        }
       }
     }
 
