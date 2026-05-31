@@ -690,14 +690,28 @@ header.scrolled.theme-dark .nav-indicator-pill {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
   }
 
-  /* Desktop Logo scaling inside capsule */
+  /* Desktop Logo scaling outside capsule */
+  .logo {
+    position: relative;
+    width: 130px;
+    height: 50px;
+    display: block;
+  }
+
   .logo img,
   header.scrolled .logo img {
-    height: 50px;
+    height: 95px;
+    width: auto;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter var(--transition-medium);
+    z-index: 10;
   }
   
   header.scrolled .logo img {
-    height: 44px;
+    height: 80px;
   }
 
   /* Compact button styling inside capsule */
