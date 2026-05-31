@@ -638,86 +638,120 @@ header.scrolled.theme-dark .nav-indicator-pill {
     display: none;
   }
 
-  /* --- Floating Glass Capsule Header for Desktop --- */
-  header {
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 48px);
-    max-width: 1100px;
-    border-radius: 40px;
-    padding: 0.6rem 2rem;
-    border: 1px solid transparent;
-    transition: 
-      top 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-      padding 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
-      background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
-      backdrop-filter 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-      -webkit-backdrop-filter 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-      box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
-      border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    
-    /* Always clear glass on desktop */
-    -webkit-backdrop-filter: blur(2px) saturate(180%);
-    backdrop-filter: blur(2px) saturate(180%);
+  /* --- Transparent Header for Desktop --- */
+  header,
+  header.scrolled {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    transform: none;
+    border-radius: 0;
+    background-color: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding: 1.5rem 0;
+    transition: padding 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1000;
   }
 
   header.scrolled {
-    top: 12px;
-    padding: 0.45rem 2rem;
+    padding: 0.8rem 0;
   }
 
+  /* Three-Column Center-Aligned Layout for perfect menu centering */
   header .nav-container {
-    max-width: 100%;
-    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
   }
 
-  /* Light Theme Floating Header */
-  header.theme-light,
-  header.scrolled.theme-light {
+  .logo {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    position: relative;
+    width: auto;
+    height: auto;
+  }
+
+  .nav-cta {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  /* --- Floating Glass Capsule for the Menu only --- */
+  .nav-menu {
+    flex: 0 0 auto;
+    height: 52px;
+    border-radius: 26px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    -webkit-backdrop-filter: blur(2px) saturate(180%);
+    backdrop-filter: blur(2px) saturate(180%);
+    transition: 
+      background-color var(--transition-medium), 
+      border-color var(--transition-medium), 
+      box-shadow var(--transition-medium);
+  }
+
+  /* Light Theme Menu Capsule */
+  header.theme-light .nav-menu {
     background-color: rgba(255, 255, 255, 0.92);
     border: 1px solid rgba(0, 0, 0, 0.06);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
   }
 
-  /* Dark Theme Floating Header */
-  header.theme-dark,
-  header.scrolled.theme-dark {
+  /* Dark Theme Menu Capsule */
+  header.theme-dark .nav-menu {
     background-color: rgba(17, 17, 17, 0.92);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
   }
 
-  /* Desktop Logo scaling outside capsule */
-  .logo {
-    position: relative;
-    width: 130px;
-    height: 50px;
-    display: block;
+  .nav-menu ul {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
   }
 
+  .nav-link {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.8rem;
+  }
+
+  /* Large Logo Outside the Capsule */
   .logo img,
   header.scrolled .logo img {
-    height: 95px;
+    height: 105px;
     width: auto;
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
+    position: static;
+    transform: none;
     transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter var(--transition-medium);
-    z-index: 10;
   }
   
   header.scrolled .logo img {
-    height: 80px;
+    height: 85px;
   }
 
-  /* Compact button styling inside capsule */
+  /* CTA Button styling */
   .nav-cta .btn {
-    padding: 0.5rem 1.4rem;
-    font-size: 0.78rem;
+    padding: 0.7rem 1.6rem;
+    font-size: 0.82rem;
   }
 
   /* Desktop spring-like transition override for indicator */
@@ -730,7 +764,7 @@ header.scrolled.theme-dark .nav-indicator-pill {
       opacity 0.3s ease;
   }
 
-  /* Desktop Indicator pill theme overrides */
+  /* Desktop Indicator pill theme overrides inside capsule */
   header.theme-light .nav-indicator-pill,
   header.scrolled.theme-light .nav-indicator-pill {
     background: rgba(0, 0, 0, 0.05);
