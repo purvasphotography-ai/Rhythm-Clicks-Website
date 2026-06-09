@@ -99,7 +99,10 @@
       <form id="add-gallery-form" class="login-form" style="gap: 1rem;">
         <div class="form-group">
           <label for="gallery-client-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client / Event Name *</label>
-          <input type="text" id="gallery-client-name" list="contacts-datalist" placeholder="e.g., Ananya - Newborn Session" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+          <div style="position: relative;">
+            <input type="text" id="gallery-client-name" placeholder="e.g., Ananya - Newborn Session" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);" autocomplete="off">
+            <ul class="autocomplete-list" id="gallery-client-name-autocomplete"></ul>
+          </div>
         </div>
         <div class="form-group">
           <label for="gallery-notes-input" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Folder Name / Selections Note</label>
@@ -166,7 +169,10 @@
         <input type="hidden" id="edit-gallery-id">
         <div class="form-group">
           <label for="edit-gallery-client-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client / Event Name *</label>
-          <input type="text" id="edit-gallery-client-name" list="contacts-datalist" placeholder="e.g., Ananya - Newborn Session" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+          <div style="position: relative;">
+            <input type="text" id="edit-gallery-client-name" placeholder="e.g., Ananya - Newborn Session" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);" autocomplete="off">
+            <ul class="autocomplete-list" id="edit-gallery-client-name-autocomplete"></ul>
+          </div>
         </div>
         <div class="form-group">
           <label for="edit-gallery-notes-input" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Folder Name / Selections Note</label>
@@ -230,9 +236,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Contacts Datalist for autocomplete -->
-  <datalist id="contacts-datalist"></datalist>
 
   <!-- Main Dashboard App Wrapper -->
   <div class="dashboard-wrapper" id="dashboard-app" style="display: none;">

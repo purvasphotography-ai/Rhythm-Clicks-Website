@@ -455,10 +455,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   };
 
-  const updateContactsDatalist = () => {
-    const datalist = document.getElementById('contacts-datalist');
-    if (!datalist) return;
-    datalist.innerHTML = contacts.map(c => `<option value="${escapeHtml(c.name)}"></option>`).join('');
+  const setupAutocomplete = (inputEl, autocompleteListEl) => {
+    if (!inputEl || !autocompleteListEl) return;
+
+    const renderAutocompleteDropdown = (query) => {
+      const q = query.toLowerCase().trim();
+      if (!q) {
+        autocompleteListEl.innerHTML = '';
+        autocompleteListEl.classList.remove('show');
+        return;
+      }
+
+      // Filter contacts whose name includes the query
+      const matches = contacts.filter(c => c.name.toLowerCase().includes(q));
+
+      if (matches.length === 0) {
+        autocompleteListEl.innerHTML = '';
+        autocompleteListEl.classList.remove('show');
+        return;
+      }
+
+      autocompleteListEl.innerHTML = matches.map(c => `
+        <li class="autocomplete-item" data-value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</li>
+      `).join('');
+      autocompleteListEl.classList.add('show');
+
+      // Attach click events to the items
+      autocompleteListEl.querySelectorAll('.autocomplete-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          inputEl.value = e.target.getAttribute('data-value');
+          autocompleteListEl.innerHTML = '';
+          autocompleteListEl.classList.remove('show');
+        });
+      });
+    };
+
+    // Listeners
+    inputEl.addEventListener('input', (e) => {
+      renderAutocompleteDropdown(e.target.value);
+    });
+
+    inputEl.addEventListener('focus', (e) => {
+      renderAutocompleteDropdown(e.target.value);
+    });
+
+    // Close on blur (with a small timeout so click triggers first)
+    inputEl.addEventListener('blur', () => {
+      setTimeout(() => {
+        autocompleteListEl.classList.remove('show');
+      }, 250);
+    });
   };
 
   const renderContacts = () => {
@@ -474,9 +520,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         (c.email && c.email.toLowerCase().includes(searchFilter)) ||
         (c.notes && c.notes.toLowerCase().includes(searchFilter));
     });
-
-    // Sync datalist autocomplete whenever contacts list is loaded/rendered
-    updateContactsDatalist();
 
     if (filteredContacts.length === 0) {
       grid.innerHTML = `
@@ -1763,5 +1806,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   }
+
+  // Initialize Custom Autocompletes for Client Name fields
+  const galleryClientNameAutocomplete = document.getElementById('gallery-client-name-autocomplete');
+  const editGalleryClientNameAutocomplete = document.getElementById('edit-gallery-client-name-autocomplete');
+  setupAutocomplete(galleryClientName, galleryClientNameAutocomplete);
+  setupAutocomplete(editGalleryClientName, editGalleryClientNameAutocomplete);
 
 });
