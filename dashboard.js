@@ -554,8 +554,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Customize login card for local simulation
     const submitBtn = loginForm.querySelector('.login-submit-btn');
     submitBtn.textContent = 'Enter Local Board';
-    loginEmail.placeholder = 'Username (Priya, Purva, or Bijal)';
-    loginPassword.placeholder = 'Local Password (e.g. rhythm123)';
+    loginEmail.placeholder = 'Enter email address';
+    loginPassword.placeholder = 'Enter password';
     
     // Define local passwords loader/saver for testing offline
     const getLocalAccounts = () => {
