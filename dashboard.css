@@ -1137,4 +1137,54 @@ body {
   margin-top: auto;
 }
 
+.btn-edit-gallery, .btn-edit-contact {
+  background: transparent;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all var(--transition-fast);
+}
+
+.btn-edit-gallery:hover, .btn-edit-contact:hover {
+  color: #a88a3a;
+  background: rgba(168, 138, 58, 0.05);
+}
+
+.gallery-timestamps-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0 10px 0;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  border-left: 2px solid rgba(0, 0, 0, 0.06);
+}
+
+.gallery-timestamp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.gallery-timestamp-label {
+  font-weight: 600;
+  color: var(--text-light);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.gallery-timestamp-val {
+  color: var(--text-secondary);
+}
+
 

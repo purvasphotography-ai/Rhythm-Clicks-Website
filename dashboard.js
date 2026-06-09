@@ -336,14 +336,60 @@ document.addEventListener('DOMContentLoaded', async () => {
         deliveredCount++;
       }
 
+      // Build workflow phase timeline
+      let timelineHtml = `
+        <div class="gallery-timestamps-timeline">
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Arrived</span>
+            <span class="gallery-timestamp-val">${dateStr} • ${timeStr}</span>
+          </div>
+      `;
+      if (gallery.selectionDate) {
+        const sDate = new Date(gallery.selectionDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        const sTime = new Date(gallery.selectionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        timelineHtml += `
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Selected</span>
+            <span class="gallery-timestamp-val">${sDate} • ${sTime}</span>
+          </div>
+        `;
+      }
+      if (gallery.editedDate) {
+        const eDate = new Date(gallery.editedDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        const eTime = new Date(gallery.editedDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        timelineHtml += `
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Edited</span>
+            <span class="gallery-timestamp-val">${eDate} • ${eTime}</span>
+          </div>
+        `;
+      }
+      if (gallery.deliveredDate) {
+        const dDate = new Date(gallery.deliveredDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        const dTime = new Date(gallery.deliveredDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        timelineHtml += `
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Delivered</span>
+            <span class="gallery-timestamp-val">${dDate} • ${dTime}</span>
+          </div>
+        `;
+      }
+      timelineHtml += `</div>`;
+
       const item = document.createElement('li');
       item.className = 'gallery-card';
       item.innerHTML = `
         <h4 class="gallery-title">${escapeHtml(gallery.clientName)}</h4>
-        <p class="gallery-date">Received: ${dateStr} • ${timeStr}</p>
-        ${gallery.notes ? `<p class="gallery-notes">${escapeHtml(gallery.notes)}</p>` : ''}
+        ${timelineHtml}
+        ${gallery.notes ? `<p class="gallery-notes" style="margin-top: 4px;">${escapeHtml(gallery.notes)}</p>` : ''}
         <div class="gallery-actions">
           ${actionBtn}
+          <button class="btn-edit-gallery" data-id="${gallery.id}" title="Edit gallery" style="margin-right: 0.25rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
           <button class="btn-delete-gallery" data-id="${gallery.id}" title="Delete gallery">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="3 6 5 6 21 6"></polyline>
@@ -387,6 +433,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.deleteGallery(id);
       });
     });
+
+    // Attach edit listeners
+    document.querySelectorAll('.btn-edit-gallery').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const button = e.target.closest('.btn-edit-gallery');
+        const id = button.getAttribute('data-id');
+        const gallery = galleries.find(g => g.id === id);
+        if (gallery) {
+          document.getElementById('edit-gallery-id').value = gallery.id;
+          document.getElementById('edit-gallery-client-name').value = gallery.clientName;
+          document.getElementById('edit-gallery-notes-input').value = gallery.notes || '';
+          document.getElementById('edit-gallery-status-select').value = gallery.status;
+          
+          const editGalleryModal = document.getElementById('edit-gallery-modal');
+          editGalleryModal.style.display = 'flex';
+          editGalleryModal.offsetHeight; // force reflow
+          editGalleryModal.classList.remove('hidden');
+        }
+      });
+    });
+  };
+
+  const updateContactsDatalist = () => {
+    const datalist = document.getElementById('contacts-datalist');
+    if (!datalist) return;
+    datalist.innerHTML = contacts.map(c => `<option value="${escapeHtml(c.name)}"></option>`).join('');
   };
 
   const renderContacts = () => {
@@ -402,6 +474,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         (c.email && c.email.toLowerCase().includes(searchFilter)) ||
         (c.notes && c.notes.toLowerCase().includes(searchFilter));
     });
+
+    // Sync datalist autocomplete whenever contacts list is loaded/rendered
+    updateContactsDatalist();
 
     if (filteredContacts.length === 0) {
       grid.innerHTML = `
@@ -448,6 +523,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>` : ''}
           </div>
           <div class="contact-card-actions">
+            <button class="btn-edit-contact" data-id="${contact.id}" title="Edit contact" style="margin-right: 0.5rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
             <button class="btn-delete-gallery btn-delete-contact" data-id="${contact.id}" title="Delete contact">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
@@ -467,6 +548,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         const button = e.target.closest('.btn-delete-contact');
         const id = button.getAttribute('data-id');
         window.deleteContact(id);
+      });
+    });
+
+    // Attach edit listeners
+    grid.querySelectorAll('.btn-edit-contact').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const button = e.target.closest('.btn-edit-contact');
+        const id = button.getAttribute('data-id');
+        const contact = contacts.find(c => c.id === id);
+        if (contact) {
+          document.getElementById('edit-contact-id').value = contact.id;
+          document.getElementById('edit-contact-name').value = contact.name;
+          document.getElementById('edit-contact-phone').value = contact.phone;
+          document.getElementById('edit-contact-email').value = contact.email || '';
+          document.getElementById('edit-contact-notes').value = contact.notes || '';
+          
+          const editContactModal = document.getElementById('edit-contact-modal');
+          editContactModal.style.display = 'flex';
+          editContactModal.offsetHeight; // force reflow
+          editContactModal.classList.remove('hidden');
+        }
       });
     });
   };
@@ -813,7 +915,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           clientName: clientName.trim(),
           notes: notes.trim(),
           status: 'arrived',
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          selectionDate: null,
+          editedDate: null,
+          deliveredDate: null
         });
         showToast(`Gallery <strong>${clientName}</strong> registered`, '📸');
       } catch (err) {
@@ -824,12 +929,61 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.moveGallery = async (id, nextStatus) => {
       try {
-        await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "galleries", id), {
-          status: nextStatus
-        });
+        const existing = galleries.find(g => g.id === id);
+        const updateFields = { status: nextStatus };
+        if (existing) {
+          if (nextStatus === 'selected') {
+            updateFields.editedDate = null;
+            updateFields.deliveredDate = null;
+            if (!existing.selectionDate) updateFields.selectionDate = Date.now();
+          } else if (nextStatus === 'edited') {
+            updateFields.deliveredDate = null;
+            if (!existing.selectionDate) updateFields.selectionDate = Date.now();
+            if (!existing.editedDate) updateFields.editedDate = Date.now();
+          } else if (nextStatus === 'delivered') {
+            if (!existing.selectionDate) updateFields.selectionDate = Date.now();
+            if (!existing.editedDate) updateFields.editedDate = Date.now();
+            if (!existing.deliveredDate) updateFields.deliveredDate = Date.now();
+          }
+        }
+        await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "galleries", id), updateFields);
         showToast(`Moved to <strong>${nextStatus}</strong>`, '➡️');
       } catch (err) {
         console.error('Failed to update gallery status:', err);
+      }
+    };
+
+    window.updateGallery = async (id, clientName, notes, status) => {
+      try {
+        const existing = galleries.find(g => g.id === id);
+        const updateFields = {
+          clientName: clientName.trim(),
+          notes: notes.trim(),
+          status: status
+        };
+        if (existing) {
+          if (status === 'arrived') {
+            updateFields.selectionDate = null;
+            updateFields.editedDate = null;
+            updateFields.deliveredDate = null;
+          } else if (status === 'selected') {
+            updateFields.editedDate = null;
+            updateFields.deliveredDate = null;
+            if (!existing.selectionDate) updateFields.selectionDate = Date.now();
+          } else if (status === 'edited') {
+            updateFields.deliveredDate = null;
+            if (!existing.selectionDate) updateFields.selectionDate = Date.now();
+            if (!existing.editedDate) updateFields.editedDate = Date.now();
+          } else if (status === 'delivered') {
+            if (!existing.selectionDate) updateFields.selectionDate = Date.now();
+            if (!existing.editedDate) updateFields.editedDate = Date.now();
+            if (!existing.deliveredDate) updateFields.deliveredDate = Date.now();
+          }
+        }
+        await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "galleries", id), updateFields);
+        showToast(`Gallery updated`, '📝');
+      } catch (err) {
+        console.error('Failed to update gallery:', err);
       }
     };
 
@@ -856,6 +1010,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       } catch (err) {
         console.error('Failed to add contact:', err);
         showToast('Failed to save contact. Try again.', '⚠️');
+      }
+    };
+
+    window.updateContact = async (id, name, phone, email, notes) => {
+      try {
+        await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "contacts", id), {
+          name: name.trim(),
+          phone: phone.trim(),
+          email: email.trim(),
+          notes: notes.trim()
+        });
+        showToast(`Contact <strong>${name}</strong> updated`, '👥');
+      } catch (err) {
+        console.error('Failed to update contact:', err);
+        showToast('Failed to update contact. Try again.', '⚠️');
       }
     };
 
@@ -1156,7 +1325,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         clientName: clientName.trim(),
         notes: notes.trim(),
         status: 'arrived',
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        selectionDate: null,
+        editedDate: null,
+        deliveredDate: null
       };
 
       galleries.push(newGallery);
@@ -1175,7 +1347,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       const galleryIndex = galleries.findIndex(g => g.id === id);
       if (galleryIndex === -1) return;
 
-      galleries[galleryIndex].status = nextStatus;
+      const existing = galleries[galleryIndex];
+      existing.status = nextStatus;
+      if (nextStatus === 'selected') {
+        existing.editedDate = null;
+        existing.deliveredDate = null;
+        if (!existing.selectionDate) existing.selectionDate = Date.now();
+      } else if (nextStatus === 'edited') {
+        existing.deliveredDate = null;
+        if (!existing.selectionDate) existing.selectionDate = Date.now();
+        if (!existing.editedDate) existing.editedDate = Date.now();
+      } else if (nextStatus === 'delivered') {
+        if (!existing.selectionDate) existing.selectionDate = Date.now();
+        if (!existing.editedDate) existing.editedDate = Date.now();
+        if (!existing.deliveredDate) existing.deliveredDate = Date.now();
+      }
+
       saveLocalGalleries();
       renderGalleries();
 
@@ -1186,6 +1373,44 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       showToast(`Moved to <strong>${nextStatus}</strong>`, '➡️');
+    };
+
+    window.updateGallery = (id, clientName, notes, status) => {
+      const gIndex = galleries.findIndex(g => g.id === id);
+      if (gIndex === -1) return;
+
+      const existing = galleries[gIndex];
+      existing.clientName = clientName.trim();
+      existing.notes = notes.trim();
+      existing.status = status;
+
+      if (status === 'arrived') {
+        existing.selectionDate = null;
+        existing.editedDate = null;
+        existing.deliveredDate = null;
+      } else if (status === 'selected') {
+        existing.editedDate = null;
+        existing.deliveredDate = null;
+        if (!existing.selectionDate) existing.selectionDate = Date.now();
+      } else if (status === 'edited') {
+        existing.deliveredDate = null;
+        if (!existing.selectionDate) existing.selectionDate = Date.now();
+        if (!existing.editedDate) existing.editedDate = Date.now();
+      } else if (status === 'delivered') {
+        if (!existing.selectionDate) existing.selectionDate = Date.now();
+        if (!existing.editedDate) existing.editedDate = Date.now();
+        if (!existing.deliveredDate) existing.deliveredDate = Date.now();
+      }
+
+      saveLocalGalleries();
+      renderGalleries();
+
+      localChannel.postMessage({
+        type: 'UPDATE_GALLERY',
+        gallery: existing
+      });
+
+      showToast(`Gallery updated`, '📝');
     };
 
     window.deleteGallery = (id) => {
@@ -1222,6 +1447,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       showToast(`Contact <strong>${name}</strong> saved`, '👥');
+    };
+
+    window.updateContact = (id, name, phone, email, notes) => {
+      const cIndex = contacts.findIndex(c => c.id === id);
+      if (cIndex === -1) return;
+
+      const existing = contacts[cIndex];
+      existing.name = name.trim();
+      existing.phone = phone.trim();
+      existing.email = email.trim();
+      existing.notes = notes.trim();
+
+      saveLocalContacts();
+      renderContacts();
+
+      localChannel.postMessage({
+        type: 'UPDATE_CONTACT',
+        contact: existing
+      });
+
+      showToast(`Contact <strong>${name}</strong> updated`, '👥');
     };
 
     window.deleteContact = (id) => {
@@ -1399,6 +1645,92 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       await window.addGallery(name, notes);
       closeGallery();
+    });
+  }
+
+  // --- Edit Gallery Modal Display Handlers ---
+  const editGalleryModal = document.getElementById('edit-gallery-modal');
+  const closeEditGalleryBtn = document.getElementById('close-edit-gallery-btn');
+  const editGalleryForm = document.getElementById('edit-gallery-form');
+  const editGalleryId = document.getElementById('edit-gallery-id');
+  const editGalleryClientName = document.getElementById('edit-gallery-client-name');
+  const editGalleryNotesInput = document.getElementById('edit-gallery-notes-input');
+  const editGalleryStatusSelect = document.getElementById('edit-gallery-status-select');
+
+  const closeEditGallery = () => {
+    editGalleryModal.classList.add('hidden');
+    setTimeout(() => {
+      editGalleryModal.style.display = 'none';
+    }, 400);
+  };
+
+  if (closeEditGalleryBtn) {
+    closeEditGalleryBtn.addEventListener('click', closeEditGallery);
+  }
+
+  if (editGalleryModal) {
+    editGalleryModal.addEventListener('click', (e) => {
+      if (e.target === editGalleryModal) {
+        closeEditGallery();
+      }
+    });
+  }
+
+  if (editGalleryForm) {
+    editGalleryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = editGalleryId.value;
+      const name = editGalleryClientName.value;
+      const notes = editGalleryNotesInput.value;
+      const status = editGalleryStatusSelect.value;
+      if (!name.trim()) return;
+
+      await window.updateGallery(id, name, notes, status);
+      closeEditGallery();
+    });
+  }
+
+  // --- Edit Contact Modal Display Handlers ---
+  const editContactModal = document.getElementById('edit-contact-modal');
+  const closeEditContactBtn = document.getElementById('close-edit-contact-btn');
+  const editContactForm = document.getElementById('edit-contact-form');
+  const editContactId = document.getElementById('edit-contact-id');
+  const editContactName = document.getElementById('edit-contact-name');
+  const editContactPhone = document.getElementById('edit-contact-phone');
+  const editContactEmail = document.getElementById('edit-contact-email');
+  const editContactNotes = document.getElementById('edit-contact-notes');
+
+  const closeEditContact = () => {
+    editContactModal.classList.add('hidden');
+    setTimeout(() => {
+      editContactModal.style.display = 'none';
+    }, 400);
+  };
+
+  if (closeEditContactBtn) {
+    closeEditContactBtn.addEventListener('click', closeEditContact);
+  }
+
+  if (editContactModal) {
+    editContactModal.addEventListener('click', (e) => {
+      if (e.target === editContactModal) {
+        closeEditContact();
+      }
+    });
+  }
+
+  if (editContactForm) {
+    editContactForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = editContactId.value;
+      const name = editContactName.value;
+      const phone = editContactPhone.value;
+      const email = editContactEmail.value;
+      const notes = editContactNotes.value;
+      if (!name.trim() || !phone.trim()) return;
+
+      await window.updateContact(id, name, phone, email, notes);
+      closeEditContact();
     });
   }
 

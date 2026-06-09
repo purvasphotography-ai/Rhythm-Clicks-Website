@@ -99,7 +99,7 @@
       <form id="add-gallery-form" class="login-form" style="gap: 1rem;">
         <div class="form-group">
           <label for="gallery-client-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client / Event Name *</label>
-          <input type="text" id="gallery-client-name" placeholder="e.g., Ananya - Newborn Session" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+          <input type="text" id="gallery-client-name" list="contacts-datalist" placeholder="e.g., Ananya - Newborn Session" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
         </div>
         <div class="form-group">
           <label for="gallery-notes-input" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Folder Name / Selections Note</label>
@@ -153,6 +153,86 @@
       </div>
     </div>
   </div>
+
+  <!-- Edit Gallery Modal -->
+  <div class="login-overlay hidden" id="edit-gallery-modal" style="display: none;">
+    <div class="login-card" style="max-width: 400px; padding: 2rem;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Edit Gallery Entry</h2>
+        <button class="modal-close-btn" id="close-edit-gallery-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="edit-gallery-form" class="login-form" style="gap: 1rem;">
+        <input type="hidden" id="edit-gallery-id">
+        <div class="form-group">
+          <label for="edit-gallery-client-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client / Event Name *</label>
+          <input type="text" id="edit-gallery-client-name" list="contacts-datalist" placeholder="e.g., Ananya - Newborn Session" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="edit-gallery-notes-input" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Folder Name / Selections Note</label>
+          <textarea id="edit-gallery-notes-input" placeholder="e.g., Folder: Aarav_Newborn, 30 files selected by client" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); min-height: 80px; resize: vertical;"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="edit-gallery-status-select" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Pipeline Status</label>
+          <select id="edit-gallery-status-select" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+            <option value="arrived">Arrived</option>
+            <option value="selected">Selected on PC</option>
+            <option value="edited">Edited</option>
+            <option value="delivered">Delivered</option>
+          </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 0.5rem; padding: 0.8rem;">
+          Save Changes
+        </button>
+      </form>
+      
+      <div class="login-footer" id="edit-gallery-status-msg" style="padding-top: 0.5rem; font-size: 0.75rem;">
+        Modify client name, notes, or advance/roll back pipeline status.
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Contact Modal -->
+  <div class="login-overlay hidden" id="edit-contact-modal" style="display: none;">
+    <div class="login-card" style="max-width: 400px; padding: 2rem;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Edit Client Contact</h2>
+        <button class="modal-close-btn" id="close-edit-contact-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="edit-contact-form" class="login-form" style="gap: 1rem;">
+        <input type="hidden" id="edit-contact-id">
+        <div class="form-group">
+          <label for="edit-contact-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client Name *</label>
+          <input type="text" id="edit-contact-name" placeholder="e.g., Ananya Sharma" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="edit-contact-phone" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Phone Number *</label>
+          <input type="tel" id="edit-contact-phone" placeholder="e.g., +91 98765 43210" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="edit-contact-email" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Email Address</label>
+          <input type="email" id="edit-contact-email" placeholder="e.g., ananya@example.com" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="edit-contact-notes" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Instagram / Notes</label>
+          <input type="text" id="edit-contact-notes" placeholder="e.g., @ananya_clicks, Pre-wedding & Wedding" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 0.5rem; padding: 0.8rem;">
+          Save Changes
+        </button>
+      </form>
+      
+      <div class="login-footer" id="edit-contact-status-msg" style="padding-top: 0.5rem; font-size: 0.75rem;">
+        Modify client name, phone number, email, or Instagram/Notes.
+      </div>
+    </div>
+  </div>
+
+  <!-- Contacts Datalist for autocomplete -->
+  <datalist id="contacts-datalist"></datalist>
 
   <!-- Main Dashboard App Wrapper -->
   <div class="dashboard-wrapper" id="dashboard-app" style="display: none;">
