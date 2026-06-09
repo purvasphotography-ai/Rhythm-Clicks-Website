@@ -1038,3 +1038,103 @@ body {
   background: rgba(211, 47, 47, 0.05);
 }
 
+/* --- Global Search Bar & Contacts Tab styles --- */
+#global-search:focus {
+  outline: none;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.03) !important;
+}
+
+.contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0 0;
+}
+
+.contact-card {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--border-radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.contact-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.contact-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.contact-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a88a3a, #cba358);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.contact-details-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  margin-top: 0.5rem;
+}
+
+.contact-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contact-detail-row svg {
+  color: var(--text-light);
+  flex-shrink: 0;
+}
+
+.contact-detail-row a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.contact-detail-row a:hover {
+  color: var(--text-primary);
+}
+
+.contact-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 0.6rem;
+  margin-top: auto;
+}
+
+

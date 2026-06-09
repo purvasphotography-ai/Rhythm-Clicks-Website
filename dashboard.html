@@ -117,6 +117,43 @@
     </div>
   </div>
 
+  <!-- Add Contact Modal -->
+  <div class="login-overlay hidden" id="contact-modal" style="display: none;">
+    <div class="login-card" style="max-width: 400px; padding: 2rem;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Add Client Contact</h2>
+        <button class="modal-close-btn" id="close-contact-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="add-contact-form" class="login-form" style="gap: 1rem;">
+        <div class="form-group">
+          <label for="contact-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client Name *</label>
+          <input type="text" id="contact-name" placeholder="e.g., Ananya Sharma" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="contact-phone" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Phone Number *</label>
+          <input type="tel" id="contact-phone" placeholder="e.g., +91 98765 43210" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="contact-email" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Email Address</label>
+          <input type="email" id="contact-email" placeholder="e.g., ananya@example.com" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="contact-notes" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Instagram / Notes</label>
+          <input type="text" id="contact-notes" placeholder="e.g., @ananya_clicks, Pre-wedding & Wedding" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 0.5rem; padding: 0.8rem;">
+          Save Contact
+        </button>
+      </form>
+      
+      <div class="login-footer" id="contact-status-msg" style="padding-top: 0.5rem; font-size: 0.75rem;">
+        Add a new client to the studio database.
+      </div>
+    </div>
+  </div>
+
   <!-- Main Dashboard App Wrapper -->
   <div class="dashboard-wrapper" id="dashboard-app" style="display: none;">
     <!-- Header -->
@@ -159,10 +196,20 @@
       </div>
     </div>
 
-    <!-- Tab Navigation -->
-    <div class="tab-navigation">
-      <button class="tab-btn active" id="tab-tasks">📋 Task Planner</button>
-      <button class="tab-btn" id="tab-galleries">📸 Gallery Tracker</button>
+    <!-- Tab Navigation & Search -->
+    <div class="tab-navigation-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;">
+      <div class="tab-navigation" style="margin-bottom: 0;">
+        <button class="tab-btn active" id="tab-tasks">📋 Task Planner</button>
+        <button class="tab-btn" id="tab-galleries">📸 Gallery Tracker</button>
+        <button class="tab-btn" id="tab-contacts">📞 Contacts</button>
+      </div>
+      <div class="search-bar-container" style="position: relative; min-width: 250px; flex-grow: 1; max-width: 350px;">
+        <input type="text" id="global-search" placeholder="Search tasks, galleries, or contacts..." style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.2rem; border: 1px solid rgba(0,0,0,0.08); border-radius: 50px; background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); font-size: 0.85rem; color: var(--text-primary); transition: all 0.3s ease;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); color: var(--text-light); pointer-events: none;">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
     </div>
 
     <!-- Main Content Area -->
@@ -322,6 +369,26 @@
               <!-- Rendered dynamically -->
             </ul>
           </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Contacts Directory -->
+      <div id="contacts-section" class="tab-content">
+        <div class="gallery-tracker-header">
+          <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Client Contacts</h2>
+          <button id="add-contact-btn" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Contact
+          </button>
+        </div>
+
+        <div class="contacts-grid-wrapper">
+          <ul class="contacts-grid" id="contacts-grid">
+            <!-- Rendered dynamically -->
+          </ul>
         </div>
       </div>
 

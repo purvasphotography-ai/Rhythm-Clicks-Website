@@ -23,7 +23,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   let db = null;
   let firestoreUnsubscribe = null;
   let galleriesUnsubscribe = null;
+  let contactsUnsubscribe = null;
   let galleries = [];
+  let contacts = [];
+  let searchFilter = '';
 
   // --- UI Elements ---
   const loginOverlay = document.getElementById('login-overlay');
@@ -160,7 +163,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const renderMyTasks = () => {
     if (!myTasksList) return;
-    const myTasks = tasks.filter(t => t.assignee === currentUser);
+    const myTasks = tasks.filter(t => {
+      const matchesUser = t.assignee === currentUser;
+      const matchesSearch = !searchFilter || 
+        t.text.toLowerCase().includes(searchFilter) || 
+        t.sender.toLowerCase().includes(searchFilter);
+      return matchesUser && matchesSearch;
+    });
     
     myTasks.sort((a, b) => {
       if (a.status === b.status) {
@@ -216,7 +225,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const renderSentTasks = () => {
     if (!sentTasksList) return;
-    const sentTasks = tasks.filter(t => t.sender === currentUser);
+    const sentTasks = tasks.filter(t => {
+      const matchesUser = t.sender === currentUser;
+      const matchesSearch = !searchFilter || 
+        t.text.toLowerCase().includes(searchFilter) || 
+        t.assignee.toLowerCase().includes(searchFilter);
+      return matchesUser && matchesSearch;
+    });
     sentTasks.sort((a, b) => b.timestamp - a.timestamp);
 
     if (sentTasks.length === 0) {
@@ -297,7 +312,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     let editedCount = 0;
     let deliveredCount = 0;
 
-    galleries.forEach(gallery => {
+    const filteredGalleries = galleries.filter(g => {
+      return !searchFilter || 
+        g.clientName.toLowerCase().includes(searchFilter) || 
+        (g.notes && g.notes.toLowerCase().includes(searchFilter));
+    });
+
+    filteredGalleries.forEach(gallery => {
       const dateStr = new Date(gallery.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' });
       const timeStr = new Date(gallery.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -364,6 +385,88 @@ document.addEventListener('DOMContentLoaded', async () => {
         const button = e.target.closest('.btn-delete-gallery');
         const id = button.getAttribute('data-id');
         window.deleteGallery(id);
+      });
+    });
+  };
+
+  const renderContacts = () => {
+    const grid = document.getElementById('contacts-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    const filteredContacts = contacts.filter(c => {
+      return !searchFilter ||
+        c.name.toLowerCase().includes(searchFilter) ||
+        c.phone.toLowerCase().includes(searchFilter) ||
+        (c.email && c.email.toLowerCase().includes(searchFilter)) ||
+        (c.notes && c.notes.toLowerCase().includes(searchFilter));
+    });
+
+    if (filteredContacts.length === 0) {
+      grid.innerHTML = `
+        <li class="empty-state" style="grid-column: 1 / -1;">
+          <div class="empty-icon">👥</div>
+          <p>${searchFilter ? 'No contacts match your search.' : 'No client contacts saved yet.'}</p>
+        </li>
+      `;
+      return;
+    }
+
+    grid.innerHTML = filteredContacts.map(contact => {
+      const initial = contact.name.substring(0, 1).toUpperCase();
+      
+      return `
+        <li class="contact-card" data-id="${contact.id}">
+          <div class="contact-card-header">
+            <div class="contact-avatar">${initial}</div>
+            <h3 class="gallery-title" style="margin: 0;">${escapeHtml(contact.name)}</h3>
+          </div>
+          <div class="contact-details-box">
+            <div class="contact-detail-row">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+              <a href="tel:${contact.phone}">${escapeHtml(contact.phone)}</a>
+            </div>
+            ${contact.email ? `
+            <div class="contact-detail-row">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              <a href="mailto:${contact.email}">${escapeHtml(contact.email)}</a>
+            </div>` : ''}
+            ${contact.notes ? `
+            <div class="contact-detail-row" style="align-items: flex-start;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-top: 2px;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span style="font-size: 0.8rem; word-break: break-word;">${escapeHtml(contact.notes)}</span>
+            </div>` : ''}
+          </div>
+          <div class="contact-card-actions">
+            <button class="btn-delete-gallery btn-delete-contact" data-id="${contact.id}" title="Delete contact">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+            </button>
+          </div>
+        </li>
+      `;
+    }).join('');
+
+    // Attach delete listeners
+    grid.querySelectorAll('.btn-delete-contact').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const button = e.target.closest('.btn-delete-contact');
+        const id = button.getAttribute('data-id');
+        window.deleteContact(id);
       });
     });
   };
@@ -513,6 +616,27 @@ document.addEventListener('DOMContentLoaded', async () => {
           console.error('Firestore galleries subscription error:', error);
         });
 
+        // Setup Firestore Contacts Snapshots Listener
+        if (contactsUnsubscribe) contactsUnsubscribe();
+
+        const contactsQuery = firebaseFirestore.query(
+          firebaseFirestore.collection(db, "contacts"),
+          firebaseFirestore.orderBy("name", "asc")
+        );
+
+        contactsUnsubscribe = firebaseFirestore.onSnapshot(contactsQuery, (snapshot) => {
+          contacts = [];
+          snapshot.forEach(doc => {
+            contacts.push({
+              id: doc.id,
+              ...doc.data()
+            });
+          });
+          renderContacts();
+        }, (error) => {
+          console.error('Firestore contacts subscription error:', error);
+        });
+
       } else {
         // Sign-out states
         if (firestoreUnsubscribe) {
@@ -523,11 +647,17 @@ document.addEventListener('DOMContentLoaded', async () => {
           galleriesUnsubscribe();
           galleriesUnsubscribe = null;
         }
+        if (contactsUnsubscribe) {
+          contactsUnsubscribe();
+          contactsUnsubscribe = null;
+        }
         tasks = [];
         previousTasksState = [];
         galleries = [];
+        contacts = [];
         renderDashboard();
         renderGalleries();
+        renderContacts();
         
         loginOverlay.classList.remove('hidden');
         dashboardApp.style.display = 'none';
@@ -712,6 +842,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Failed to delete gallery:', err);
       }
     };
+
+    window.addContact = async (name, phone, email, notes) => {
+      try {
+        await firebaseFirestore.addDoc(firebaseFirestore.collection(db, "contacts"), {
+          name: name.trim(),
+          phone: phone.trim(),
+          email: email.trim(),
+          notes: notes.trim(),
+          timestamp: Date.now()
+        });
+        showToast(`Contact <strong>${name}</strong> saved`, '👥');
+      } catch (err) {
+        console.error('Failed to add contact:', err);
+        showToast('Failed to save contact. Try again.', '⚠️');
+      }
+    };
+
+    window.deleteContact = async (id) => {
+      if (!confirm('Are you sure you want to delete this contact?')) return;
+      try {
+        await firebaseFirestore.deleteDoc(firebaseFirestore.doc(db, "contacts", id));
+        showToast('Contact deleted', '🧹');
+      } catch (err) {
+        console.error('Failed to delete contact:', err);
+      }
+    };
   }
   // ==========================================================================
   // 2. LOCAL FALLBACK MODE IMPLEMENTATION (LocalStorage + BroadcastChannel)
@@ -759,6 +915,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       localStorage.setItem('rhythm_clicks_galleries', JSON.stringify(galleries));
     };
 
+    const loadLocalContacts = () => {
+      const raw = localStorage.getItem('rhythm_clicks_contacts');
+      contacts = raw ? JSON.parse(raw) : [];
+      renderContacts();
+    };
+
+    const saveLocalContacts = () => {
+      localStorage.setItem('rhythm_clicks_contacts', JSON.stringify(contacts));
+    };
+
     // Handle Local Login Submission
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -789,6 +955,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Load initial state
       loadLocalTasks();
       loadLocalGalleries();
+      loadLocalContacts();
       isInitialLoad = true;
       checkForTaskStateUpdates();
 
@@ -817,8 +984,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       logoutBtn.style.display = 'none';
       tasks = [];
       galleries = [];
+      contacts = [];
       renderDashboard();
       renderGalleries();
+      renderContacts();
     });
 
     // Handle Local Password Update
@@ -1033,6 +1202,42 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast('Gallery entry deleted', '🧹');
     };
 
+    window.addContact = (name, phone, email, notes) => {
+      const newContact = {
+        id: 'contact_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        notes: notes.trim(),
+        timestamp: Date.now()
+      };
+
+      contacts.push(newContact);
+      saveLocalContacts();
+      renderContacts();
+
+      localChannel.postMessage({
+        type: 'ADD_CONTACT',
+        contact: newContact
+      });
+
+      showToast(`Contact <strong>${name}</strong> saved`, '👥');
+    };
+
+    window.deleteContact = (id) => {
+      if (!confirm('Are you sure you want to delete this contact?')) return;
+      contacts = contacts.filter(c => c.id !== id);
+      saveLocalContacts();
+      renderContacts();
+
+      localChannel.postMessage({
+        type: 'DELETE_CONTACT',
+        contactId: id
+      });
+
+      showToast('Contact deleted', '🧹');
+    };
+
     // Sync over local BroadcastChannel
     localChannel.onmessage = (event) => {
       const data = event.data;
@@ -1040,6 +1245,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       loadLocalTasks();
       loadLocalGalleries();
+      loadLocalContacts();
       checkForTaskStateUpdates();
     };
   }
@@ -1047,22 +1253,102 @@ document.addEventListener('DOMContentLoaded', async () => {
   // --- Tab switching listeners ---
   const tabTasks = document.getElementById('tab-tasks');
   const tabGalleries = document.getElementById('tab-galleries');
+  const tabContacts = document.getElementById('tab-contacts');
   const tasksSection = document.getElementById('tasks-section');
   const galleriesSection = document.getElementById('galleries-section');
+  const contactsSection = document.getElementById('contacts-section');
 
-  if (tabTasks && tabGalleries && tasksSection && galleriesSection) {
+  if (tabTasks && tabGalleries && tabContacts && tasksSection && galleriesSection && contactsSection) {
     tabTasks.addEventListener('click', () => {
       tabTasks.classList.add('active');
       tabGalleries.classList.remove('active');
+      tabContacts.classList.remove('active');
       tasksSection.classList.add('active');
       galleriesSection.classList.remove('active');
+      contactsSection.classList.remove('active');
     });
 
     tabGalleries.addEventListener('click', () => {
       tabGalleries.classList.add('active');
       tabTasks.classList.remove('active');
+      tabContacts.classList.remove('active');
       galleriesSection.classList.add('active');
       tasksSection.classList.remove('active');
+      contactsSection.classList.remove('active');
+    });
+
+    tabContacts.addEventListener('click', () => {
+      tabContacts.classList.add('active');
+      tabTasks.classList.remove('active');
+      tabGalleries.classList.remove('active');
+      contactsSection.classList.add('active');
+      tasksSection.classList.remove('active');
+      galleriesSection.classList.remove('active');
+    });
+  }
+
+  // --- Add Contact Modal Display Handlers ---
+  const contactModal = document.getElementById('contact-modal');
+  const addContactBtn = document.getElementById('add-contact-btn');
+  const closeContactBtn = document.getElementById('close-contact-btn');
+  const addContactForm = document.getElementById('add-contact-form');
+  const contactName = document.getElementById('contact-name');
+  const contactPhone = document.getElementById('contact-phone');
+  const contactEmail = document.getElementById('contact-email');
+  const contactNotes = document.getElementById('contact-notes');
+  const contactStatusMsg = document.getElementById('contact-status-msg');
+
+  if (addContactBtn) {
+    addContactBtn.addEventListener('click', () => {
+      addContactForm.reset();
+      contactStatusMsg.textContent = 'Add a new client to the studio database.';
+      contactModal.style.display = 'flex';
+      contactModal.offsetHeight; // force reflow
+      contactModal.classList.remove('hidden');
+    });
+  }
+
+  const closeContact = () => {
+    contactModal.classList.add('hidden');
+    setTimeout(() => {
+      contactModal.style.display = 'none';
+    }, 400);
+  };
+
+  if (closeContactBtn) {
+    closeContactBtn.addEventListener('click', closeContact);
+  }
+
+  if (contactModal) {
+    contactModal.addEventListener('click', (e) => {
+      if (e.target === contactModal) {
+        closeContact();
+      }
+    });
+  }
+
+  if (addContactForm) {
+    addContactForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = contactName.value;
+      const phone = contactPhone.value;
+      const email = contactEmail.value;
+      const notes = contactNotes.value;
+      if (!name.trim() || !phone.trim()) return;
+
+      await window.addContact(name, phone, email, notes);
+      closeContact();
+    });
+  }
+
+  // --- Global Search Input ---
+  const globalSearch = document.getElementById('global-search');
+  if (globalSearch) {
+    globalSearch.addEventListener('input', (e) => {
+      searchFilter = e.target.value.toLowerCase().trim();
+      renderDashboard();
+      renderGalleries();
+      renderContacts();
     });
   }
 
