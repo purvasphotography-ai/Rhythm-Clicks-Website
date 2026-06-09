@@ -13,11 +13,10 @@
  * automatically fallback to Local Mode (LocalStorage & BroadcastChannel sync).
  */
 export const firebaseConfig = {
-  apiKey: "AIzaSyCZ15XdF-PRhgw7TPPjSKlEjYlnfeHPgTk",
-  authDomain: "rhythm-clicks-dashboard.firebaseapp.com",
-  projectId: "rhythm-clicks-dashboard",
-  storageBucket: "rhythm-clicks-dashboard.firebasestorage.app",
-  messagingSenderId: "1001804808361",
-  appId: "1:1001804808361:web:dc60605c842aa5b07c69b8",
-  measurementId: "G-6CC989CK19"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
