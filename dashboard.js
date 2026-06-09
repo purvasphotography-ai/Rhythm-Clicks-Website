@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let auth = null;
   let db = null;
   let firestoreUnsubscribe = null;
+  let galleriesUnsubscribe = null;
+  let galleries = [];
 
   // --- UI Elements ---
   const loginOverlay = document.getElementById('login-overlay');
@@ -275,6 +277,100 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderSentTasks();
   };
 
+  const renderGalleries = () => {
+    const listArrived = document.getElementById('list-arrived');
+    const listSelected = document.getElementById('list-selected');
+    const listEdited = document.getElementById('list-edited');
+    const listDelivered = document.getElementById('list-delivered');
+
+    const countArrived = document.getElementById('count-arrived');
+    const countSelected = document.getElementById('count-selected');
+    const countEdited = document.getElementById('count-edited');
+    const countDelivered = document.getElementById('count-delivered');
+
+    if (!listArrived || !listSelected || !listEdited || !listDelivered) return;
+
+    listArrived.innerHTML = '';
+    listSelected.innerHTML = '';
+    listEdited.innerHTML = '';
+    listDelivered.innerHTML = '';
+
+    let arrivedCount = 0;
+    let selectedCount = 0;
+    let editedCount = 0;
+    let deliveredCount = 0;
+
+    galleries.forEach(gallery => {
+      const dateStr = new Date(gallery.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' });
+      const timeStr = new Date(gallery.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      let actionBtn = '';
+      if (gallery.status === 'arrived') {
+        actionBtn = `<button class="btn-move" data-id="${gallery.id}" data-status="selected" title="Mark selected on PC">Selected ➡️</button>`;
+        arrivedCount++;
+      } else if (gallery.status === 'selected') {
+        actionBtn = `<button class="btn-move" data-id="${gallery.id}" data-status="edited" title="Mark edited by Priya">Edited ➡️</button>`;
+        selectedCount++;
+      } else if (gallery.status === 'edited') {
+        actionBtn = `<button class="btn-move" data-id="${gallery.id}" data-status="delivered" title="Mark delivered to client">Delivered ✓</button>`;
+        editedCount++;
+      } else if (gallery.status === 'delivered') {
+        deliveredCount++;
+      }
+
+      const item = document.createElement('li');
+      item.className = 'gallery-card';
+      item.innerHTML = `
+        <h4 class="gallery-title">${escapeHtml(gallery.clientName)}</h4>
+        <p class="gallery-date">Received: ${dateStr} • ${timeStr}</p>
+        ${gallery.notes ? `<p class="gallery-notes">${escapeHtml(gallery.notes)}</p>` : ''}
+        <div class="gallery-actions">
+          ${actionBtn}
+          <button class="btn-delete-gallery" data-id="${gallery.id}" title="Delete gallery">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+        </div>
+      `;
+
+      if (gallery.status === 'arrived') {
+        listArrived.appendChild(item);
+      } else if (gallery.status === 'selected') {
+        listSelected.appendChild(item);
+      } else if (gallery.status === 'edited') {
+        listEdited.appendChild(item);
+      } else if (gallery.status === 'delivered') {
+        listDelivered.appendChild(item);
+      }
+    });
+
+    if (countArrived) countArrived.textContent = arrivedCount;
+    if (countSelected) countSelected.textContent = selectedCount;
+    if (countEdited) countEdited.textContent = editedCount;
+    if (countDelivered) countDelivered.textContent = deliveredCount;
+
+    // Attach listeners
+    document.querySelectorAll('.btn-move').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.getAttribute('data-id');
+        const nextStatus = e.target.getAttribute('data-status');
+        window.moveGallery(id, nextStatus);
+      });
+    });
+
+    document.querySelectorAll('.btn-delete-gallery').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const button = e.target.closest('.btn-delete-gallery');
+        const id = button.getAttribute('data-id');
+        window.deleteGallery(id);
+      });
+    });
+  };
+
   // --- Notification Event Trigger Engine ---
   const checkForTaskStateUpdates = () => {
     if (isInitialLoad) {
@@ -398,15 +494,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         showToast('Database access denied. Verify permissions.', '⚠️');
       });
 
+      // Setup Firestore Galleries Snapshots Listener
+      if (galleriesUnsubscribe) galleriesUnsubscribe();
+
+      const galleriesQuery = firebaseFirestore.query(
+        firebaseFirestore.collection(db, "galleries"),
+        firebaseFirestore.orderBy("timestamp", "asc")
+      );
+
+      galleriesUnsubscribe = firebaseFirestore.onSnapshot(galleriesQuery, (snapshot) => {
+        galleries = [];
+        snapshot.forEach(doc => {
+          galleries.push({
+            id: doc.id,
+            ...doc.data()
+          });
+        });
+        renderGalleries();
+      }, (error) => {
+        console.error('Firestore galleries subscription error:', error);
+      });
+
     } else {
       // Sign-out states
       if (firestoreUnsubscribe) {
         firestoreUnsubscribe();
         firestoreUnsubscribe = null;
       }
+      if (galleriesUnsubscribe) {
+        galleriesUnsubscribe();
+        galleriesUnsubscribe = null;
+      }
       tasks = [];
       previousTasksState = [];
+      galleries = [];
       renderDashboard();
+      renderGalleries();
       
       loginOverlay.classList.remove('hidden');
       dashboardApp.style.display = 'none';
@@ -552,6 +675,115 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       window.addTask(text, activeAssignee);
       taskText.value = '';
+    });
+  }
+
+  // --- Gallery database actions ---
+  window.addGallery = async (clientName, notes) => {
+    try {
+      await firebaseFirestore.addDoc(firebaseFirestore.collection(db, "galleries"), {
+        clientName: clientName.trim(),
+        notes: notes.trim(),
+        status: 'arrived',
+        timestamp: Date.now()
+      });
+      showToast(`Gallery <strong>${clientName}</strong> registered`, '📸');
+    } catch (err) {
+      console.error('Failed to add gallery:', err);
+      showToast('Failed to register gallery. Try again.', '⚠️');
+    }
+  };
+
+  window.moveGallery = async (id, nextStatus) => {
+    try {
+      await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "galleries", id), {
+        status: nextStatus
+      });
+      showToast(`Moved to <strong>${nextStatus}</strong>`, '➡️');
+    } catch (err) {
+      console.error('Failed to update gallery status:', err);
+    }
+  };
+
+  window.deleteGallery = async (id) => {
+    if (!confirm('Are you sure you want to delete this gallery entry?')) return;
+    try {
+      await firebaseFirestore.deleteDoc(firebaseFirestore.doc(db, "galleries", id));
+      showToast('Gallery entry deleted', '🧹');
+    } catch (err) {
+      console.error('Failed to delete gallery:', err);
+    }
+  };
+
+  // --- Tab switching listeners ---
+  const tabTasks = document.getElementById('tab-tasks');
+  const tabGalleries = document.getElementById('tab-galleries');
+  const tasksSection = document.getElementById('tasks-section');
+  const galleriesSection = document.getElementById('galleries-section');
+
+  if (tabTasks && tabGalleries && tasksSection && galleriesSection) {
+    tabTasks.addEventListener('click', () => {
+      tabTasks.classList.add('active');
+      tabGalleries.classList.remove('active');
+      tasksSection.classList.add('active');
+      galleriesSection.classList.remove('active');
+    });
+
+    tabGalleries.addEventListener('click', () => {
+      tabGalleries.classList.add('active');
+      tabTasks.classList.remove('active');
+      galleriesSection.classList.add('active');
+      tasksSection.classList.remove('active');
+    });
+  }
+
+  // --- Add Gallery Modal Display Handlers ---
+  const galleryModal = document.getElementById('gallery-modal');
+  const addGalleryBtn = document.getElementById('add-gallery-btn');
+  const closeGalleryBtn = document.getElementById('close-gallery-btn');
+  const addGalleryForm = document.getElementById('add-gallery-form');
+  const galleryClientName = document.getElementById('gallery-client-name');
+  const galleryNotesInput = document.getElementById('gallery-notes-input');
+  const galleryStatusMsg = document.getElementById('gallery-status-msg');
+
+  if (addGalleryBtn) {
+    addGalleryBtn.addEventListener('click', () => {
+      addGalleryForm.reset();
+      galleryStatusMsg.textContent = 'This gallery will enter the "Arrived" column.';
+      galleryModal.style.display = 'flex';
+      galleryModal.offsetHeight; // force reflow
+      galleryModal.classList.remove('hidden');
+    });
+  }
+
+  const closeGallery = () => {
+    galleryModal.classList.add('hidden');
+    setTimeout(() => {
+      galleryModal.style.display = 'none';
+    }, 400);
+  };
+
+  if (closeGalleryBtn) {
+    closeGalleryBtn.addEventListener('click', closeGallery);
+  }
+
+  if (galleryModal) {
+    galleryModal.addEventListener('click', (e) => {
+      if (e.target === galleryModal) {
+        closeGallery();
+      }
+    });
+  }
+
+  if (addGalleryForm) {
+    addGalleryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = galleryClientName.value;
+      const notes = galleryNotesInput.value;
+      if (!name.trim()) return;
+
+      await window.addGallery(name, notes);
+      closeGallery();
     });
   }
 
