@@ -1187,4 +1187,10 @@ body {
   color: var(--text-secondary);
 }
 
+/* Ensure option text is readable (dark) in datalist and select dropdowns */
+option, datalist option {
+  color: #111111 !important;
+  background-color: #ffffff !important;
+}
+
 
