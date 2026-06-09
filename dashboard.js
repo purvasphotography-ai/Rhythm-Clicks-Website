@@ -8,15 +8,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     firebaseConfig.projectId && 
     !firebaseConfig.projectId.startsWith('YOUR_');
 
+  if (!isFirebaseActive) {
+    console.error('Firebase configuration keys are missing or invalid.');
+    loginStatusMsg.innerHTML = '<span style="color: #d32f2f; font-weight: 600;">Sync configuration missing. Please check your firebase-config.js file.</span>';
+    return;
+  }
+
   // --- State Variables ---
   let currentUser = 'Priya'; // Active user identity
   let activeAssignee = ''; // Holds selected assignee during task compose
   let tasks = [];
   let previousTasksState = []; // Used to track changes for notification triggers
   let isInitialLoad = true; // Prevents spamming notifications for old tasks on boot
-
-  // Local Mode Sync Channel
-  let localChannel = null;
 
   // Firebase references
   let auth = null;
@@ -308,504 +311,237 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 1. GLOBAL MODE IMPLEMENTATION (Firebase Firestore + Auth)
   // ==========================================================================
   
-  if (isFirebaseActive) {
-    console.log('Booting in Secure Global Mode (Firebase active)');
-    loginStatusMsg.textContent = 'Enter studio credentials to sign in.';
+  console.log('Booting in Secure Global Mode (Firebase active)');
+  loginStatusMsg.textContent = 'Enter studio credentials to sign in.';
 
-    // Dynamic Module Imports of Firebase Web SDKs
-    let firebaseApp, firebaseFirestore, firebaseAuth;
-    try {
-      firebaseApp = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
-      firebaseAuth = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
-      firebaseFirestore = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
-    } catch (err) {
-      console.error('Failed to import Firebase modules from CDN:', err);
-      loginStatusMsg.textContent = 'Connection error. Check internet link.';
-      return;
-    }
+  // Dynamic Module Imports of Firebase Web SDKs
+  let firebaseApp, firebaseFirestore, firebaseAuth;
+  try {
+    firebaseApp = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
+    firebaseAuth = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
+    firebaseFirestore = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+  } catch (err) {
+    console.error('Failed to import Firebase modules from CDN:', err);
+    loginStatusMsg.innerHTML = '<span style="color: #d32f2f; font-weight: 600;">Connection error. Check internet link.</span>';
+    return;
+  }
 
-    const app = firebaseApp.initializeApp(firebaseConfig);
-    auth = firebaseAuth.getAuth(app);
-    db = firebaseFirestore.getFirestore(app);
+  const app = firebaseApp.initializeApp(firebaseConfig);
+  auth = firebaseAuth.getAuth(app);
+  db = firebaseFirestore.getFirestore(app);
 
-    // Setup Auth Listener
-    firebaseAuth.onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Auth success!
-        currentUser = getIdentityFromEmail(user.email);
-        console.log(`Authenticated securely as ${currentUser} (${user.email})`);
+  // Setup Auth Listener
+  firebaseAuth.onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // Auth success!
+      currentUser = getIdentityFromEmail(user.email);
+      console.log(`Authenticated securely as ${currentUser} (${user.email})`);
 
-        // Update UI states
-        loginOverlay.classList.add('hidden');
-        dashboardApp.style.display = 'flex';
-        logoutBtn.style.display = 'block';
-        userDisplayLabel.textContent = `Viewing secure board:`;
-
-        // Configure workspace selector (disable switching to other users' views)
-        identityPills.forEach(pill => {
-          const pillUser = pill.getAttribute('data-user');
-          if (pillUser === currentUser) {
-            pill.classList.add('active');
-            pill.style.display = 'inline-flex';
-          } else {
-            pill.classList.remove('active');
-            pill.style.display = 'none'; // Lock views
-          }
-        });
-
-        // Initialize compose assignees options
-        assigneePills.forEach(pill => {
-          const name = pill.getAttribute('data-assignee');
-          if (name === currentUser) {
-            pill.style.display = 'none';
-            pill.classList.remove('active');
-          } else {
-            pill.style.display = 'inline-flex';
-          }
-        });
-
-        // Pick default assignee
-        const defAssignee = Array.from(assigneePills).find(p => p.getAttribute('data-assignee') !== currentUser);
-        if (defAssignee) {
-          activeAssignee = defAssignee.getAttribute('data-assignee');
-          assigneePills.forEach(p => p.classList.toggle('active', p.getAttribute('data-assignee') === activeAssignee));
-        }
-
-        // Setup Firestore Snapshots Listener
-        if (firestoreUnsubscribe) firestoreUnsubscribe();
-        
-        const tasksQuery = firebaseFirestore.query(
-          firebaseFirestore.collection(db, "tasks"), 
-          firebaseFirestore.orderBy("timestamp", "asc")
-        );
-
-        isInitialLoad = true;
-        firestoreUnsubscribe = firebaseFirestore.onSnapshot(tasksQuery, (snapshot) => {
-          tasks = [];
-          snapshot.forEach(doc => {
-            tasks.push({
-              id: doc.id,
-              ...doc.data()
-            });
-          });
-          
-          renderDashboard();
-          checkForTaskStateUpdates();
-        }, (error) => {
-          console.error('Firestore subscription error:', error);
-          showToast('Database access denied. Verify permissions.', '⚠️');
-        });
-
-      } else {
-        // Sign-out states
-        if (firestoreUnsubscribe) {
-          firestoreUnsubscribe();
-          firestoreUnsubscribe = null;
-        }
-        tasks = [];
-        previousTasksState = [];
-        renderDashboard();
-        
-        loginOverlay.classList.remove('hidden');
-        dashboardApp.style.display = 'none';
-        logoutBtn.style.display = 'none';
-      }
-    });
-
-    // Form sign-in submission
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const email = loginEmail.value.trim();
-      const password = loginPassword.value;
-
-      loginStatusMsg.textContent = 'Verifying credentials...';
-
-      firebaseAuth.signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          loginForm.reset();
-        })
-        .catch((error) => {
-          console.error('Sign-in failed:', error);
-          loginStatusMsg.innerHTML = '<span style="color: #d32f2f;">Invalid email address or password.</span>';
-          showToast('Login failed. Please check credentials.', '❌');
-        });
-    });
-
-    // Logout trigger
-    logoutBtn.addEventListener('click', () => {
-      firebaseAuth.signOut(auth)
-        .then(() => {
-          showToast('Signed out cleanly', '🔒');
-        })
-        .catch(err => console.error('Sign out error:', err));
-    });
-
-    // Add task
-    window.addTask = async (text, assignee) => {
-      try {
-        await firebaseFirestore.addDoc(firebaseFirestore.collection(db, "tasks"), {
-          text: text.trim(),
-          sender: currentUser,
-          assignee: assignee,
-          status: 'pending',
-          timestamp: Date.now()
-        });
-        showToast(`Task assigned to <strong>${assignee}</strong>`, '📤');
-      } catch (err) {
-        console.error('Failed to add task to Firestore:', err);
-        showToast('Failed to save task. Try again.', '⚠️');
-      }
-    };
-
-    // Complete task
-    window.toggleTaskCompletion = async (id) => {
-      const task = tasks.find(t => t.id === id);
-      if (!task) return;
-      const newStatus = task.status === 'pending' ? 'completed' : 'pending';
-
-      try {
-        await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "tasks", id), {
-          status: newStatus
-        });
-        if (newStatus === 'completed') {
-          showToast(`Completed task: "${task.text.substring(0, 20)}..."`, '✓', 'task_complete');
-        }
-      } catch (err) {
-        console.error('Failed to update task status:', err);
-      }
-    };
-
-    // Delete task
-    window.deleteTask = async (id) => {
-      try {
-        await firebaseFirestore.deleteDoc(firebaseFirestore.doc(db, "tasks", id));
-      } catch (err) {
-        console.error('Failed to delete document:', err);
-      }
-    };
-
-    // Clear completed tasks
-    clearCompletedBtn.addEventListener('click', async () => {
-      const completedSentTasks = tasks.filter(t => t.sender === currentUser && t.status === 'completed');
-      if (completedSentTasks.length === 0) {
-        showToast('No completed sent tasks to clear.', 'ℹ️');
-        return;
-      }
-
-      try {
-        const batch = firebaseFirestore.writeBatch(db);
-        completedSentTasks.forEach(task => {
-          const docRef = firebaseFirestore.doc(db, "tasks", task.id);
-          batch.delete(docRef);
-        });
-
-        await batch.commit();
-        showToast(`Cleared ${completedSentTasks.length} completed tasks from logs`, '🧹');
-      } catch (err) {
-        console.error('Batch delete failed:', err);
-        showToast('Failed to clear logs.', '⚠️');
-      }
-    });
-
-    // Handle Password Update for Firebase
-    changePasswordForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const newPass = newPasswordInput.value;
-      const confirmPass = confirmPasswordInput.value;
-      
-      if (newPass !== confirmPass) {
-        settingsStatusMsg.innerHTML = '<span style="color: #d32f2f;">New passwords do not match.</span>';
-        return;
-      }
-      if (newPass.length < 6) {
-        settingsStatusMsg.innerHTML = '<span style="color: #d32f2f;">Password must be at least 6 characters.</span>';
-        return;
-      }
-      
-      settingsStatusMsg.textContent = 'Updating password globally...';
-      try {
-        await firebaseAuth.updatePassword(auth.currentUser, newPass);
-        showToast('Password updated globally!', '🔑');
-        
-        // Hide modal
-        settingsModal.classList.add('hidden');
-        setTimeout(() => settingsModal.style.display = 'none', 400);
-      } catch (error) {
-        console.error('Firebase password update failed:', error);
-        if (error.code === 'auth/requires-recent-login') {
-          settingsStatusMsg.innerHTML = '<span style="color: #d32f2f; font-weight: 500;">Security timeout. Please Logout and Log back in to update password.</span>';
-          showToast('Logout and login required for security.', '⚠️');
-        } else {
-          settingsStatusMsg.innerHTML = `<span style="color: #d32f2f;">${error.message}</span>`;
-        }
-      }
-    });
-
-  } 
-  
-  // ==========================================================================
-  // 2. LOCAL FALLBACK MODE IMPLEMENTATION (LocalStorage + BroadcastChannel)
-  // ==========================================================================
-  
-  else {
-    console.log('Booting in Local Offline Fallback Mode');
-    loginStatusMsg.innerHTML = 'Workspace ready. <span style="font-weight:700; color: #2E7D32;">Local Mode Active.</span>';
-    
-    // Customize login card for local simulation
-    const submitBtn = loginForm.querySelector('.login-submit-btn');
-    submitBtn.textContent = 'Enter Local Board';
-    loginEmail.placeholder = 'Enter email address';
-    loginPassword.placeholder = 'Enter password';
-    
-    // Define local passwords loader/saver for testing offline
-    const getLocalAccounts = () => {
-      const stored = localStorage.getItem('rhythm_clicks_local_accounts');
-      return stored ? JSON.parse(stored) : {
-        'priya': 'rhythm123',
-        'purva': 'rhythm123',
-        'bijal': 'rhythm123'
-      };
-    };
-
-    // Enable Local Channel
-    localChannel = new BroadcastChannel('rhythm_clicks_workflow_channel');
-
-    const loadLocalTasks = () => {
-      const raw = localStorage.getItem('rhythm_clicks_tasks');
-      tasks = raw ? JSON.parse(raw) : [];
-      renderDashboard();
-    };
-
-    const saveLocalTasks = () => {
-      localStorage.setItem('rhythm_clicks_tasks', JSON.stringify(tasks));
-    };
-
-    // Handle Local Login Submission
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const val = loginEmail.value.trim().toLowerCase();
-      const passwordVal = loginPassword.value;
-
-      // Identify user key
-      let userKey = '';
-      if (val.includes('priya')) userKey = 'priya';
-      else if (val.includes('purva')) userKey = 'purva';
-      else if (val.includes('bijal')) userKey = 'bijal';
-
-      // Validate passcode using local accounts persistence
-      const accounts = getLocalAccounts();
-      if (!userKey || accounts[userKey] !== passwordVal) {
-        loginStatusMsg.innerHTML = '<span style="color: #d32f2f;">Invalid password for local user.</span>';
-        showToast('Incorrect password.', '❌');
-        return;
-      }
-      
-      currentUser = userKey === 'priya' ? 'Priya' : (userKey === 'purva' ? 'Purva' : 'Bijal');
-
+      // Update UI states
       loginOverlay.classList.add('hidden');
       dashboardApp.style.display = 'flex';
       logoutBtn.style.display = 'block';
+      userDisplayLabel.textContent = `Viewing secure board:`;
 
-      // Load initial state
-      loadLocalTasks();
-      isInitialLoad = true;
-      checkForTaskStateUpdates();
-
-      // Configure manual identity switcher pills (Locked to logged in user)
+      // Configure workspace selector (disable switching to other users' views)
       identityPills.forEach(pill => {
         const pillUser = pill.getAttribute('data-user');
         if (pillUser === currentUser) {
-          pill.style.display = 'inline-flex';
           pill.classList.add('active');
+          pill.style.display = 'inline-flex';
         } else {
-          pill.style.display = 'none';
           pill.classList.remove('active');
+          pill.style.display = 'none'; // Lock views
         }
       });
 
-      // Update compose assignees options
-      selectIdentity(currentUser);
-      loginForm.reset();
-      showToast(`Logged into local board as <strong>${currentUser}</strong>`, '🔒');
-    });
+      // Initialize compose assignees options
+      assigneePills.forEach(pill => {
+        const name = pill.getAttribute('data-assignee');
+        if (name === currentUser) {
+          pill.style.display = 'none';
+          pill.classList.remove('active');
+        } else {
+          pill.style.display = 'inline-flex';
+        }
+      });
 
-    // Handle Logout
-    logoutBtn.addEventListener('click', () => {
+      // Pick default assignee
+      const defAssignee = Array.from(assigneePills).find(p => p.getAttribute('data-assignee') !== currentUser);
+      if (defAssignee) {
+        activeAssignee = defAssignee.getAttribute('data-assignee');
+        assigneePills.forEach(p => p.classList.toggle('active', p.getAttribute('data-assignee') === activeAssignee));
+      }
+
+      // Setup Firestore Snapshots Listener
+      if (firestoreUnsubscribe) firestoreUnsubscribe();
+      
+      const tasksQuery = firebaseFirestore.query(
+        firebaseFirestore.collection(db, "tasks"), 
+        firebaseFirestore.orderBy("timestamp", "asc")
+      );
+
+      isInitialLoad = true;
+      firestoreUnsubscribe = firebaseFirestore.onSnapshot(tasksQuery, (snapshot) => {
+        tasks = [];
+        snapshot.forEach(doc => {
+          tasks.push({
+            id: doc.id,
+            ...doc.data()
+          });
+        });
+        
+        renderDashboard();
+        checkForTaskStateUpdates();
+      }, (error) => {
+        console.error('Firestore subscription error:', error);
+        showToast('Database access denied. Verify permissions.', '⚠️');
+      });
+
+    } else {
+      // Sign-out states
+      if (firestoreUnsubscribe) {
+        firestoreUnsubscribe();
+        firestoreUnsubscribe = null;
+      }
+      tasks = [];
+      previousTasksState = [];
+      renderDashboard();
+      
       loginOverlay.classList.remove('hidden');
       dashboardApp.style.display = 'none';
       logoutBtn.style.display = 'none';
-      tasks = [];
-      renderDashboard();
-    });
+    }
+  });
 
-    // Handle Local Password Update
-    changePasswordForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const currentPass = currentPasswordInput.value;
-      const newPass = newPasswordInput.value;
-      const confirmPass = confirmPasswordInput.value;
+  // Form sign-in submission
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value;
 
-      const accounts = getLocalAccounts();
-      const userKey = currentUser.toLowerCase();
+    loginStatusMsg.textContent = 'Verifying credentials...';
 
-      if (accounts[userKey] !== currentPass) {
-        settingsStatusMsg.innerHTML = '<span style="color: #d32f2f;">Incorrect current password.</span>';
-        showToast('Verification failed.', '❌');
-        return;
-      }
-      if (newPass !== confirmPass) {
-        settingsStatusMsg.innerHTML = '<span style="color: #d32f2f;">New passwords do not match.</span>';
-        return;
-      }
-      if (newPass.length < 6) {
-        settingsStatusMsg.innerHTML = '<span style="color: #d32f2f;">Password must be at least 6 characters.</span>';
-        return;
-      }
-
-      accounts[userKey] = newPass;
-      localStorage.setItem('rhythm_clicks_local_accounts', JSON.stringify(accounts));
-      
-      showToast('Password updated locally!', '🔑');
-      settingsModal.classList.add('hidden');
-      setTimeout(() => settingsModal.style.display = 'none', 400);
-    });
-
-    // Dynamic Identity switcher support (Local offline only)
-    const selectIdentity = (name) => {
-      currentUser = name;
-      identityPills.forEach(pill => {
-        pill.classList.toggle('active', pill.getAttribute('data-user') === name);
+    firebaseAuth.signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        loginForm.reset();
+      })
+      .catch((error) => {
+        console.error('Sign-in failed:', error);
+        loginStatusMsg.innerHTML = '<span style="color: #d32f2f;">Invalid email address or password.</span>';
+        showToast('Login failed. Please check credentials.', '❌');
       });
+  });
 
-      assigneePills.forEach(pill => {
-        const pName = pill.getAttribute('data-assignee');
-        if (pName === currentUser) {
-          pill.style.display = 'none';
-          pill.classList.remove('active');
-        } else {
-          pill.style.display = 'inline-flex';
-        }
-      });
+  // Logout trigger
+  logoutBtn.addEventListener('click', () => {
+    firebaseAuth.signOut(auth)
+      .then(() => {
+        showToast('Signed out cleanly', '🔒');
+      })
+      .catch(err => console.error('Sign out error:', err));
+  });
 
-      const nextAssignee = Array.from(assigneePills).find(p => p.getAttribute('data-assignee') !== currentUser);
-      if (nextAssignee) {
-        selectAssignee(nextAssignee.getAttribute('data-assignee'));
-      }
-      renderDashboard();
-    };
-
-    const selectAssignee = (name) => {
-      activeAssignee = name;
-      assigneePills.forEach(pill => {
-        pill.classList.toggle('active', pill.getAttribute('data-assignee') === name);
-      });
-    };
-
-    identityPills.forEach(pill => {
-      pill.addEventListener('click', () => {
-        selectIdentity(pill.getAttribute('data-user'));
-      });
-    });
-
-    assigneePills.forEach(pill => {
-      pill.addEventListener('click', () => {
-        selectAssignee(pill.getAttribute('data-assignee'));
-      });
-    });
-
-    // Custom Tasks operations mapping for Local mode
-    window.addTask = (text, assignee) => {
-      const newTask = {
-        id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+  // Add task
+  window.addTask = async (text, assignee) => {
+    try {
+      await firebaseFirestore.addDoc(firebaseFirestore.collection(db, "tasks"), {
         text: text.trim(),
         sender: currentUser,
         assignee: assignee,
         status: 'pending',
         timestamp: Date.now()
-      };
-
-      tasks.push(newTask);
-      saveLocalTasks();
-      renderDashboard();
-
-      localChannel.postMessage({
-        type: 'ADD_TASK',
-        task: newTask
       });
-
       showToast(`Task assigned to <strong>${assignee}</strong>`, '📤');
-      previousTasksState = JSON.parse(JSON.stringify(tasks));
-    };
+    } catch (err) {
+      console.error('Failed to add task to Firestore:', err);
+      showToast('Failed to save task. Try again.', '⚠️');
+    }
+  };
 
-    window.toggleTaskCompletion = (id) => {
-      const taskIndex = tasks.findIndex(t => t.id === id);
-      if (taskIndex === -1) return;
+  // Complete task
+  window.toggleTaskCompletion = async (id) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    const newStatus = task.status === 'pending' ? 'completed' : 'pending';
 
-      const task = tasks[taskIndex];
-      const newStatus = task.status === 'pending' ? 'completed' : 'pending';
-      
-      task.status = newStatus;
-      saveLocalTasks();
-      renderDashboard();
-
-      localChannel.postMessage({
-        type: 'COMPLETE_TASK',
-        taskId: id,
-        completedBy: currentUser,
-        newStatus: newStatus
+    try {
+      await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "tasks", id), {
+        status: newStatus
       });
-
       if (newStatus === 'completed') {
         showToast(`Completed task: "${task.text.substring(0, 20)}..."`, '✓', 'task_complete');
       }
-      previousTasksState = JSON.parse(JSON.stringify(tasks));
-    };
+    } catch (err) {
+      console.error('Failed to update task status:', err);
+    }
+  };
 
-    window.deleteTask = (id) => {
-      tasks = tasks.filter(t => t.id !== id);
-      saveLocalTasks();
-      renderDashboard();
+  // Delete task
+  window.deleteTask = async (id) => {
+    try {
+      await firebaseFirestore.deleteDoc(firebaseFirestore.doc(db, "tasks", id));
+    } catch (err) {
+      console.error('Failed to delete document:', err);
+    }
+  };
 
-      localChannel.postMessage({
-        type: 'DELETE_TASK',
-        taskId: id
+  // Clear completed tasks
+  clearCompletedBtn.addEventListener('click', async () => {
+    const completedSentTasks = tasks.filter(t => t.sender === currentUser && t.status === 'completed');
+    if (completedSentTasks.length === 0) {
+      showToast('No completed sent tasks to clear.', 'ℹ️');
+      return;
+    }
+
+    try {
+      const batch = firebaseFirestore.writeBatch(db);
+      completedSentTasks.forEach(task => {
+        const docRef = firebaseFirestore.doc(db, "tasks", task.id);
+        batch.delete(docRef);
       });
-      previousTasksState = JSON.parse(JSON.stringify(tasks));
-    };
 
-    clearCompletedBtn.addEventListener('click', () => {
-      const beforeCount = tasks.length;
-      const deletedIds = tasks
-        .filter(t => t.sender === currentUser && t.status === 'completed')
-        .map(t => t.id);
+      await batch.commit();
+      showToast(`Cleared ${completedSentTasks.length} completed tasks from logs`, '🧹');
+    } catch (err) {
+      console.error('Batch delete failed:', err);
+      showToast('Failed to clear logs.', '⚠️');
+    }
+  });
 
-      if (deletedIds.length === 0) {
-        showToast('No completed sent tasks to clear.', 'ℹ️');
-        return;
+  // Handle Password Update for Firebase
+  changePasswordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const newPass = newPasswordInput.value;
+    const confirmPass = confirmPasswordInput.value;
+    
+    if (newPass !== confirmPass) {
+      settingsStatusMsg.innerHTML = '<span style="color: #d32f2f;">New passwords do not match.</span>';
+      return;
+    }
+    if (newPass.length < 6) {
+      settingsStatusMsg.innerHTML = '<span style="color: #d32f2f;">Password must be at least 6 characters.</span>';
+      return;
+    }
+    
+    settingsStatusMsg.textContent = 'Updating password globally...';
+    try {
+      await firebaseAuth.updatePassword(auth.currentUser, newPass);
+      showToast('Password updated globally!', '🔑');
+      
+      // Hide modal
+      settingsModal.classList.add('hidden');
+      setTimeout(() => settingsModal.style.display = 'none', 400);
+    } catch (error) {
+      console.error('Firebase password update failed:', error);
+      if (error.code === 'auth/requires-recent-login') {
+        settingsStatusMsg.innerHTML = '<span style="color: #d32f2f; font-weight: 500;">Security timeout. Please Logout and Log back in to update password.</span>';
+        showToast('Logout and login required for security.', '⚠️');
+      } else {
+        settingsStatusMsg.innerHTML = `<span style="color: #d32f2f;">${error.message}</span>`;
       }
-
-      tasks = tasks.filter(t => !(t.sender === currentUser && t.status === 'completed'));
-      saveLocalTasks();
-      renderDashboard();
-
-      localChannel.postMessage({
-        type: 'CLEAR_COMPLETED',
-        deletedIds: deletedIds
-      });
-
-      showToast(`Cleared ${deletedIds.length} completed tasks from logs`, '🧹');
-      previousTasksState = JSON.parse(JSON.stringify(tasks));
-    });
-
-    // Sync over local BroadcastChannel
-    localChannel.onmessage = (event) => {
-      const data = event.data;
-      if (!data) return;
-
-      loadLocalTasks();
-      checkForTaskStateUpdates();
-    };
-  }
+    }
+  });
 
   // --- Assign form submit actions ---
   if (taskForm) {
