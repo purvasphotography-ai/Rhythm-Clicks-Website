@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rhythm Clicks Studio | Workflow Planner</title>
+  
+  <!-- Favicon Links -->
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  
+  <!-- Google Fonts (Outfit matching the main website) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <!-- Liquid Ambient Background Blobs -->
+  <div class="glass-blob glass-blob-1"></div>
+  <div class="glass-blob glass-blob-2"></div>
+  <div class="glass-blob glass-blob-3"></div>
+
+  <!-- Login Screen Overlay -->
+  <div class="login-overlay" id="login-overlay">
+    <div class="login-card">
+      <div class="login-header">
+        <img src="assets/logo.webp" alt="Rhythm Clicks Studio Logo" class="login-logo">
+        <h2>Rhythm Clicks</h2>
+        <p>Secure Studio Workspace</p>
+      </div>
+      
+      <form id="login-form" class="login-form">
+        <div class="form-group">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" placeholder="name@rhythmclicksstudio.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn">
+          Sign In
+        </button>
+      </form>
+      
+      <div class="login-footer" id="login-status-msg">
+        Connecting to synchronization server...
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal (Change Password) -->
+  <div class="login-overlay hidden" id="settings-modal" style="display: none;">
+    <div class="login-card" style="max-width: 400px; padding: 2rem;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1rem; padding-bottom: 0.5rem;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Change Password</h2>
+        <button class="modal-close-btn" id="close-settings-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="change-password-form" class="login-form" style="gap: 1rem;">
+        <div class="form-group">
+          <label for="current-password" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Current Password *</label>
+          <input type="password" id="current-password" placeholder="••••••••" required autocomplete="current-password" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="new-password" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">New Password *</label>
+          <input type="password" id="new-password" placeholder="••••••••" required autocomplete="new-password" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="confirm-password" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Confirm New Password *</label>
+          <input type="password" id="confirm-password" placeholder="••••••••" required autocomplete="new-password" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 0.5rem; padding: 0.8rem;">
+          Update Password
+        </button>
+      </form>
+      
+      <div class="login-footer" id="settings-status-msg" style="padding-top: 0.5rem; font-size: 0.75rem;">
+        Modify your workspace password.
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard App Wrapper -->
+  <div class="dashboard-wrapper" id="dashboard-app" style="display: none;">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <div class="header-brand">
+        <a href="index.html" class="back-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Website
+        </a>
+        <div class="brand-text">
+          <h1>Rhythm Clicks</h1>
+          <span class="badge">Workflow Hub</span>
+        </div>
+      </div>
+
+      <!-- Identity Selector & Logout -->
+      <div class="user-identity-selector">
+        <span class="selector-label" id="user-display-label">I am working as:</span>
+        <div class="identity-pills-wrapper">
+          <div class="identity-pills" id="identity-pills-container">
+            <button class="identity-pill active" data-user="Priya">
+              <span class="avatar-dot priya-dot">P</span>
+              Priya
+            </button>
+            <button class="identity-pill" data-user="Purva">
+              <span class="avatar-dot purva-dot">Pu</span>
+              Purva
+            </button>
+            <button class="identity-pill" data-user="Bijal">
+              <span class="avatar-dot bijal-dot">B</span>
+              Bijal
+            </button>
+          </div>
+          <button id="settings-btn" class="btn-clear-completed logout-btn" title="Change your workspace password" style="background-color: rgba(0, 0, 0, 0.03); border: 1px solid rgba(0, 0, 0, 0.08); color: var(--text-secondary);">Password</button>
+          <button id="logout-btn" class="btn-clear-completed logout-btn" title="Log out of secure session">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <main class="dashboard-main">
+      <div class="dashboard-grid">
+        
+        <!-- Column 1: Compose Task -->
+        <section class="grid-card compose-card">
+          <div class="card-header">
+            <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+            <h2>Create New Task</h2>
+          </div>
+          
+          <form id="task-form" class="task-form">
+            <div class="form-group">
+              <label for="task-text">What needs to be done? *</label>
+              <textarea id="task-text" placeholder="Example: Need newborn session photo selections for Baby Aarav..." required></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label>Assign To: *</label>
+              <div class="assignee-selector">
+                <button type="button" class="assignee-pill" data-assignee="Priya">
+                  <span class="avatar-dot small priya-dot">P</span> Priya
+                </button>
+                <button type="button" class="assignee-pill" data-assignee="Purva">
+                  <span class="avatar-dot small purva-dot">Pu</span> Purva
+                </button>
+                <button type="button" class="assignee-pill" data-assignee="Bijal">
+                  <span class="avatar-dot small bijal-dot">B</span> Bijal
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary submit-task-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+              Send to Board
+            </button>
+          </form>
+        </section>
+
+        <!-- Column 2: My Tasks -->
+        <section class="grid-card tasks-card">
+          <div class="card-header">
+            <div class="header-title-group">
+              <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <h2>My Tasks</h2>
+            </div>
+            <span class="task-count" id="my-task-count">0</span>
+          </div>
+
+          <div class="tasks-list-container">
+            <ul id="my-tasks-list" class="tasks-list">
+              <!-- Dynamically populated -->
+              <li class="empty-state">
+                <div class="empty-icon">☕</div>
+                <p>All caught up! No tasks assigned to you right now.</p>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Column 3: Sent Tasks Log -->
+        <section class="grid-card sent-card">
+          <div class="card-header">
+            <div class="header-title-group">
+              <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <h2>Sent by Me</h2>
+            </div>
+            <button class="btn-clear-completed" id="clear-completed-btn" title="Clear completed tasks">Clear Done</button>
+          </div>
+
+          <div class="tasks-list-container">
+            <ul id="sent-tasks-list" class="tasks-list">
+              <!-- Dynamically populated -->
+              <li class="empty-state">
+                <p>You haven't assigned any tasks to others yet.</p>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <div class="dashboard-footer-bar">
+      <p>&copy; 2026 Rhythm Clicks Studio Workflow Hub. Sync server active.</p>
+    </div>
+  </div>
+
+  <!-- Notification Toasts Container -->
+  <div class="toasts-container" id="toasts-container"></div>
+
+  <!-- Script Files (Loaded as ES6 Module for Firebase support) -->
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>
