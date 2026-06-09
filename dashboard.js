@@ -1042,6 +1042,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       loadLocalGalleries();
       checkForTaskStateUpdates();
     };
+  }
 
   // --- Tab switching listeners ---
   const tabTasks = document.getElementById('tab-tasks');
