@@ -1965,7 +1965,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
       if (!response.ok) {
-        throw new Error('Drive check failed: ' + response.status);
+        const errText = await response.text();
+        throw new Error(`Drive check failed (${response.status}): ${errText}`);
       }
       const data = await response.json();
       if (data.files && data.files.length > 0) {
@@ -1977,7 +1978,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     } catch (err) {
       console.warn('Failed to query Google Drive backup status:', err);
-      updateDriveUIStatus('Error', 'Unable to check Google Drive.');
+      updateDriveUIStatus('Error', 'Unable to check Google Drive: ' + err.message);
     }
   };
 
@@ -2010,7 +2011,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         handleGoogleTokenExpiry();
         return;
       }
-      if (!findRes.ok) throw new Error('Search failed: ' + findRes.status);
+      if (!findRes.ok) {
+        const errText = await findRes.text();
+        throw new Error(`Search failed (${findRes.status}): ${errText}`);
+      }
       
       const findData = await findRes.json();
       let fileId = null;
@@ -2029,7 +2033,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           body: payloadStr
         });
         
-        if (!updateRes.ok) throw new Error('Update failed: ' + updateRes.status);
+        if (!updateRes.ok) {
+          const errText = await updateRes.text();
+          throw new Error(`Update failed (${updateRes.status}): ${errText}`);
+        }
       } else {
         const createMetaRes = await fetch('https://www.googleapis.com/drive/v3/files', {
           method: 'POST',
@@ -2043,7 +2050,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           })
         });
         
-        if (!createMetaRes.ok) throw new Error('Metadata create failed: ' + createMetaRes.status);
+        if (!createMetaRes.ok) {
+          const errText = await createMetaRes.text();
+          throw new Error(`Metadata create failed (${createMetaRes.status}): ${errText}`);
+        }
         const newFileMeta = await createMetaRes.json();
         fileId = newFileMeta.id;
         
@@ -2056,7 +2066,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           body: payloadStr
         });
         
-        if (!uploadRes.ok) throw new Error('Upload payload failed: ' + uploadRes.status);
+        if (!uploadRes.ok) {
+          const errText = await uploadRes.text();
+          throw new Error(`Upload payload failed (${uploadRes.status}): ${errText}`);
+        }
       }
       
       const nowString = new Date().toLocaleString();
@@ -2065,8 +2078,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       
     } catch (err) {
       console.error('Failed to backup to Google Drive:', err);
-      updateDriveUIStatus('Error', 'Google Drive backup failed.');
-      if (isManual) showToast('Failed to backup to Google Drive.', '⚠️');
+      updateDriveUIStatus('Error', 'Backup failed: ' + err.message);
+      showToast('Failed to backup: ' + err.message, '⚠️');
     }
   };
 
@@ -2092,7 +2105,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         handleGoogleTokenExpiry();
         return;
       }
-      if (!findRes.ok) throw new Error('Search failed: ' + findRes.status);
+      if (!findRes.ok) {
+        const errText = await findRes.text();
+        throw new Error(`Search failed (${findRes.status}): ${errText}`);
+      }
       
       const findData = await findRes.json();
       
@@ -2109,7 +2125,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         headers: { 'Authorization': `Bearer ${gcalAccessToken}` }
       });
       
-      if (!downloadRes.ok) throw new Error('Download failed: ' + downloadRes.status);
+      if (!downloadRes.ok) {
+        const errText = await downloadRes.text();
+        throw new Error(`Download failed (${downloadRes.status}): ${errText}`);
+      }
       
       const backup = await downloadRes.json();
       
