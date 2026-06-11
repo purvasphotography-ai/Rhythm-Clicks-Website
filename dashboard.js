@@ -2809,7 +2809,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         showToast(`Task assigned to <strong>${assignee}</strong>`, '📤');
       } catch (err) {
         console.error('Failed to add task to Firestore:', err);
-        showToast('Failed to save task. Try again.', '⚠️');
+        showToast('Failed to save task: ' + err.message, '⚠️');
       }
     };
 
@@ -3147,7 +3147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         showToast(`Contact <strong>${name}</strong> saved`, '👥');
       } catch (err) {
         console.error('Failed to add contact:', err);
-        showToast('Failed to save contact. Try again.', '⚠️');
+        showToast('Failed to save contact: ' + err.message, '⚠️');
       }
     };
 
@@ -3162,7 +3162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         showToast(`Contact <strong>${name}</strong> updated`, '👥');
       } catch (err) {
         console.error('Failed to update contact:', err);
-        showToast('Failed to update contact. Try again.', '⚠️');
+        showToast('Failed to update contact: ' + err.message, '⚠️');
       }
     };
 
@@ -3210,7 +3210,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       } catch (err) {
         console.error('Failed to add booking:', err);
-        showToast('Failed to save booking. Try again.', '⚠️');
+        showToast('Failed to save booking: ' + err.message, '⚠️');
       }
     };
 
@@ -3268,7 +3268,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       } catch (err) {
         console.error('Failed to update booking:', err);
-        showToast('Failed to update booking. Try again.', '⚠️');
+        showToast('Failed to update booking: ' + err.message, '⚠️');
       }
     };
 
@@ -3310,7 +3310,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await window.addGallery(clientName, `Auto-created from completed shoot logged on ${date}`);
       } catch (err) {
         console.error('Failed to add shoot:', err);
-        showToast('Failed to save shoot log.', '⚠️');
+        showToast('Failed to save shoot log: ' + err.message, '⚠️');
       }
     };
 
@@ -3331,7 +3331,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         showToast(`Shoot details for <strong>${clientName}</strong> updated!`, '📷');
       } catch (err) {
         console.error('Failed to update shoot:', err);
-        showToast('Failed to update shoot log.', '⚠️');
+        showToast('Failed to update shoot log: ' + err.message, '⚠️');
       }
     };
 
