@@ -1641,7 +1641,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const clientId = firebaseConfig.googleClientId || "50274890207-k3a6eso5pftt724trat593hg351u8toc.apps.googleusercontent.com";
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly',
+        scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/drive.file',
         callback: (tokenResponse) => {
           if (tokenResponse.error) {
             console.error('Google OAuth error:', tokenResponse.error);
@@ -1653,9 +1653,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           
           document.getElementById('google-login-card').style.display = 'none';
           document.getElementById('google-calendar-container').style.display = 'block';
-          showToast('Google Calendar connected successfully!', '📅');
+          showToast('Google services connected successfully!', '☁️');
           
           fetchGoogleCalendarEvents();
+          checkGoogleDriveBackupStatus();
+          autoRestoreFromGoogleDrive();
         }
       });
       
@@ -1666,6 +1668,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (loginCard) loginCard.style.display = 'none';
         if (calContainer) calContainer.style.display = 'block';
         fetchGoogleCalendarEvents();
+        checkGoogleDriveBackupStatus();
+        autoRestoreFromGoogleDrive();
       }
     }
   }, 500);
@@ -1910,6 +1914,300 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         showToast('All bookings are already synced!', '✓');
       }
+    });
+  }
+
+  // --- Google Drive Backup & Restore Methods ---
+  const updateDriveUIStatus = (status, message) => {
+    const statusText = document.getElementById('drive-backup-status');
+    if (!statusText) return;
+    
+    let badge = '';
+    if (status === 'Connected') {
+      badge = '<span style="background: rgba(46, 125, 50, 0.12); color: #2E7D32; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 700; font-size: 0.75rem; margin-right: 6px;">Connected</span>';
+    } else if (status === 'Syncing' || status === 'Checking') {
+      badge = '<span style="background: rgba(33, 150, 243, 0.12); color: #2196f3; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 700; font-size: 0.75rem; margin-right: 6px;">' + status + '...</span>';
+    } else if (status === 'Error') {
+      badge = '<span style="background: rgba(211, 47, 47, 0.12); color: #d32f2f; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 700; font-size: 0.75rem; margin-right: 6px;">Error</span>';
+    } else {
+      badge = '<span style="background: rgba(0, 0, 0, 0.06); color: var(--text-secondary); padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 700; font-size: 0.75rem; margin-right: 6px;">Disconnected</span>';
+    }
+    
+    statusText.innerHTML = badge + ' ' + message;
+  };
+
+  const handleGoogleTokenExpiry = () => {
+    localStorage.removeItem('gcal_access_token');
+    gcalAccessToken = null;
+    const loginCard = document.getElementById('google-login-card');
+    const calContainer = document.getElementById('google-calendar-container');
+    if (loginCard) loginCard.style.display = 'flex';
+    if (calContainer) calContainer.style.display = 'none';
+    showToast('Google session expired. Please connect again.', '⚠️');
+    updateDriveUIStatus('Disconnected', 'Session expired. Connect again.');
+  };
+
+  window.checkGoogleDriveBackupStatus = async () => {
+    if (!gcalAccessToken) {
+      updateDriveUIStatus('Disconnected', 'No active Google connection.');
+      return;
+    }
+    updateDriveUIStatus('Checking', 'Checking backup on Drive...');
+    try {
+      const q = encodeURIComponent("name='rhythm_clicks_backup.json' and trashed=false");
+      const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,modifiedTime)`, {
+        headers: { 'Authorization': `Bearer ${gcalAccessToken}` }
+      });
+      if (response.status === 401) {
+        handleGoogleTokenExpiry();
+        return;
+      }
+      if (!response.ok) {
+        throw new Error('Drive check failed: ' + response.status);
+      }
+      const data = await response.json();
+      if (data.files && data.files.length > 0) {
+        const file = data.files[0];
+        const lastModified = new Date(file.modifiedTime).toLocaleString();
+        updateDriveUIStatus('Connected', `Backup found. Last synced: ${lastModified}`);
+      } else {
+        updateDriveUIStatus('Connected', 'No backup file found. Ready to backup.');
+      }
+    } catch (err) {
+      console.warn('Failed to query Google Drive backup status:', err);
+      updateDriveUIStatus('Error', 'Unable to check Google Drive.');
+    }
+  };
+
+  window.backupToGoogleDrive = async (isManual = false) => {
+    if (!gcalAccessToken) {
+      if (isManual) showToast('Connect to Google Services first.', '⏳');
+      return;
+    }
+    
+    updateDriveUIStatus('Syncing', 'Uploading database payload...');
+    
+    try {
+      const backupData = {
+        bookings: JSON.parse(localStorage.getItem('rhythm_clicks_bookings') || '[]'),
+        shoots: JSON.parse(localStorage.getItem('rhythm_clicks_shoots') || '[]'),
+        contacts: JSON.parse(localStorage.getItem('rhythm_clicks_contacts') || '[]'),
+        tasks: JSON.parse(localStorage.getItem('rhythm_clicks_tasks') || '[]'),
+        galleries: JSON.parse(localStorage.getItem('rhythm_clicks_galleries') || '[]'),
+        albums: JSON.parse(localStorage.getItem('rhythm_clicks_albums') || '[]')
+      };
+      
+      const payloadStr = JSON.stringify(backupData);
+      
+      const q = encodeURIComponent("name='rhythm_clicks_backup.json' and trashed=false");
+      const findRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+        headers: { 'Authorization': `Bearer ${gcalAccessToken}` }
+      });
+      
+      if (findRes.status === 401) {
+        handleGoogleTokenExpiry();
+        return;
+      }
+      if (!findRes.ok) throw new Error('Search failed: ' + findRes.status);
+      
+      const findData = await findRes.json();
+      let fileId = null;
+      
+      if (findData.files && findData.files.length > 0) {
+        fileId = findData.files[0].id;
+      }
+      
+      if (fileId) {
+        const updateRes = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${gcalAccessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: payloadStr
+        });
+        
+        if (!updateRes.ok) throw new Error('Update failed: ' + updateRes.status);
+      } else {
+        const createMetaRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${gcalAccessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: 'rhythm_clicks_backup.json',
+            mimeType: 'application/json'
+          })
+        });
+        
+        if (!createMetaRes.ok) throw new Error('Metadata create failed: ' + createMetaRes.status);
+        const newFileMeta = await createMetaRes.json();
+        fileId = newFileMeta.id;
+        
+        const uploadRes = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${gcalAccessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: payloadStr
+        });
+        
+        if (!uploadRes.ok) throw new Error('Upload payload failed: ' + uploadRes.status);
+      }
+      
+      const nowString = new Date().toLocaleString();
+      updateDriveUIStatus('Connected', `Last synced: ${nowString}`);
+      showToast('Database successfully backed up to Google Drive!', '💾');
+      
+    } catch (err) {
+      console.error('Failed to backup to Google Drive:', err);
+      updateDriveUIStatus('Error', 'Google Drive backup failed.');
+      if (isManual) showToast('Failed to backup to Google Drive.', '⚠️');
+    }
+  };
+
+  window.restoreFromGoogleDrive = async () => {
+    if (!gcalAccessToken) {
+      showToast('Connect Google Services first.', '⏳');
+      return;
+    }
+    
+    if (!confirm('Are you sure you want to restore from Google Drive? This will overwrite your current local bookings, tasks, shoots, contacts, galleries, and albums with the backup data from Drive.')) {
+      return;
+    }
+    
+    updateDriveUIStatus('Checking', 'Searching for backup file...');
+    
+    try {
+      const q = encodeURIComponent("name='rhythm_clicks_backup.json' and trashed=false");
+      const findRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+        headers: { 'Authorization': `Bearer ${gcalAccessToken}` }
+      });
+      
+      if (findRes.status === 401) {
+        handleGoogleTokenExpiry();
+        return;
+      }
+      if (!findRes.ok) throw new Error('Search failed: ' + findRes.status);
+      
+      const findData = await findRes.json();
+      
+      if (!findData.files || findData.files.length === 0) {
+        showToast('No backup file (rhythm_clicks_backup.json) found on Google Drive.', '⚠️');
+        updateDriveUIStatus('Connected', 'Ready to backup (no backup file exists).');
+        return;
+      }
+      
+      const fileId = findData.files[0].id;
+      updateDriveUIStatus('Checking', 'Downloading backup...');
+      
+      const downloadRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+        headers: { 'Authorization': `Bearer ${gcalAccessToken}` }
+      });
+      
+      if (!downloadRes.ok) throw new Error('Download failed: ' + downloadRes.status);
+      
+      const backup = await downloadRes.json();
+      
+      localStorage.setItem('rhythm_clicks_bookings', JSON.stringify(backup.bookings || []));
+      localStorage.setItem('rhythm_clicks_shoots', JSON.stringify(backup.shoots || []));
+      localStorage.setItem('rhythm_clicks_contacts', JSON.stringify(backup.contacts || []));
+      localStorage.setItem('rhythm_clicks_tasks', JSON.stringify(backup.tasks || []));
+      localStorage.setItem('rhythm_clicks_galleries', JSON.stringify(backup.galleries || []));
+      localStorage.setItem('rhythm_clicks_albums', JSON.stringify(backup.albums || []));
+      
+      if (typeof loadLocalTasks === 'function') loadLocalTasks();
+      if (typeof loadLocalGalleries === 'function') loadLocalGalleries();
+      if (typeof loadLocalContacts === 'function') loadLocalContacts();
+      if (typeof loadLocalBookings === 'function') loadLocalBookings();
+      if (typeof loadLocalShoots === 'function') loadLocalShoots();
+      if (typeof loadLocalAlbums === 'function') loadLocalAlbums();
+      
+      showToast('Database successfully restored from Google Drive!', '✅');
+      checkGoogleDriveBackupStatus();
+      
+    } catch (err) {
+      console.error('Failed to restore from Google Drive:', err);
+      showToast('Error restoring from Google Drive backup.', '⚠️');
+      checkGoogleDriveBackupStatus();
+    }
+  };
+
+  const autoRestoreFromGoogleDrive = async () => {
+    const hasLocalData = 
+      localStorage.getItem('rhythm_clicks_bookings') ||
+      localStorage.getItem('rhythm_clicks_shoots') ||
+      localStorage.getItem('rhythm_clicks_contacts') ||
+      localStorage.getItem('rhythm_clicks_tasks') ||
+      localStorage.getItem('rhythm_clicks_galleries') ||
+      localStorage.getItem('rhythm_clicks_albums');
+    
+    if (hasLocalData) return;
+    
+    console.log('No local cache found. Attempting to restore database from Google Drive...');
+    try {
+      const q = encodeURIComponent("name='rhythm_clicks_backup.json' and trashed=false");
+      const findRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+        headers: { 'Authorization': `Bearer ${gcalAccessToken}` }
+      });
+      if (!findRes.ok) return;
+      const findData = await findRes.json();
+      if (findData.files && findData.files.length > 0) {
+        const fileId = findData.files[0].id;
+        const downloadRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+          headers: { 'Authorization': `Bearer ${gcalAccessToken}` }
+        });
+        if (downloadRes.ok) {
+          const backup = await downloadRes.json();
+          localStorage.setItem('rhythm_clicks_bookings', JSON.stringify(backup.bookings || []));
+          localStorage.setItem('rhythm_clicks_shoots', JSON.stringify(backup.shoots || []));
+          localStorage.setItem('rhythm_clicks_contacts', JSON.stringify(backup.contacts || []));
+          localStorage.setItem('rhythm_clicks_tasks', JSON.stringify(backup.tasks || []));
+          localStorage.setItem('rhythm_clicks_galleries', JSON.stringify(backup.galleries || []));
+          localStorage.setItem('rhythm_clicks_albums', JSON.stringify(backup.albums || []));
+          
+          if (typeof loadLocalTasks === 'function') loadLocalTasks();
+          if (typeof loadLocalGalleries === 'function') loadLocalGalleries();
+          if (typeof loadLocalContacts === 'function') loadLocalContacts();
+          if (typeof loadLocalBookings === 'function') loadLocalBookings();
+          if (typeof loadLocalShoots === 'function') loadLocalShoots();
+          if (typeof loadLocalAlbums === 'function') loadLocalAlbums();
+          
+          showToast('Data auto-restored from Google Drive!', '✅');
+          checkGoogleDriveBackupStatus();
+        }
+      }
+    } catch (err) {
+      console.warn('Auto-restore from Google Drive failed:', err);
+    }
+  };
+
+  let driveBackupTimeout = null;
+  window.triggerGoogleDriveBackup = () => {
+    if (!gcalAccessToken) return;
+    
+    updateDriveUIStatus('Syncing', 'Pending auto-backup in 5s...');
+    
+    if (driveBackupTimeout) clearTimeout(driveBackupTimeout);
+    
+    driveBackupTimeout = setTimeout(() => {
+      backupToGoogleDrive(false);
+    }, 5000);
+  };
+
+  const driveBackupBtn = document.getElementById('drive-backup-btn');
+  if (driveBackupBtn) {
+    driveBackupBtn.addEventListener('click', () => {
+      backupToGoogleDrive(true);
+    });
+  }
+
+  const driveRestoreBtn = document.getElementById('drive-restore-btn');
+  if (driveRestoreBtn) {
+    driveRestoreBtn.addEventListener('click', () => {
+      restoreFromGoogleDrive();
     });
   }
 
@@ -3139,6 +3437,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       } catch (err) {
         console.warn('Local file backup sync failed:', err);
+      }
+      if (typeof triggerGoogleDriveBackup === 'function') {
+        triggerGoogleDriveBackup();
       }
     };
 
