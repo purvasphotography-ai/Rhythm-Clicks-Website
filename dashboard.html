@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rhythm Clicks Studio | Workflow Planner</title>
+  
+  <!-- Favicon Links -->
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  
+  <!-- Google Fonts (Outfit matching the main website) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="dashboard.css">
+  <!-- SheetJS client-side Excel utility library -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <!-- Liquid Ambient Background Blobs -->
+  <div class="glass-blob glass-blob-1"></div>
+  <div class="glass-blob glass-blob-2"></div>
+  <div class="glass-blob glass-blob-3"></div>
+
+  <!-- Login Screen Overlay -->
+  <div class="login-overlay" id="login-overlay">
+    <!-- Credentials Card -->
+    <div class="login-card" id="login-credentials-card">
+      <div class="login-header">
+        <img src="assets/logo.webp" alt="Rhythm Clicks Studio Logo" class="login-logo">
+        <h2>Rhythm Clicks</h2>
+        <p>Secure Studio Workspace</p>
+      </div>
+      
+      <form id="login-form" class="login-form">
+        <div class="form-group">
+          <label for="login-email">User ID / Email Address</label>
+          <input type="email" id="login-email" placeholder="name@rhythmclicksstudio.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn">
+          Sign In
+        </button>
+      </form>
+      
+      <div class="login-footer" id="login-status-msg">
+        Connecting to synchronization server...
+      </div>
+    </div>
+
+    <!-- Profile Selection Card -->
+    <div class="login-card hidden" id="login-profile-card" style="display: none; max-width: 550px; padding: 2.5rem;">
+      <div class="login-header" style="margin-bottom: 2rem; text-align: center;">
+        <h2>Who's Watching?</h2>
+        <p style="font-size: 0.9rem; color: var(--text-light);">Select a profile to access the workspace</p>
+      </div>
+      
+      <div class="profile-grid">
+        <div class="profile-option" data-profile="Priya">
+          <div class="profile-avatar priya-avatar">P</div>
+          <span class="profile-name">Priya</span>
+        </div>
+        <div class="profile-option" data-profile="Purva">
+          <div class="profile-avatar purva-avatar">P</div>
+          <span class="profile-name">Purva</span>
+        </div>
+        <div class="profile-option" data-profile="Bijal">
+          <div class="profile-avatar bijal-avatar">B</div>
+          <span class="profile-name">Bijal</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal (Change Password) -->
+  <div class="login-overlay hidden" id="settings-modal" style="display: none;">
+    <div class="login-card" style="max-width: 400px; padding: 2rem;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1rem; padding-bottom: 0.5rem;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Change Password</h2>
+        <button class="modal-close-btn" id="close-settings-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="change-password-form" class="login-form" style="gap: 1rem;">
+        <div class="form-group">
+          <label for="current-password" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Current Password *</label>
+          <input type="password" id="current-password" placeholder="••••••••" required autocomplete="current-password" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="new-password" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">New Password *</label>
+          <input type="password" id="new-password" placeholder="••••••••" required autocomplete="new-password" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="confirm-password" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Confirm New Password *</label>
+          <input type="password" id="confirm-password" placeholder="••••••••" required autocomplete="new-password" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 0.5rem; padding: 0.8rem;">
+          Update Password
+        </button>
+      </form>
+      
+      <div class="login-footer" id="settings-status-msg" style="padding-top: 0.5rem; font-size: 0.75rem;">
+        Modify your workspace password.
+      </div>
+    </div>
+  </div>
+
+  <!-- Backup & Restore Modal -->
+  <div class="login-overlay hidden" id="backup-modal" style="display: none;">
+    <div class="login-card" style="max-width: 450px; padding: 2rem; text-align: left;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1.5rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0; text-align: left;">Backup & Restore</h2>
+        <button class="modal-close-btn" id="close-backup-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+
+      <!-- Export Section -->
+      <div style="margin-bottom: 1.75rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(0,0,0,0.06);">
+        <h3 style="font-size: 0.95rem; font-weight: 600; margin: 0 0 0.5rem 0; color: var(--text-primary);">📥 Export Data</h3>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 1rem 0; line-height: 1.4;">
+          Download a single Excel file containing all tasks, bookings, shoot logs, contacts, and gallery workflow data.
+        </p>
+        <button id="export-excel-btn" class="btn btn-primary" style="width: 100%; padding: 0.8rem; font-size: 0.9rem; background-color: #2E7D32; border-color: #2E7D32; display: flex; justify-content: center; align-items: center; gap: 8px;">
+          <span>📊</span> Export to Excel (.xlsx)
+        </button>
+      </div>
+
+      <!-- Import Section -->
+      <div>
+        <h3 style="font-size: 0.95rem; font-weight: 600; margin: 0 0 0.5rem 0; color: var(--text-primary);">📤 Restore Data</h3>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 1rem 0; line-height: 1.4;">
+          Upload a previously exported Excel backup file to restore your database.
+        </p>
+        
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label for="restore-file-input" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">Select Backup File</label>
+          <input type="file" id="restore-file-input" accept=".xlsx, .xls" style="width: 100%; padding: 0.6rem; border: 1px dashed rgba(0,0,0,0.15); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.4); font-size: 0.8rem;">
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+          <button id="restore-merge-btn" class="btn btn-secondary" style="flex: 1; padding: 0.75rem 0.5rem; font-size: 0.85rem; border: 1px solid rgba(0,0,0,0.1); background: rgba(0,0,0,0.02);">
+            Merge & Append
+          </button>
+          <button id="restore-overwrite-btn" class="btn btn-primary" style="flex: 1; padding: 0.75rem 0.5rem; font-size: 0.85rem; background-color: #d32f2f; border-color: #d32f2f;">
+            Overwrite All
+          </button>
+        </div>
+      </div>
+
+      <div class="login-footer" id="backup-status-msg" style="padding-top: 1rem; font-size: 0.75rem; margin-top: 1rem; border-top: 1px solid rgba(0,0,0,0.05); text-align: center;">
+        Backup contains: Bookings, Shoots, Contacts, Tasks, Galleries.
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Gallery Modal -->
+  <div class="login-overlay hidden" id="gallery-modal" style="display: none;">
+    <div class="login-card" style="max-width: 400px; padding: 2rem;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Add New Gallery</h2>
+        <button class="modal-close-btn" id="close-gallery-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="add-gallery-form" class="login-form" style="gap: 1rem;">
+        <div class="form-group">
+          <label for="gallery-client-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client / Event Name *</label>
+          <div style="position: relative;">
+            <input type="text" id="gallery-client-name" placeholder="e.g., Ananya - Newborn Session" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);" autocomplete="new-password">
+            <ul class="autocomplete-list" id="gallery-client-name-autocomplete"></ul>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="gallery-notes-input" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Folder Name / Selections Note</label>
+          <textarea id="gallery-notes-input" placeholder="e.g., Folder: Aarav_Newborn, 30 files selected by client" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); min-height: 80px; resize: vertical;"></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 0.5rem; padding: 0.8rem;">
+          Add to Board
+        </button>
+      </form>
+      
+      <div class="login-footer" id="gallery-status-msg" style="padding-top: 0.5rem; font-size: 0.75rem;">
+        This gallery will enter the "Arrived" column.
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Contact Modal -->
+  <div class="login-overlay hidden" id="contact-modal" style="display: none;">
+    <div class="login-card" style="max-width: 400px; padding: 2rem;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Add Client Contact</h2>
+        <button class="modal-close-btn" id="close-contact-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="add-contact-form" class="login-form" style="gap: 1rem;">
+        <div class="form-group">
+          <label for="contact-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client Name *</label>
+          <input type="text" id="contact-name" placeholder="e.g., Ananya Sharma" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="contact-phone" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Phone Number *</label>
+          <input type="tel" id="contact-phone" placeholder="e.g., +91 98765 43210" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="contact-email" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Email Address</label>
+          <input type="email" id="contact-email" placeholder="e.g., ananya@example.com" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="contact-notes" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Instagram / Notes</label>
+          <input type="text" id="contact-notes" placeholder="e.g., @ananya_clicks, Pre-wedding & Wedding" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 0.5rem; padding: 0.8rem;">
+          Save Contact
+        </button>
+      </form>
+      
+      <div class="login-footer" id="contact-status-msg" style="padding-top: 0.5rem; font-size: 0.75rem;">
+        Add a new client to the studio database.
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Gallery Modal -->
+  <div class="login-overlay hidden" id="edit-gallery-modal" style="display: none;">
+    <div class="login-card" style="max-width: 400px; padding: 2rem;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Edit Gallery Entry</h2>
+        <button class="modal-close-btn" id="close-edit-gallery-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="edit-gallery-form" class="login-form" style="gap: 1rem;">
+        <input type="hidden" id="edit-gallery-id">
+        <div class="form-group">
+          <label for="edit-gallery-client-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client / Event Name *</label>
+          <div style="position: relative;">
+            <input type="text" id="edit-gallery-client-name" placeholder="e.g., Ananya - Newborn Session" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);" autocomplete="new-password">
+            <ul class="autocomplete-list" id="edit-gallery-client-name-autocomplete"></ul>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-gallery-notes-input" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Folder Name / Selections Note</label>
+          <textarea id="edit-gallery-notes-input" placeholder="e.g., Folder: Aarav_Newborn, 30 files selected by client" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); min-height: 80px; resize: vertical;"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="edit-gallery-status-select" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Pipeline Status</label>
+          <select id="edit-gallery-status-select" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+            <option value="pending">Pending Selection</option>
+            <option value="arrived">Arrived</option>
+            <option value="selected">Selected on PC</option>
+            <option value="edited">Edited</option>
+            <option value="delivered">Delivered</option>
+          </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 0.5rem; padding: 0.8rem;">
+          Save Changes
+        </button>
+      </form>
+      
+      <div class="login-footer" id="edit-gallery-status-msg" style="padding-top: 0.5rem; font-size: 0.75rem;">
+        Modify client name, notes, or advance/roll back pipeline status.
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Contact Modal -->
+  <div class="login-overlay hidden" id="edit-contact-modal" style="display: none;">
+    <div class="login-card" style="max-width: 400px; padding: 2rem;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Edit Client Contact</h2>
+        <button class="modal-close-btn" id="close-edit-contact-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="edit-contact-form" class="login-form" style="gap: 1rem;">
+        <input type="hidden" id="edit-contact-id">
+        <div class="form-group">
+          <label for="edit-contact-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client Name *</label>
+          <input type="text" id="edit-contact-name" placeholder="e.g., Ananya Sharma" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="edit-contact-phone" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Phone Number *</label>
+          <input type="tel" id="edit-contact-phone" placeholder="e.g., +91 98765 43210" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="edit-contact-email" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Email Address</label>
+          <input type="email" id="edit-contact-email" placeholder="e.g., ananya@example.com" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        <div class="form-group">
+          <label for="edit-contact-notes" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Instagram / Notes</label>
+          <input type="text" id="edit-contact-notes" placeholder="e.g., @ananya_clicks, Pre-wedding & Wedding" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 0.5rem; padding: 0.8rem;">
+          Save Changes
+        </button>
+      </form>
+      
+      <div class="login-footer" id="edit-contact-status-msg" style="padding-top: 0.5rem; font-size: 0.75rem;">
+        Modify client name, phone number, email, or Instagram/Notes.
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Booking Modal -->
+  <div class="login-overlay hidden" id="booking-modal" style="display: none;">
+    <div class="login-card wide-card">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1.5rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Add New Booking</h2>
+        <button class="modal-close-btn" id="close-booking-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="add-booking-form" class="login-form" style="gap: 1.5rem;">
+        <div class="modal-two-columns">
+          <!-- Left Column: Client Details -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Client Name -->
+            <div class="form-group">
+              <label for="booking-client-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client Name *</label>
+              <div style="position: relative;">
+                <input type="text" id="booking-client-name" placeholder="e.g., Ananya Sharma" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);" autocomplete="new-password">
+                <ul class="autocomplete-list" id="booking-client-name-autocomplete"></ul>
+              </div>
+            </div>
+
+            <!-- Mobile Number -->
+            <div class="form-group">
+              <label for="booking-phone" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Mobile Number *</label>
+              <input type="tel" id="booking-phone" placeholder="e.g., +91 98765 43210" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+            </div>
+
+            <!-- Type of Shoot -->
+            <div class="form-group">
+              <label for="booking-shoot-type" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Type of Shoot *</label>
+              <select id="booking-shoot-type" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+                <option value="" disabled selected>Select shoot type</option>
+                <option value="Maternity">Maternity</option>
+                <option value="Newborn">Newborn</option>
+                <option value="Kids">Kids</option>
+                <option value="Other">Other</option>
+              </select>
+              <div id="booking-shoot-type-custom-container" style="display: none; margin-top: 0.75rem;">
+                <input type="text" id="booking-shoot-type-custom" placeholder="Specify other shoot type..." style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+              </div>
+            </div>
+
+            <!-- Package -->
+            <div class="form-group">
+              <label for="booking-package" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Package *</label>
+              <input type="text" id="booking-package" placeholder="e.g., Premium Candid + Video" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+            </div>
+          </div>
+
+          <!-- Right Column: Booking Specifics -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Date & Time Row -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <!-- Date -->
+              <div class="form-group">
+                <label for="booking-date" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Date *</label>
+                <input type="date" id="booking-date" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans);">
+              </div>
+
+              <!-- Time -->
+              <div class="form-group">
+                <label style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">Time *</label>
+                <div class="time-picker-group" style="display: flex; gap: 4px; align-items: center; width: 100%;">
+                  <select id="booking-time-hour" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.85rem;">
+                    <option value="01">1</option>
+                    <option value="02">2</option>
+                    <option value="03">3</option>
+                    <option value="04">4</option>
+                    <option value="05">5</option>
+                    <option value="06">6</option>
+                    <option value="07">7</option>
+                    <option value="08">8</option>
+                    <option value="09">9</option>
+                    <option value="10" selected>10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                  </select>
+                  <select id="booking-time-minute" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.85rem;">
+                    <option value="00" selected>00</option>
+                    <option value="05">05</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                    <option value="20">20</option>
+                    <option value="25">25</option>
+                    <option value="30">30</option>
+                    <option value="35">35</option>
+                    <option value="40">40</option>
+                    <option value="45">45</option>
+                    <option value="50">50</option>
+                    <option value="55">55</option>
+                  </select>
+                  <select id="booking-time-ampm" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.85rem;">
+                    <option value="AM" selected>AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Advance Amount -->
+            <div class="form-group">
+              <label for="booking-advance" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Advance Amount (₹) *</label>
+              <input type="number" id="booking-advance" min="0" placeholder="e.g., 5000" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+            </div>
+
+            <!-- Payment Account -->
+            <div class="form-group">
+              <label for="booking-payment-account" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Payment Account *</label>
+              <select id="booking-payment-account" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+                <option value="" disabled selected>Select payment account</option>
+                <option value="Rhythm">Rhythm</option>
+                <option value="Cash">Cash</option>
+                <option value="Purva">Purva</option>
+                <option value="Bijal">Bijal</option>
+                <option value="Shilpa">Shilpa</option>
+                <option value="Mahesh">Mahesh</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 1rem; padding: 0.9rem; font-size: 0.95rem;">
+          Save Booking
+        </button>
+      </form>
+      
+      <div class="login-footer" id="booking-status-msg" style="padding-top: 0.5rem; font-size: 0.75rem;">
+        Add a shoot booking to the studio database.
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Booking Modal -->
+  <div class="login-overlay hidden" id="edit-booking-modal" style="display: none;">
+    <div class="login-card wide-card">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1.5rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Edit Booking</h2>
+        <button class="modal-close-btn" id="close-edit-booking-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="edit-booking-form" class="login-form" style="gap: 1rem;">
+        <input type="hidden" id="edit-booking-id">
+        
+        <div class="modal-two-columns">
+          <!-- Left Column: Client Details -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Client Name -->
+            <div class="form-group">
+              <label for="edit-booking-client-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client Name *</label>
+              <div style="position: relative;">
+                <input type="text" id="edit-booking-client-name" placeholder="e.g., Ananya Sharma" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);" autocomplete="new-password">
+                <ul class="autocomplete-list" id="edit-booking-client-name-autocomplete"></ul>
+              </div>
+            </div>
+
+            <!-- Mobile Number -->
+            <div class="form-group">
+              <label for="edit-booking-phone" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Mobile Number *</label>
+              <input type="tel" id="edit-booking-phone" placeholder="e.g., +91 98765 43210" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+            </div>
+
+            <!-- Type of Shoot -->
+            <div class="form-group">
+              <label for="edit-booking-shoot-type" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Type of Shoot *</label>
+              <select id="edit-booking-shoot-type" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+                <option value="Maternity">Maternity</option>
+                <option value="Newborn">Newborn</option>
+                <option value="Kids">Kids</option>
+                <option value="Other">Other</option>
+              </select>
+              <div id="edit-booking-shoot-type-custom-container" style="display: none; margin-top: 0.75rem;">
+                <input type="text" id="edit-booking-shoot-type-custom" placeholder="Specify other shoot type..." style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+              </div>
+            </div>
+
+            <!-- Package -->
+            <div class="form-group">
+              <label for="edit-booking-package" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Package *</label>
+              <input type="text" id="edit-booking-package" placeholder="e.g., Premium Candid + Video" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+            </div>
+          </div>
+
+          <!-- Right Column: Booking Specifics -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Date & Time Row -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <!-- Date -->
+              <div class="form-group">
+                <label for="edit-booking-date" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Date *</label>
+                <input type="date" id="edit-booking-date" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans);">
+              </div>
+
+              <!-- Time -->
+              <div class="form-group">
+                <label style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">Time *</label>
+                <div class="time-picker-group" style="display: flex; gap: 4px; align-items: center; width: 100%;">
+                  <select id="edit-booking-time-hour" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.85rem;">
+                    <option value="01">1</option>
+                    <option value="02">2</option>
+                    <option value="03">3</option>
+                    <option value="04">4</option>
+                    <option value="05">5</option>
+                    <option value="06">6</option>
+                    <option value="07">7</option>
+                    <option value="08">8</option>
+                    <option value="09">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                  </select>
+                  <select id="edit-booking-time-minute" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.85rem;">
+                    <option value="00">00</option>
+                    <option value="05">05</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                    <option value="20">20</option>
+                    <option value="25">25</option>
+                    <option value="30">30</option>
+                    <option value="35">35</option>
+                    <option value="40">40</option>
+                    <option value="45">45</option>
+                    <option value="50">50</option>
+                    <option value="55">55</option>
+                  </select>
+                  <select id="edit-booking-time-ampm" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.85rem;">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Advance Amount -->
+            <div class="form-group">
+              <label for="edit-booking-advance" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Advance Amount (₹) *</label>
+              <input type="number" id="edit-booking-advance" min="0" placeholder="e.g., 5000" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+            </div>
+
+            <!-- Payment Account -->
+            <div class="form-group">
+              <label for="edit-booking-payment-account" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Payment Account *</label>
+              <select id="edit-booking-payment-account" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+                <option value="Rhythm">Rhythm</option>
+                <option value="Cash">Cash</option>
+                <option value="Purva">Purva</option>
+                <option value="Bijal">Bijal</option>
+                <option value="Shilpa">Shilpa</option>
+                <option value="Mahesh">Mahesh</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 1rem; padding: 0.9rem; font-size: 0.95rem;">
+          Save Changes
+        </button>
+      </form>
+      
+    </div>
+  </div>
+
+  <!-- Add Shoot Modal -->
+  <div class="login-overlay hidden" id="shoot-modal" style="display: none;">
+    <div class="login-card wide-card">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1.5rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Log Shoot</h2>
+        <button class="modal-close-btn" id="close-shoot-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="add-shoot-form" class="login-form" style="gap: 1.5rem;">
+        <input type="hidden" id="shoot-booking-id" value="">
+        <div class="modal-two-columns">
+          <!-- Left Column: Shoot Details -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Client Name -->
+            <div class="form-group">
+              <label for="shoot-client-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client Name *</label>
+              <div style="position: relative;">
+                <input type="text" id="shoot-client-name" autocomplete="off" placeholder="Search or enter client name" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+                <ul class="autocomplete-list" id="shoot-client-name-autocomplete"></ul>
+              </div>
+            </div>
+            
+            <!-- Shoot Date & Time Row -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label for="shoot-date" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Shoot Date *</label>
+                <input type="date" id="shoot-date" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans);">
+              </div>
+              <div class="form-group">
+                <label style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">Shoot Time *</label>
+                <div class="time-picker-group" style="display: flex; gap: 4px; align-items: center; width: 100%;">
+                  <select id="shoot-time-hour" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.85rem;">
+                    <option value="01">1</option>
+                    <option value="02">2</option>
+                    <option value="03">3</option>
+                    <option value="04">4</option>
+                    <option value="05">5</option>
+                    <option value="06">6</option>
+                    <option value="07">7</option>
+                    <option value="08">8</option>
+                    <option value="09">9</option>
+                    <option value="10" selected>10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                  </select>
+                  <select id="shoot-time-minute" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.85rem;">
+                    <option value="00" selected>00</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="45">45</option>
+                  </select>
+                  <select id="shoot-time-ampm" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.85rem;">
+                    <option value="AM">AM</option>
+                    <option value="PM" selected>PM</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Photos Count -->
+            <div class="form-group">
+              <label for="shoot-photos-count" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Photos to be Delivered *</label>
+              <input type="number" id="shoot-photos-count" min="1" placeholder="e.g., 50" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+            </div>
+
+            <!-- Album Included Checkbox -->
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 0.5rem;">
+              <input type="checkbox" id="shoot-album-included" style="width: 18px; height: 18px; cursor: pointer;">
+              <label for="shoot-album-included" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); cursor: pointer; user-select: none;">Album Included</label>
+            </div>
+          </div>
+
+          <!-- Right Column: Payments & Extras -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Advance amount and account -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label for="shoot-advance-amount" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Advance Paid (₹) *</label>
+                <input type="number" id="shoot-advance-amount" min="0" placeholder="e.g., 2000" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+              </div>
+              <div class="form-group">
+                <label for="shoot-advance-account" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Advance Account *</label>
+                <select id="shoot-advance-account" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+                  <option value="" disabled selected>Select account</option>
+                  <option value="Rhythm">Rhythm</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Purva">Purva</option>
+                  <option value="Bijal">Bijal</option>
+                  <option value="Shilpa">Shilpa</option>
+                  <option value="Mahesh">Mahesh</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Balance amount and account -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label for="shoot-balance-amount" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Balance Paid (₹) *</label>
+                <input type="number" id="shoot-balance-amount" min="0" placeholder="e.g., 8000" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+              </div>
+              <div class="form-group">
+                <label for="shoot-balance-account" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Balance Account *</label>
+                <select id="shoot-balance-account" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+                  <option value="" disabled selected>Select account</option>
+                  <option value="Rhythm">Rhythm</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Purva">Purva</option>
+                  <option value="Bijal">Bijal</option>
+                  <option value="Shilpa">Shilpa</option>
+                  <option value="Mahesh">Mahesh</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Special Requests -->
+            <div class="form-group">
+              <label for="shoot-special-requests" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Special Requests</label>
+              <textarea id="shoot-special-requests" placeholder="e.g., Newborn session needs heater, pastel pink backdrop setup..." rows="3" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); resize: vertical;"></textarea>
+            </div>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 1rem; padding: 0.9rem; font-size: 0.95rem;">
+          Log Shoot
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Shoot Modal -->
+  <div class="login-overlay hidden" id="edit-shoot-modal" style="display: none;">
+    <div class="login-card wide-card">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1.5rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Edit Shoot</h2>
+        <button class="modal-close-btn" id="close-edit-shoot-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="edit-shoot-form" class="login-form" style="gap: 1.5rem;">
+        <input type="hidden" id="edit-shoot-id">
+        <div class="modal-two-columns">
+          <!-- Left Column: Shoot Details -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Client Name -->
+            <div class="form-group">
+              <label for="edit-shoot-client-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client Name *</label>
+              <div style="position: relative;">
+                <input type="text" id="edit-shoot-client-name" autocomplete="off" placeholder="Search or enter client name" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+                <ul class="autocomplete-list" id="edit-shoot-client-name-autocomplete"></ul>
+              </div>
+            </div>
+            
+            <!-- Shoot Date & Time Row -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label for="edit-shoot-date" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Shoot Date *</label>
+                <input type="date" id="edit-shoot-date" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans);">
+              </div>
+              <div class="form-group">
+                <label style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">Shoot Time *</label>
+                <div class="time-picker-group" style="display: flex; gap: 4px; align-items: center; width: 100%;">
+                  <select id="edit-shoot-time-hour" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.85rem;">
+                    <option value="01">1</option>
+                    <option value="02">2</option>
+                    <option value="03">3</option>
+                    <option value="04">4</option>
+                    <option value="05">5</option>
+                    <option value="06">6</option>
+                    <option value="07">7</option>
+                    <option value="08">8</option>
+                    <option value="09">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                  </select>
+                  <select id="edit-shoot-time-minute" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.85rem;">
+                    <option value="00">00</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="45">45</option>
+                  </select>
+                  <select id="edit-shoot-time-ampm" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.85rem;">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Photos Count -->
+            <div class="form-group">
+              <label for="edit-shoot-photos-count" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Photos to be Delivered *</label>
+              <input type="number" id="edit-shoot-photos-count" min="1" placeholder="e.g., 50" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+            </div>
+
+            <!-- Album Included Checkbox -->
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 0.5rem;">
+              <input type="checkbox" id="edit-shoot-album-included" style="width: 18px; height: 18px; cursor: pointer;">
+              <label for="edit-shoot-album-included" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); cursor: pointer; user-select: none;">Album Included</label>
+            </div>
+          </div>
+
+          <!-- Right Column: Payments & Extras -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Advance amount and account -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label for="edit-shoot-advance-amount" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Advance Paid (₹) *</label>
+                <input type="number" id="edit-shoot-advance-amount" min="0" placeholder="e.g., 2000" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+              </div>
+              <div class="form-group">
+                <label for="edit-shoot-advance-account" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Advance Account *</label>
+                <select id="edit-shoot-advance-account" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+                  <option value="Rhythm">Rhythm</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Purva">Purva</option>
+                  <option value="Bijal">Bijal</option>
+                  <option value="Shilpa">Shilpa</option>
+                  <option value="Mahesh">Mahesh</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Balance amount and account -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label for="edit-shoot-balance-amount" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Balance Paid (₹) *</label>
+                <input type="number" id="edit-shoot-balance-amount" min="0" placeholder="e.g., 8000" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+              </div>
+              <div class="form-group">
+                <label for="edit-shoot-balance-account" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Balance Account *</label>
+                <select id="edit-shoot-balance-account" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+                  <option value="Rhythm">Rhythm</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Purva">Purva</option>
+                  <option value="Bijal">Bijal</option>
+                  <option value="Shilpa">Shilpa</option>
+                  <option value="Mahesh">Mahesh</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Special Requests -->
+            <div class="form-group">
+              <label for="edit-shoot-special-requests" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Special Requests</label>
+              <textarea id="edit-shoot-special-requests" placeholder="e.g., Newborn session needs heater, pastel pink backdrop setup..." rows="3" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); resize: vertical;"></textarea>
+            </div>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 1rem; padding: 0.9rem; font-size: 0.95rem;">
+          Save Changes
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Album Modal -->
+  <div class="login-overlay hidden" id="album-modal" style="display: none;">
+    <div class="login-card" style="max-width: 400px; padding: 2rem;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Add New Album</h2>
+        <button class="modal-close-btn" id="close-album-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="add-album-form" class="login-form" style="gap: 1rem;">
+        <div class="form-group">
+          <label for="album-client-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client / Event Name *</label>
+          <div style="position: relative;">
+            <input type="text" id="album-client-name" placeholder="e.g., Ananya - Pre-wedding Album" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);" autocomplete="new-password">
+            <ul class="autocomplete-list" id="album-client-name-autocomplete"></ul>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="album-notes-input" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Album Specifications / Notes</label>
+          <textarea id="album-notes-input" placeholder="e.g., Size: 12x18, 40 Pages, Matte finish, Acrylic Cover" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); min-height: 80px; resize: vertical;"></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 0.5rem; padding: 0.8rem;">
+          Add Album
+        </button>
+      </form>
+      
+      <div class="login-footer" id="album-status-msg" style="padding-top: 0.5rem; font-size: 0.75rem;">
+        This album will enter the "Approval" column.
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Album Modal -->
+  <div class="login-overlay hidden" id="edit-album-modal" style="display: none;">
+    <div class="login-card" style="max-width: 400px; padding: 2rem;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Edit Album Entry</h2>
+        <button class="modal-close-btn" id="close-edit-album-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="edit-album-form" class="login-form" style="gap: 1rem;">
+        <input type="hidden" id="edit-album-id">
+        <div class="form-group">
+          <label for="edit-album-client-name" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Client / Event Name *</label>
+          <div style="position: relative;">
+            <input type="text" id="edit-album-client-name" placeholder="e.g., Ananya - Pre-wedding Album" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);" autocomplete="new-password">
+            <ul class="autocomplete-list" id="edit-album-client-name-autocomplete"></ul>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-album-notes-input" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Album Specifications / Notes</label>
+          <textarea id="edit-album-notes-input" placeholder="e.g., Size: 12x18, 40 Pages, Matte finish, Acrylic Cover" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); min-height: 80px; resize: vertical;"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="edit-album-status-select" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Pipeline Status</label>
+          <select id="edit-album-status-select" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+            <option value="pending">Pending Approval</option>
+            <option value="approval">Approved</option>
+            <option value="printing">Printing</option>
+            <option value="arrived">Arrived</option>
+            <option value="delivered">Delivered</option>
+          </select>
+        </div>
+        
+        <div class="form-group" id="edit-album-delivery-container" style="display: none;">
+          <label for="edit-album-delivery-method" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">How was it delivered? *</label>
+          <select id="edit-album-delivery-method" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+            <option value="Courier">Courier</option>
+            <option value="In-Hand">In-Hand</option>
+            <option value="Picked Up by Client">Picked Up by Client</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 0.5rem; padding: 0.8rem;">
+          Save Album Details
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Dashboard App Wrapper -->
+  <div class="dashboard-wrapper" id="dashboard-app" style="display: none;">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <div class="header-brand">
+        <a href="https://rhythmclicksstudio.com" class="back-link" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Website
+        </a>
+        <div class="brand-text">
+          <h1>Rhythm Clicks</h1>
+          <span class="badge">Workflow Hub</span>
+        </div>
+      </div>
+
+      <!-- Identity Selector & Logout -->
+      <div class="user-identity-selector">
+        <span class="selector-label" id="user-display-label">I am working as:</span>
+        <div class="identity-pills-wrapper">
+          <div class="identity-pills" id="identity-pills-container">
+            <button class="identity-pill active" data-user="Priya">
+              <span class="avatar-dot priya-dot">P</span>
+              Priya
+            </button>
+            <button class="identity-pill" data-user="Purva">
+              <span class="avatar-dot purva-dot">Pu</span>
+              Purva
+            </button>
+            <button class="identity-pill" data-user="Bijal">
+              <span class="avatar-dot bijal-dot">B</span>
+              Bijal
+            </button>
+          </div>
+          <button id="settings-btn" class="btn-clear-completed logout-btn" title="Change your workspace password" style="background-color: rgba(0, 0, 0, 0.03); border: 1px solid rgba(0, 0, 0, 0.08); color: var(--text-secondary);">Password</button>
+          <button id="backup-btn" class="btn-clear-completed logout-btn" title="Backup or Restore data using Excel" style="background-color: rgba(76, 175, 80, 0.08); border: 1px solid rgba(76, 175, 80, 0.2); color: #2E7D32;">Backup / Restore</button>
+          <button id="logout-btn" class="btn-clear-completed logout-btn" title="Log out of secure session">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Navigation & Search -->
+    <div class="tab-navigation-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;">
+      <div class="tab-navigation" style="margin-bottom: 0;">
+        <button class="tab-btn active" id="tab-tasks">📋 Task Planner</button>
+        <button class="tab-btn" id="tab-bookings">📅 Bookings</button>
+        <button class="tab-btn" id="tab-shoots">📷 Shoots</button>
+        <button class="tab-btn" id="tab-calendar">📅 Calendar</button>
+        <button class="tab-btn" id="tab-galleries">📸 Gallery Tracker</button>
+        <button class="tab-btn" id="tab-albums">📖 Album Tracker</button>
+        <button class="tab-btn" id="tab-contacts">📞 Contacts</button>
+        <button class="tab-btn" id="tab-accounts">💰 Accounts</button>
+      </div>
+      <div class="search-bar-container" style="position: relative; min-width: 250px; flex-grow: 1; max-width: 350px;">
+        <input type="text" id="global-search" placeholder="Search tasks, galleries, contacts, or bookings..." style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.2rem; border: 1px solid rgba(0,0,0,0.08); border-radius: 50px; background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); font-size: 0.85rem; color: var(--text-primary); transition: all 0.3s ease;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); color: var(--text-light); pointer-events: none;">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-main">
+      <!-- Unified Client Pipeline Search Results -->
+      <div id="search-pipeline-results" class="search-pipeline-container" style="display: none; margin-bottom: 2rem;"></div>
+      
+      <!-- Section 1: Task Coordination -->
+      <div id="tasks-section" class="tab-content active">
+        <div class="dashboard-grid">
+          
+          <!-- Column 1: Compose Task -->
+          <section class="grid-card compose-card">
+            <div class="card-header">
+              <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              <h2>Create New Task</h2>
+            </div>
+            
+            <form id="task-form" class="task-form">
+              <div class="form-group">
+                <label for="task-text">What needs to be done? *</label>
+                <textarea id="task-text" placeholder="Example: Need newborn session photo selections for Baby Aarav..." required></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label>Assign To: *</label>
+                <div class="assignee-selector">
+                  <button type="button" class="assignee-pill" data-assignee="Priya">
+                    <span class="avatar-dot small priya-dot">P</span> Priya
+                  </button>
+                  <button type="button" class="assignee-pill" data-assignee="Purva">
+                    <span class="avatar-dot small purva-dot">Pu</span> Purva
+                  </button>
+                  <button type="button" class="assignee-pill" data-assignee="Bijal">
+                    <span class="avatar-dot small bijal-dot">B</span> Bijal
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary submit-task-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                Send to Board
+              </button>
+            </form>
+          </section>
+
+          <!-- Column 2: My Tasks -->
+          <section class="grid-card tasks-card">
+            <div class="card-header">
+              <div class="header-title-group">
+                <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <h2>My Tasks</h2>
+              </div>
+              <span class="task-count" id="my-task-count">0</span>
+            </div>
+
+            <div class="tasks-list-container">
+              <ul id="my-tasks-list" class="tasks-list">
+                <!-- Dynamically populated -->
+                <li class="empty-state">
+                  <div class="empty-icon">☕</div>
+                  <p>All caught up! No tasks assigned to you right now.</p>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- Column 3: Sent Tasks Log -->
+          <section class="grid-card sent-card">
+            <div class="card-header">
+              <div class="header-title-group">
+                <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <h2>Sent by Me</h2>
+              </div>
+              <button class="btn-clear-completed" id="clear-completed-btn" title="Clear completed tasks">Clear Done</button>
+            </div>
+
+            <div class="tasks-list-container">
+              <ul id="sent-tasks-list" class="tasks-list">
+                <!-- Dynamically populated -->
+                <li class="empty-state">
+                  <p>You haven't assigned any tasks to others yet.</p>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- Section 2: Gallery Workflow Tracker -->
+      <div id="galleries-section" class="tab-content">
+        <div class="gallery-tracker-header">
+          <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Gallery Workflow</h2>
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <button id="export-galleries-btn" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Export to Excel
+            </button>
+            <button id="add-gallery-btn" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Register New Gallery
+            </button>
+          </div>
+        </div>
+
+        <div class="gallery-pipeline gallery-pipeline-5-cols">
+          <!-- Column 0: Pending Selection -->
+          <div class="pipeline-column">
+            <div class="column-header">
+              <h3>Pending Selection</h3>
+              <span class="column-badge" id="count-pending">0</span>
+            </div>
+            <ul class="gallery-list" id="list-pending">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+
+          <!-- Column 1: Arrived -->
+          <div class="pipeline-column">
+            <div class="column-header">
+              <h3>Arrived</h3>
+              <span class="column-badge" id="count-arrived">0</span>
+            </div>
+            <ul class="gallery-list" id="list-arrived">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+
+          <!-- Column 2: Selected -->
+          <div class="pipeline-column">
+            <div class="column-header">
+              <h3>Selected on PC</h3>
+              <span class="column-badge" id="count-selected">0</span>
+            </div>
+            <ul class="gallery-list" id="list-selected">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+
+          <!-- Column 3: Edited -->
+          <div class="pipeline-column">
+            <div class="column-header">
+              <h3>Edited</h3>
+              <span class="column-badge" id="count-edited">0</span>
+            </div>
+            <ul class="gallery-list" id="list-edited">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+
+          <!-- Column 4: Delivered -->
+          <div class="pipeline-column">
+            <div class="column-header">
+              <h3>Delivered</h3>
+              <span class="column-badge" id="count-delivered">0</span>
+            </div>
+            <ul class="gallery-list" id="list-delivered">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Contacts Directory -->
+      <div id="contacts-section" class="tab-content">
+        <div class="gallery-tracker-header">
+          <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Client Contacts</h2>
+          <button id="add-contact-btn" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Contact
+          </button>
+        </div>
+
+        <div class="contacts-grid-wrapper">
+          <ul class="contacts-grid" id="contacts-grid">
+            <!-- Rendered dynamically -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 4: Bookings Calendar & List -->
+      <div id="bookings-section" class="tab-content">
+        <div class="gallery-tracker-header">
+          <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Studio Bookings</h2>
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <button id="add-booking-btn" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Add Booking
+            </button>
+          </div>
+        </div>
+
+        <div class="bookings-grid-wrapper">
+          <ul class="bookings-grid" id="bookings-grid">
+            <!-- Rendered dynamically -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 7: Shoots Manager -->
+      <div id="shoots-section" class="tab-content">
+        <div class="gallery-tracker-header">
+          <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Shoot Logs & Requirements</h2>
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <button id="add-shoot-btn" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Log New Shoot
+            </button>
+          </div>
+        </div>
+
+        <div class="bookings-grid-wrapper" style="display: flex; flex-direction: column; gap: 2rem;">
+          <!-- Pending Shoots Section -->
+          <div id="pending-shoots-section-wrapper">
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem; margin: 0 0 1rem 0; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.4rem;">⏳</span> Pending Shoots
+              <span id="pending-shoots-count" style="font-size: 0.8rem; background: rgba(33, 150, 243, 0.12); color: #1976D2; padding: 0.2rem 0.6rem; border-radius: 12px; font-weight: 700; margin-left: 4px;">0</span>
+            </h3>
+            <ul class="bookings-grid" id="pending-shoots-grid">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+
+          <!-- Completed Shoots Section -->
+          <div id="completed-shoots-section-wrapper">
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem; margin: 0 0 1rem 0; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.4rem;">✅</span> Completed Shoots
+              <span id="completed-shoots-count" style="font-size: 0.8rem; background: rgba(46, 125, 50, 0.12); color: #2E7D32; padding: 0.2rem 0.6rem; border-radius: 12px; font-weight: 700; margin-left: 4px;">0</span>
+            </h3>
+            <ul class="bookings-grid" id="completed-shoots-grid">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Google Calendar Sync -->
+      <div id="calendar-section" class="tab-content">
+        <div class="gallery-tracker-header">
+          <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Google Calendar Integration</h2>
+          <div id="google-auth-status"></div>
+        </div>
+        
+        <!-- Connection overlay (if not logged in) -->
+        <div id="google-login-card" class="grid-card" style="max-width: 500px; margin: 2rem auto; padding: 2.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); box-shadow: var(--shadow-lg);">
+          <div style="font-size: 3.5rem;">📅</div>
+          <h3 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Connect Google Calendar</h3>
+          <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem; margin: 0 0 0.5rem 0;">
+            Authorize Rhythm Clicks to sync your bookings. Once connected, shoots added to the dashboard can automatically create events on your Google Calendar.
+          </p>
+          <button id="connect-google-btn" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 0.95rem; border-radius: 50px;">
+            Sign In with Google
+          </button>
+        </div>
+
+        <!-- Active Calendar Feed Container (if logged in) -->
+        <div id="google-calendar-container" style="display: none;">
+          <div class="calendar-controls-bar" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.3); backdrop-filter: blur(10px); border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.2);">
+            <span style="font-size: 0.9rem; color: var(--text-primary); font-weight: 500;" id="google-user-info">Connected</span>
+            <button id="sync-existing-bookings-btn" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 50px; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08);">
+              Bulk Push Bookings to Google Cal
+            </button>
+          </div>
+          <ul id="calendar-events-list" class="bookings-grid">
+            <!-- Rendered dynamically as list cards -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 8: Album Tracker -->
+      <div id="albums-section" class="tab-content">
+        <div class="gallery-tracker-header">
+          <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Album Workflow</h2>
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <button id="add-album-btn" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Register New Album
+            </button>
+          </div>
+        </div>
+
+        <div class="gallery-pipeline gallery-pipeline-5-cols">
+          <!-- Column 1: Pending Approval -->
+          <div class="pipeline-column">
+            <div class="column-header" style="border-bottom: 2px solid #e6a15c;">
+              <h3>Pending Approval</h3>
+              <span class="column-badge" id="count-album-pending" style="background: rgba(230, 161, 92, 0.12); color: #e6a15c;">0</span>
+            </div>
+            <ul class="gallery-list" id="list-album-pending">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+
+          <!-- Column 2: Approved -->
+          <div class="pipeline-column">
+            <div class="column-header" style="border-bottom: 2px solid #ff9800;">
+              <h3>Approved</h3>
+              <span class="column-badge" id="count-album-approval" style="background: rgba(255, 152, 0, 0.12); color: #ff9800;">0</span>
+            </div>
+            <ul class="gallery-list" id="list-album-approval">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+
+          <!-- Column 2: Printing -->
+          <div class="pipeline-column">
+            <div class="column-header" style="border-bottom: 2px solid #2196f3;">
+              <h3>Printing</h3>
+              <span class="column-badge" id="count-album-printing" style="background: rgba(33, 150, 243, 0.12); color: #2196f3;">0</span>
+            </div>
+            <ul class="gallery-list" id="list-album-printing">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+
+          <!-- Column 3: Arrived -->
+          <div class="pipeline-column">
+            <div class="column-header" style="border-bottom: 2px solid #9c27b0;">
+              <h3>Arrived</h3>
+              <span class="column-badge" id="count-album-arrived" style="background: rgba(156, 39, 176, 0.12); color: #9c27b0;">0</span>
+            </div>
+            <ul class="gallery-list" id="list-album-arrived">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+
+          <!-- Column 4: Delivered -->
+          <div class="pipeline-column">
+            <div class="column-header" style="border-bottom: 2px solid #4caf50;">
+              <h3>Delivered</h3>
+              <span class="column-badge" id="count-album-delivered" style="background: rgba(76, 175, 80, 0.12); color: #4caf50;">0</span>
+            </div>
+            <ul class="gallery-list" id="list-album-delivered">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 6: Accounts Tracking -->
+      <div id="accounts-section" class="tab-content">
+        <div class="gallery-tracker-header">
+          <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Accounts & Income Tracker</h2>
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <select id="account-filter" style="padding: 0.6rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.7); font-size: 0.85rem; font-family: var(--font-sans); cursor: pointer;">
+              <option value="all">All Accounts</option>
+              <option value="Rhythm">Rhythm</option>
+              <option value="Cash">Cash</option>
+              <option value="Purva">Purva</option>
+              <option value="Bijal">Bijal</option>
+              <option value="Shilpa">Shilpa</option>
+              <option value="Mahesh">Mahesh</option>
+            </select>
+            <select id="account-month-filter" style="padding: 0.6rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.7); font-size: 0.85rem; font-family: var(--font-sans); cursor: pointer;">
+              <!-- Will be populated dynamically -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Global Summary Cards -->
+        <div class="accounts-summary-grid" id="accounts-summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+          <!-- Will render dynamically -->
+        </div>
+
+        <!-- Account Cards List -->
+        <h3 style="font-family: var(--font-serif); font-size: 1.2rem; margin: 0 0 1rem 0; color: var(--text-primary);">Account Breakdowns</h3>
+        <div id="accounts-cards-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+          <!-- Will render dynamically -->
+        </div>
+
+        <!-- Transaction Details Table/List -->
+        <h3 style="font-family: var(--font-serif); font-size: 1.2rem; margin: 0 0 1rem 0; color: var(--text-primary);">Related Shoot Payments</h3>
+        <div class="grid-card" style="padding: 1.5rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); overflow-x: auto; margin-bottom: 2rem;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; min-width: 600px;">
+            <thead>
+              <tr style="border-bottom: 1.5px solid rgba(0,0,0,0.08); color: var(--text-secondary); font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">
+                <th style="padding: 0.75rem 0.5rem;">Client Name</th>
+                <th style="padding: 0.75rem 0.5rem;">Date</th>
+                <th style="padding: 0.75rem 0.5rem;">Payment Type</th>
+                <th style="padding: 0.75rem 0.5rem;">Amount</th>
+                <th style="padding: 0.75rem 0.5rem;">Account</th>
+                <th style="padding: 0.75rem 0.5rem;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="accounts-transactions-body">
+              <!-- Will render dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <div class="dashboard-footer-bar">
+      <p>&copy; 2026 Rhythm Clicks Studio Workflow Hub. Sync server active.</p>
+    </div>
+  </div>
+
+  <!-- Notification Toasts Container -->
+  <div class="toasts-container" id="toasts-container"></div>
+
+  <!-- Google Identity Services client library -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Script Files (Loaded as ES6 Module for Firebase support) -->
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>
