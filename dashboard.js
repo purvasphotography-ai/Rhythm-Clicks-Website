@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const closeBookingBtn = document.getElementById('close-booking-btn');
   const addBookingForm = document.getElementById('add-booking-form');
   const bookingClientName = document.getElementById('booking-client-name');
+  const bookingPhone = document.getElementById('booking-phone');
   const bookingShootType = document.getElementById('booking-shoot-type');
   const bookingDate = document.getElementById('booking-date');
   const bookingTimeHour = document.getElementById('booking-time-hour');
@@ -123,6 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const editBookingForm = document.getElementById('edit-booking-form');
   const editBookingId = document.getElementById('edit-booking-id');
   const editBookingClientName = document.getElementById('edit-booking-client-name');
+  const editBookingPhone = document.getElementById('edit-booking-phone');
   const editBookingShootType = document.getElementById('edit-booking-shoot-type');
   const editBookingDate = document.getElementById('edit-booking-date');
   const editBookingTimeHour = document.getElementById('edit-booking-time-hour');
@@ -3176,7 +3178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.addBooking = async (clientName, shootType, date, time, pack, advance, paymentAccount) => {
+    window.addBooking = async (clientName, shootType, date, time, pack, advance, paymentAccount, clientPhone) => {
       try {
         const docRef = await firebaseFirestore.addDoc(firebaseFirestore.collection(db, "bookings"), {
           clientName: clientName.trim(),
@@ -3189,6 +3191,27 @@ document.addEventListener('DOMContentLoaded', async () => {
           timestamp: Date.now()
         });
         showToast(`Booking for <strong>${clientName}</strong> saved`, '📅');
+
+        // Auto-save/update contact
+        if (clientPhone) {
+          const contact = contacts.find(c => c.name.toLowerCase() === clientName.trim().toLowerCase());
+          if (contact) {
+            if (contact.phone !== clientPhone.trim()) {
+              await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "contacts", contact.id), {
+                phone: clientPhone.trim()
+              });
+            }
+          } else {
+            await firebaseFirestore.addDoc(firebaseFirestore.collection(db, "contacts"), {
+              name: clientName.trim(),
+              phone: clientPhone.trim(),
+              email: '',
+              notes: 'Auto-created from Booking',
+              timestamp: Date.now()
+            });
+            showToast(`Contact for <strong>${clientName}</strong> saved`, '👥');
+          }
+        }
 
         // Auto Sync with Google Calendar if connected
         if (gcalAccessToken && typeof createGoogleCalendarEvent === 'function') {
@@ -3214,7 +3237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.updateBooking = async (id, clientName, shootType, date, time, pack, advance, paymentAccount) => {
+    window.updateBooking = async (id, clientName, shootType, date, time, pack, advance, paymentAccount, clientPhone) => {
       try {
         await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "bookings", id), {
           clientName: clientName.trim(),
@@ -3226,6 +3249,27 @@ document.addEventListener('DOMContentLoaded', async () => {
           paymentAccount: paymentAccount || 'Cash'
         });
         showToast(`Booking for <strong>${clientName}</strong> updated`, '📅');
+
+        // Auto-save/update contact
+        if (clientPhone) {
+          const contact = contacts.find(c => c.name.toLowerCase() === clientName.trim().toLowerCase());
+          if (contact) {
+            if (contact.phone !== clientPhone.trim()) {
+              await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "contacts", contact.id), {
+                phone: clientPhone.trim()
+              });
+            }
+          } else {
+            await firebaseFirestore.addDoc(firebaseFirestore.collection(db, "contacts"), {
+              name: clientName.trim(),
+              phone: clientPhone.trim(),
+              email: '',
+              notes: 'Auto-created from Booking Update',
+              timestamp: Date.now()
+            });
+            showToast(`Contact for <strong>${clientName}</strong> saved`, '👥');
+          }
+        }
 
         // Auto Sync with Google Calendar if connected (update event if already exists, or create if not)
         const booking = bookings.find(b => b.id === id);
@@ -3997,7 +4041,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast('Contact deleted', '🧹');
     };
 
-    window.addBooking = async (clientName, shootType, date, time, pack, advance, paymentAccount) => {
+    window.addBooking = async (clientName, shootType, date, time, pack, advance, paymentAccount, clientPhone) => {
       const newBooking = {
         id: 'booking_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         clientName: clientName.trim(),
@@ -4022,6 +4066,39 @@ document.addEventListener('DOMContentLoaded', async () => {
       saveLocalBookings();
       renderBookings();
 
+      // Auto-save/update contact
+      if (clientPhone) {
+        const contact = contacts.find(c => c.name.toLowerCase() === clientName.trim().toLowerCase());
+        if (contact) {
+          if (contact.phone !== clientPhone.trim()) {
+            contact.phone = clientPhone.trim();
+            saveLocalContacts();
+            renderContacts();
+            localChannel.postMessage({
+              type: 'UPDATE_CONTACT',
+              contact: contact
+            });
+          }
+        } else {
+          const newContact = {
+            id: 'contact_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            name: clientName.trim(),
+            phone: clientPhone.trim(),
+            email: '',
+            notes: 'Auto-created from Booking',
+            timestamp: Date.now()
+          };
+          contacts.push(newContact);
+          saveLocalContacts();
+          renderContacts();
+          localChannel.postMessage({
+            type: 'ADD_CONTACT',
+            contact: newContact
+          });
+          showToast(`Contact for <strong>${clientName}</strong> saved`, '👥');
+        }
+      }
+
       localChannel.postMessage({
         type: 'ADD_BOOKING',
         booking: newBooking
@@ -4030,7 +4107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast(`Booking for <strong>${clientName}</strong> saved`, '📅');
     };
 
-    window.updateBooking = async (id, clientName, shootType, date, time, pack, advance, paymentAccount) => {
+    window.updateBooking = async (id, clientName, shootType, date, time, pack, advance, paymentAccount, clientPhone) => {
       const existing = bookings.find(b => b.id === id);
       if (!existing) return;
 
@@ -4062,6 +4139,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       saveLocalBookings();
       renderBookings();
+
+      // Auto-save/update contact
+      if (clientPhone) {
+        const contact = contacts.find(c => c.name.toLowerCase() === clientName.trim().toLowerCase());
+        if (contact) {
+          if (contact.phone !== clientPhone.trim()) {
+            contact.phone = clientPhone.trim();
+            saveLocalContacts();
+            renderContacts();
+            localChannel.postMessage({
+              type: 'UPDATE_CONTACT',
+              contact: contact
+            });
+          }
+        } else {
+          const newContact = {
+            id: 'contact_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            name: clientName.trim(),
+            phone: clientPhone.trim(),
+            email: '',
+            notes: 'Auto-created from Booking Update',
+            timestamp: Date.now()
+          };
+          contacts.push(newContact);
+          saveLocalContacts();
+          renderContacts();
+          localChannel.postMessage({
+            type: 'ADD_CONTACT',
+            contact: newContact
+          });
+        }
+      }
 
       localChannel.postMessage({
         type: 'UPDATE_BOOKING',
@@ -5164,6 +5273,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     addBookingForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = bookingClientName.value;
+      const phone = bookingPhone ? bookingPhone.value.trim() : '';
       let shootType = bookingShootType.value;
       if (shootType === 'Other' && bookingShootTypeCustom) {
         shootType = bookingShootTypeCustom.value.trim();
@@ -5182,7 +5292,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      await window.addBooking(name, shootType, date, time, pack, advance, paymentAccount);
+      await window.addBooking(name, shootType, date, time, pack, advance, paymentAccount, phone);
       closeBooking();
     });
   }
@@ -5212,6 +5322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       e.preventDefault();
       const id = editBookingId.value;
       const name = editBookingClientName.value;
+      const phone = editBookingPhone ? editBookingPhone.value.trim() : '';
       let shootType = editBookingShootType.value;
       if (shootType === 'Other' && editBookingShootTypeCustom) {
         shootType = editBookingShootTypeCustom.value.trim();
@@ -5229,7 +5340,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      await window.updateBooking(id, name, shootType, date, time, pack, advance, paymentAccount);
+      await window.updateBooking(id, name, shootType, date, time, pack, advance, paymentAccount, phone);
       closeEditBooking();
     });
   }
@@ -5240,6 +5351,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     editBookingId.value = b.id;
     editBookingClientName.value = b.clientName;
+    
+    // Find matching contact phone
+    const clientContact = contacts.find(c => c.name.toLowerCase() === b.clientName.toLowerCase());
+    if (editBookingPhone) {
+      editBookingPhone.value = clientContact ? clientContact.phone : '';
+    }
     
     const standardTypes = ['Maternity', 'Newborn', 'Kids'];
     if (standardTypes.includes(b.shootType)) {
