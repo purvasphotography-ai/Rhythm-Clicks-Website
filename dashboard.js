@@ -2211,6 +2211,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  const disconnectGoogleBtn = document.getElementById('disconnect-google-btn');
+  if (disconnectGoogleBtn) {
+    disconnectGoogleBtn.addEventListener('click', () => {
+      if (gcalAccessToken) {
+        try {
+          google.accounts.oauth2.revoke(gcalAccessToken, () => {
+            console.log('Google access token revoked.');
+          });
+        } catch (e) {
+          console.warn('Could not revoke Google token remotely:', e);
+        }
+      }
+      localStorage.removeItem('gcal_access_token');
+      gcalAccessToken = null;
+      
+      const loginCard = document.getElementById('google-login-card');
+      const calContainer = document.getElementById('google-calendar-container');
+      if (loginCard) loginCard.style.display = 'flex';
+      if (calContainer) calContainer.style.display = 'none';
+      
+      showToast('Google account disconnected.', '👋');
+      
+      const eventsList = document.getElementById('calendar-events-list');
+      if (eventsList) eventsList.innerHTML = '';
+      updateDriveUIStatus('Disconnected', 'No active Google connection.');
+    });
+  }
+
   const checkBookingOverlap = (id, date, time) => {
     if (!time || !date) return false;
     const [tHours, tMinutes] = time.split(':').map(Number);

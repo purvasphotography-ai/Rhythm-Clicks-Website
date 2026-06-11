@@ -1282,9 +1282,14 @@
 
           <div class="calendar-controls-bar" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.3); backdrop-filter: blur(10px); border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.2);">
             <span style="font-size: 0.9rem; color: var(--text-primary); font-weight: 500;" id="google-user-info">Connected</span>
-            <button id="sync-existing-bookings-btn" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 50px; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08);">
-              Bulk Push Bookings to Google Cal
-            </button>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <button id="sync-existing-bookings-btn" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 50px; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08);">
+                Bulk Push Bookings to Google Cal
+              </button>
+              <button id="disconnect-google-btn" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 50px; background: rgba(211, 47, 47, 0.08); border: 1px solid rgba(211, 47, 47, 0.15); color: #d32f2f; cursor: pointer; transition: all 0.2s;">
+                Disconnect
+              </button>
+            </div>
           </div>
           <ul id="calendar-events-list" class="bookings-grid">
             <!-- Rendered dynamically as list cards -->
