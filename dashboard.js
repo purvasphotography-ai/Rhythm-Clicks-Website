@@ -2003,6 +2003,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                   gCalEventId: eventId
                 });
                 if (targetBooking) {
+                  targetBooking.gCalEventId = eventId;
                   await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "bookings", targetBooking.id), {
                     gCalEventId: eventId
                   });
@@ -2403,7 +2404,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const targetMin = tHours * 60 + tMinutes;
 
     for (let b of bookings) {
-      if (b.id !== id && b.date === date) {
+      if (b.id !== id && b.date === date && b.time) {
         const [bHours, bMinutes] = b.time.split(':').map(Number);
         const bMin = bHours * 60 + bMinutes;
         if (Math.abs(targetMin - bMin) < 120) {
@@ -2459,7 +2460,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       // Format Time to 12-hour format (e.g. 10:00 AM)
-      const [hours, minutes] = booking.time.split(':');
+      const [hours, minutes] = (booking.time || '10:00').split(':');
       const timeHrs = parseInt(hours);
       const ampm = timeHrs >= 12 ? 'PM' : 'AM';
       const formattedTime = `${timeHrs % 12 || 12}:${minutes} ${ampm}`;
@@ -3496,6 +3497,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Auto Sync with Google Calendar if connected (update event if already exists, or create if not)
         const booking = bookings.find(b => b.id === id);
         if (gcalAccessToken && booking) {
+          const targetShoot = shoots.find(s => s.bookingId === id || (s.clientName && s.clientName.toLowerCase().trim() === booking.clientName.toLowerCase().trim() && s.date === booking.date));
           if (booking.gCalEventId && typeof deleteGoogleCalendarEvent === 'function' && typeof createGoogleCalendarEvent === 'function') {
             // Delete old event and create new one for simplicity
             await deleteGoogleCalendarEvent(booking.gCalEventId);
@@ -3510,9 +3512,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
             const eventId = await createGoogleCalendarEvent(bookingObj);
             if (eventId) {
+              booking.gCalEventId = eventId;
               await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "bookings", id), {
                 gCalEventId: eventId
               });
+              if (targetShoot) {
+                targetShoot.gCalEventId = eventId;
+                await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "shoots", targetShoot.id), {
+                  gCalEventId: eventId
+                });
+              }
             }
           } else if (!booking.gCalEventId && typeof createGoogleCalendarEvent === 'function') {
             const bookingObj = {
@@ -3526,9 +3535,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
             const eventId = await createGoogleCalendarEvent(bookingObj);
             if (eventId) {
+              booking.gCalEventId = eventId;
               await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "bookings", id), {
                 gCalEventId: eventId
               });
+              if (targetShoot) {
+                targetShoot.gCalEventId = eventId;
+                await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "shoots", targetShoot.id), {
+                  gCalEventId: eventId
+                });
+              }
             }
           }
         }
@@ -3588,6 +3604,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (eventId) {
               gCalEventId = eventId;
               if (targetBooking) {
+                targetBooking.gCalEventId = eventId;
                 await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "bookings", targetBooking.id), {
                   gCalEventId: eventId
                 });
@@ -3652,9 +3669,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             await deleteGoogleCalendarEvent(gCalEventId);
             const eventId = await createGoogleCalendarEvent(shootObj);
             gCalEventId = eventId || "";
+            if (eventId && targetBooking) {
+              targetBooking.gCalEventId = eventId;
+              await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "bookings", targetBooking.id), {
+                gCalEventId: eventId
+              });
+            }
           } else if (!gCalEventId && typeof createGoogleCalendarEvent === 'function') {
             const eventId = await createGoogleCalendarEvent(shootObj);
             gCalEventId = eventId || "";
+            if (eventId && targetBooking) {
+              targetBooking.gCalEventId = eventId;
+              await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "bookings", targetBooking.id), {
+                gCalEventId: eventId
+              });
+            }
           }
         }
 
@@ -5889,8 +5918,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           return priorityA - priorityB;
         }
 
-        const dateTimeA = new Date(`${a.date}T${a.time}`);
-        const dateTimeB = new Date(`${b.date}T${b.time}`);
+        const dateTimeA = new Date(`${a.date}T${a.time || '10:00'}`);
+        const dateTimeB = new Date(`${b.date}T${b.time || '10:00'}`);
         return dateTimeA - dateTimeB;
       });
 
@@ -5901,7 +5930,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           month: 'short',
           year: 'numeric'
         });
-        const [hours, minutes] = b.time.split(':');
+        const [hours, minutes] = (b.time || '10:00').split(':');
         const timeHrs = parseInt(hours);
         const ampm = timeHrs >= 12 ? 'PM' : 'AM';
         const formattedTime = `${timeHrs % 12 || 12}:${minutes} ${ampm}`;
@@ -5958,7 +5987,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             shootClientName.value = booking.clientName;
             shootDate.value = booking.date;
             
-            const [h, m] = booking.time.split(':');
+            const [h, m] = (booking.time || '10:00').split(':');
             const hrs = parseInt(h);
             shootTimeHour.value = String(hrs % 12 || 12).padStart(2, '0');
             shootTimeMinute.value = m;
@@ -5996,8 +6025,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
     } else {
       filteredCompleted.sort((a, b) => {
-        const dateTimeA = new Date(`${a.date}T${a.time}`);
-        const dateTimeB = new Date(`${b.date}T${b.time}`);
+        const dateTimeA = new Date(`${a.date}T${a.time || '10:00'}`);
+        const dateTimeB = new Date(`${b.date}T${b.time || '10:00'}`);
         return dateTimeB - dateTimeA;
       });
 
@@ -6008,7 +6037,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           month: 'short',
           year: 'numeric'
         });
-        const [hours, minutes] = s.time.split(':');
+        const [hours, minutes] = (s.time || '10:00').split(':');
         const timeHrs = parseInt(hours);
         const ampm = timeHrs >= 12 ? 'PM' : 'AM';
         const formattedTime = `${timeHrs % 12 || 12}:${minutes} ${ampm}`;
@@ -6092,7 +6121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     editShootClientName.value = s.clientName;
     editShootDate.value = s.date;
     
-    const [h, m] = s.time.split(':');
+    const [h, m] = (s.time || '10:00').split(':');
     const hrs = parseInt(h);
     editShootTimeHour.value = String(hrs % 12 || 12).padStart(2, '0');
     editShootTimeMinute.value = m;
