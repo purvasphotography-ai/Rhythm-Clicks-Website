@@ -955,21 +955,22 @@
     <!-- Tab Navigation & Search -->
     <div class="tab-navigation-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;">
       <div class="tab-navigation" style="margin-bottom: 0;">
-        <button class="tab-btn active" id="tab-tasks">📋 Task Planner</button>
-        <button class="tab-btn" id="tab-bookings">📅 Bookings</button>
-        <button class="tab-btn" id="tab-shoots">📷 Shoots</button>
-        <button class="tab-btn" id="tab-calendar">📅 Google Sync</button>
-        <button class="tab-btn" id="tab-galleries">📸 Gallery Tracker</button>
-        <button class="tab-btn" id="tab-albums">📖 Album Tracker</button>
-        <button class="tab-btn" id="tab-contacts">📞 Contacts</button>
-        <button class="tab-btn" id="tab-accounts">💰 Accounts</button>
+        <button class="tab-btn active" id="tab-tasks"><span class="tab-icon">📋</span> <span class="tab-text">Tasks</span></button>
+        <button class="tab-btn" id="tab-bookings"><span class="tab-icon">📅</span> <span class="tab-text">Bookings</span></button>
+        <button class="tab-btn" id="tab-shoots"><span class="tab-icon">📷</span> <span class="tab-text">Shoots</span></button>
+        <button class="tab-btn" id="tab-calendar"><span class="tab-icon">📅</span> <span class="tab-text">Calendar</span></button>
+        <button class="tab-btn" id="tab-galleries"><span class="tab-icon">📸</span> <span class="tab-text">Galleries</span></button>
+        <button class="tab-btn" id="tab-albums"><span class="tab-icon">📖</span> <span class="tab-text">Albums</span></button>
+        <button class="tab-btn" id="tab-contacts"><span class="tab-icon">📞</span> <span class="tab-text">Contacts</span></button>
+        <button class="tab-btn" id="tab-accounts"><span class="tab-icon">💰</span> <span class="tab-text">Accounts</span></button>
       </div>
       <div class="search-bar-container" style="position: relative; min-width: 250px; flex-grow: 1; max-width: 350px;">
-        <input type="text" id="global-search" placeholder="Search tasks, galleries, contacts, or bookings..." style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.2rem; border: 1px solid rgba(0,0,0,0.08); border-radius: 50px; background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); font-size: 0.85rem; color: var(--text-primary); transition: all 0.3s ease;">
+        <input type="text" id="global-search" placeholder="Search tasks, galleries, contacts, or bookings..." style="width: 100%; padding: 0.6rem 2.2rem 0.6rem 2.2rem; border: 1px solid rgba(0,0,0,0.08); border-radius: 50px; background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); font-size: 0.85rem; color: var(--text-primary); transition: all 0.3s ease;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); color: var(--text-light); pointer-events: none;">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
+        <button id="clear-search-btn" class="clear-search-icon-btn" title="Clear search" style="display: none;">&times;</button>
       </div>
     </div>
 
@@ -1425,8 +1426,32 @@
     </main>
 
     <!-- Footer -->
-    <div class="dashboard-footer-bar">
+    <div class="dashboard-footer-bar" style="display: none;">
       <p>&copy; 2026 Rhythm Clicks Studio Workflow Hub. Sync server active.</p>
+    </div>
+  </div>
+
+  <!-- Transition Date Modal -->
+  <div class="login-overlay hidden" id="transition-date-modal" style="display: none; z-index: 100000;">
+    <div class="login-card" style="max-width: 400px; padding: 2rem; gap: 1.5rem;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 0.5rem; display: flex; align-items: center; margin-bottom: 0;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Transition Date</h2>
+        <button class="modal-close-btn" id="close-transition-date-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <div style="text-align: left; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5;">
+        Choose the transition date for this update, or use the current system time.
+      </div>
+      
+      <div class="form-group" style="text-align: left;">
+        <label for="transition-date-picker" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Select Date *</label>
+        <input type="date" id="transition-date-picker" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans);">
+      </div>
+      
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+        <button id="btn-use-selected-date" class="btn btn-primary" style="padding: 0.8rem; font-size: 0.9rem; width: 100%;">Use Selected Date</button>
+        <button id="btn-use-current-date" class="btn btn-secondary" style="padding: 0.8rem; font-size: 0.9rem; width: 100%; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); color: var(--text-primary);">Use Current Time</button>
+      </div>
     </div>
   </div>
 

@@ -585,6 +585,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Touch Swiping Support for Testimonial Slider on Mobile Devices
+  let touchStartX = 0;
+  let touchEndX = 0;
+  const testimonialContainer = document.querySelector('.testimonial-container');
+  
+  if (testimonialContainer) {
+    testimonialContainer.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    testimonialContainer.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+  }
+  
+  const handleSwipe = () => {
+    if (touchEndX < touchStartX - 50) {
+      nextTestimonial();
+      resetTestimonialTimer();
+    }
+    if (touchEndX > touchStartX + 50) {
+      prevTestimonial();
+      resetTestimonialTimer();
+    }
+  };
+
   // Optional: Auto play testimonials
   let testimonialTimer = setInterval(nextTestimonial, 8000);
   

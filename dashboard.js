@@ -1050,6 +1050,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (searchInput) {
           searchInput.value = '';
           searchFilter = '';
+          const clearSearchBtn = document.getElementById('clear-search-btn');
+          if (clearSearchBtn) clearSearchBtn.style.display = 'none';
           renderDashboard();
           renderGalleries();
           renderContacts();
@@ -1909,12 +1911,72 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
 
+      for (let shoot of shoots) {
+        if (!shoot.gCalEventId) {
+          let targetBooking = null;
+          if (shoot.bookingId) {
+            targetBooking = bookings.find(b => b.id === shoot.bookingId);
+          } else {
+            targetBooking = bookings.find(b => 
+              b.clientName && b.clientName.toLowerCase().trim() === shoot.clientName.toLowerCase().trim() && b.date === shoot.date
+            );
+          }
+
+          if (targetBooking && targetBooking.gCalEventId) {
+            shoot.gCalEventId = targetBooking.gCalEventId;
+            if (isFirebaseActive) {
+              await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "shoots", shoot.id), {
+                gCalEventId: targetBooking.gCalEventId
+              });
+            } else {
+              saveLocalShoots();
+            }
+            syncCount++;
+          } else {
+            let shootType = "Completed";
+            if (targetBooking && targetBooking.shootType) {
+              shootType = targetBooking.shootType;
+            }
+            const shootObj = {
+              clientName: shoot.clientName,
+              shootType: shootType,
+              date: shoot.date,
+              time: shoot.time,
+              package: `${shoot.photosCount} photos`,
+              advance: (shoot.advanceAmount || 0) + (shoot.balanceAmount || 0)
+            };
+            const eventId = await createGoogleCalendarEvent(shootObj);
+            if (eventId) {
+              shoot.gCalEventId = eventId;
+              if (isFirebaseActive) {
+                await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "shoots", shoot.id), {
+                  gCalEventId: eventId
+                });
+                if (targetBooking) {
+                  await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "bookings", targetBooking.id), {
+                    gCalEventId: eventId
+                  });
+                }
+              } else {
+                saveLocalShoots();
+                if (targetBooking) {
+                  targetBooking.gCalEventId = eventId;
+                  saveLocalBookings();
+                }
+              }
+              syncCount++;
+            }
+          }
+        }
+      }
+
       if (syncCount > 0) {
-        showToast(`Successfully pushed ${syncCount} booking(s) to Google Calendar!`, '📅');
+        showToast(`Successfully pushed ${syncCount} booking(s)/shoot(s) to Google Calendar!`, '📅');
         renderBookings();
+        if (typeof renderShoots === 'function') renderShoots();
         fetchGoogleCalendarEvents();
       } else {
-        showToast('All bookings are already synced!', '✓');
+        showToast('All bookings and shoots are already synced!', '✓');
       }
     });
   }
@@ -1925,17 +1987,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!statusText) return;
     
     let badge = '';
+    let displayMessage = message;
+    
     if (status === 'Connected') {
       badge = '<span style="background: rgba(46, 125, 50, 0.12); color: #2E7D32; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 700; font-size: 0.75rem; margin-right: 6px;">Connected</span>';
     } else if (status === 'Syncing' || status === 'Checking') {
       badge = '<span style="background: rgba(33, 150, 243, 0.12); color: #2196f3; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 700; font-size: 0.75rem; margin-right: 6px;">' + status + '...</span>';
     } else if (status === 'Error') {
       badge = '<span style="background: rgba(211, 47, 47, 0.12); color: #d32f2f; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 700; font-size: 0.75rem; margin-right: 6px;">Error</span>';
+      
+      // Parse Google API Error JSON dynamically
+      try {
+        const jsonStartIndex = message.indexOf('{');
+        if (jsonStartIndex !== -1) {
+          const jsonStr = message.substring(jsonStartIndex);
+          const errorObj = JSON.parse(jsonStr);
+          if (errorObj && errorObj.error) {
+            const apiErr = errorObj.error;
+            if (apiErr.message && (apiErr.message.includes('disabled') || apiErr.message.includes('not been used'))) {
+              const projIdMatch = apiErr.message.match(/project\s+(\d+)/);
+              const projectId = projIdMatch ? projIdMatch[1] : '50274890207';
+              const enableUrl = `https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=${projectId}`;
+              
+              displayMessage = `<strong>Google Drive API is disabled</strong>. You must enable it in your Google Cloud Console for project ${projectId}. <a href="${enableUrl}" target="_blank" style="color: #d32f2f; text-decoration: underline; font-weight: 700; margin-left: 5px;">Enable Google Drive API here &rarr;</a> and then reload this page.`;
+            } else {
+              displayMessage = `Drive error: ${apiErr.message}`;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to parse friendly API error:', e);
+      }
     } else {
       badge = '<span style="background: rgba(0, 0, 0, 0.06); color: var(--text-secondary); padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 700; font-size: 0.75rem; margin-right: 6px;">Disconnected</span>';
     }
     
-    statusText.innerHTML = badge + ' ' + message;
+    statusText.innerHTML = badge + ' ' + displayMessage;
   };
 
   const handleGoogleTokenExpiry = () => {
@@ -2940,8 +3027,71 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
+    window.promptTransitionDate = () => {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('transition-date-modal');
+        const closeBtn = document.getElementById('close-transition-date-btn');
+        const useSelectedBtn = document.getElementById('btn-use-selected-date');
+        const useCurrentBtn = document.getElementById('btn-use-current-date');
+        const datePicker = document.getElementById('transition-date-picker');
+        
+        if (!modal || !datePicker) {
+          resolve(Date.now());
+          return;
+        }
+        
+        // Set default date to today in local timezone YYYY-MM-DD
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        datePicker.value = `${year}-${month}-${day}`;
+        
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        
+        const cleanup = () => {
+          modal.classList.add('hidden');
+          modal.style.display = 'none';
+          closeBtn.removeEventListener('click', handleCancel);
+          useSelectedBtn.removeEventListener('click', handleSelected);
+          useCurrentBtn.removeEventListener('click', handleCurrent);
+        };
+        
+        const handleCancel = () => {
+          cleanup();
+          resolve(null);
+        };
+        
+        const handleSelected = () => {
+          const val = datePicker.value;
+          cleanup();
+          if (val) {
+            const selectedDateObj = new Date(val);
+            const now = new Date();
+            selectedDateObj.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+            resolve(selectedDateObj.getTime());
+          } else {
+            resolve(Date.now());
+          }
+        };
+        
+        const handleCurrent = () => {
+          cleanup();
+          resolve(Date.now());
+        };
+        
+        closeBtn.addEventListener('click', handleCancel);
+        useSelectedBtn.addEventListener('click', handleSelected);
+        useCurrentBtn.addEventListener('click', handleCurrent);
+      });
+    };
+
     window.moveGallery = async (id, nextStatus) => {
       try {
+        const chosenTimestamp = await window.promptTransitionDate();
+        if (chosenTimestamp === null) return; // User cancelled
+        
         const existing = galleries.find(g => g.id === id);
         const updateFields = { status: nextStatus };
         if (existing) {
@@ -2949,22 +3099,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateFields.selectionDate = null;
             updateFields.editedDate = null;
             updateFields.deliveredDate = null;
-            if (!existing.arrivedDate) updateFields.arrivedDate = Date.now();
+            updateFields.arrivedDate = chosenTimestamp;
           } else if (nextStatus === 'selected') {
             updateFields.editedDate = null;
             updateFields.deliveredDate = null;
-            if (!existing.arrivedDate) updateFields.arrivedDate = Date.now();
-            if (!existing.selectionDate) updateFields.selectionDate = Date.now();
+            if (!existing.arrivedDate) updateFields.arrivedDate = chosenTimestamp;
+            updateFields.selectionDate = chosenTimestamp;
           } else if (nextStatus === 'edited') {
             updateFields.deliveredDate = null;
-            if (!existing.arrivedDate) updateFields.arrivedDate = Date.now();
-            if (!existing.selectionDate) updateFields.selectionDate = Date.now();
-            if (!existing.editedDate) updateFields.editedDate = Date.now();
+            if (!existing.arrivedDate) updateFields.arrivedDate = chosenTimestamp;
+            if (!existing.selectionDate) updateFields.selectionDate = chosenTimestamp;
+            updateFields.editedDate = chosenTimestamp;
           } else if (nextStatus === 'delivered') {
-            if (!existing.arrivedDate) updateFields.arrivedDate = Date.now();
-            if (!existing.selectionDate) updateFields.selectionDate = Date.now();
-            if (!existing.editedDate) updateFields.editedDate = Date.now();
-            if (!existing.deliveredDate) updateFields.deliveredDate = Date.now();
+            if (!existing.arrivedDate) updateFields.arrivedDate = chosenTimestamp;
+            if (!existing.selectionDate) updateFields.selectionDate = chosenTimestamp;
+            if (!existing.editedDate) updateFields.editedDate = chosenTimestamp;
+            updateFields.deliveredDate = chosenTimestamp;
           }
         }
         await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "galleries", id), updateFields);
@@ -3056,6 +3206,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.moveAlbum = async (id, nextStatus, deliveryMethod = '') => {
       try {
+        const chosenTimestamp = await window.promptTransitionDate();
+        if (chosenTimestamp === null) return; // User cancelled
+        
         const existing = albums.find(a => a.id === id);
         const updateFields = { status: nextStatus };
         if (existing) {
@@ -3070,24 +3223,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateFields.arrivedDate = null;
             updateFields.deliveredDate = null;
             updateFields.deliveredMethod = '';
-            if (!existing.approvalDate) updateFields.approvalDate = Date.now();
+            updateFields.approvalDate = chosenTimestamp;
           } else if (nextStatus === 'printing') {
             updateFields.arrivedDate = null;
             updateFields.deliveredDate = null;
             updateFields.deliveredMethod = '';
-            if (!existing.approvalDate) updateFields.approvalDate = Date.now();
-            if (!existing.printingDate) updateFields.printingDate = Date.now();
+            if (!existing.approvalDate) updateFields.approvalDate = chosenTimestamp;
+            updateFields.printingDate = chosenTimestamp;
           } else if (nextStatus === 'arrived') {
             updateFields.deliveredDate = null;
             updateFields.deliveredMethod = '';
-            if (!existing.approvalDate) updateFields.approvalDate = Date.now();
-            if (!existing.printingDate) updateFields.printingDate = Date.now();
-            if (!existing.arrivedDate) updateFields.arrivedDate = Date.now();
+            if (!existing.approvalDate) updateFields.approvalDate = chosenTimestamp;
+            if (!existing.printingDate) updateFields.printingDate = chosenTimestamp;
+            updateFields.arrivedDate = chosenTimestamp;
           } else if (nextStatus === 'delivered') {
-            if (!existing.approvalDate) updateFields.approvalDate = Date.now();
-            if (!existing.printingDate) updateFields.printingDate = Date.now();
-            if (!existing.arrivedDate) updateFields.arrivedDate = Date.now();
-            if (!existing.deliveredDate) updateFields.deliveredDate = Date.now();
+            if (!existing.approvalDate) updateFields.approvalDate = chosenTimestamp;
+            if (!existing.printingDate) updateFields.printingDate = chosenTimestamp;
+            if (!existing.arrivedDate) updateFields.arrivedDate = chosenTimestamp;
+            updateFields.deliveredDate = chosenTimestamp;
             updateFields.deliveredMethod = deliveryMethod || 'In-Hand';
           }
         }
@@ -3353,6 +3506,46 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.addShoot = async (bookingId, clientName, date, time, photosCount, advanceAmount, advanceAccount, balanceAmount, balanceAccount, specialRequests, albumIncluded) => {
       try {
+        let gCalEventId = "";
+
+        // Auto Sync with Google Calendar if connected
+        if (gcalAccessToken) {
+          let targetBooking = null;
+          if (bookingId) {
+            targetBooking = bookings.find(b => b.id === bookingId);
+          } else {
+            targetBooking = bookings.find(b => 
+              b.clientName && b.clientName.toLowerCase().trim() === clientName.toLowerCase().trim() && b.date === date
+            );
+          }
+
+          if (targetBooking && targetBooking.gCalEventId) {
+            gCalEventId = targetBooking.gCalEventId;
+          } else if (typeof createGoogleCalendarEvent === 'function') {
+            let shootType = "Completed";
+            if (targetBooking && targetBooking.shootType) {
+              shootType = targetBooking.shootType;
+            }
+            const shootObj = {
+              clientName: clientName,
+              shootType: shootType,
+              date: date,
+              time: time,
+              package: `${photosCount} photos`,
+              advance: advanceAmount + balanceAmount
+            };
+            const eventId = await createGoogleCalendarEvent(shootObj);
+            if (eventId) {
+              gCalEventId = eventId;
+              if (targetBooking) {
+                await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "bookings", targetBooking.id), {
+                  gCalEventId: eventId
+                });
+              }
+            }
+          }
+        }
+
         await firebaseFirestore.addDoc(firebaseFirestore.collection(db, "shoots"), {
           bookingId: bookingId || "",
           clientName: clientName.trim(),
@@ -3365,6 +3558,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           balanceAccount: balanceAccount,
           specialRequests: specialRequests.trim(),
           albumIncluded: !!albumIncluded,
+          gCalEventId: gCalEventId,
           timestamp: Date.now()
         });
         showToast(`Shoot for <strong>${clientName}</strong> logged!`, '📷');
@@ -3379,6 +3573,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.updateShoot = async (id, clientName, date, time, photosCount, advanceAmount, advanceAccount, balanceAmount, balanceAccount, specialRequests, albumIncluded) => {
       try {
+        const existing = shoots.find(s => s.id === id);
+        let gCalEventId = existing ? (existing.gCalEventId || "") : "";
+
+        // Auto Sync with Google Calendar if connected
+        if (gcalAccessToken) {
+          let shootType = "Completed";
+          if (existing) {
+            if (existing.bookingId) {
+              const booking = bookings.find(b => b.id === existing.bookingId);
+              if (booking && booking.shootType) shootType = booking.shootType;
+            } else {
+              const booking = bookings.find(b => b.clientName && b.clientName.toLowerCase().trim() === clientName.toLowerCase().trim() && b.date === date);
+              if (booking && booking.shootType) shootType = booking.shootType;
+            }
+          }
+
+          const shootObj = {
+            clientName: clientName,
+            shootType: shootType,
+            date: date,
+            time: time,
+            package: `${photosCount} photos`,
+            advance: advanceAmount + balanceAmount
+          };
+
+          if (gCalEventId && typeof deleteGoogleCalendarEvent === 'function' && typeof createGoogleCalendarEvent === 'function') {
+            await deleteGoogleCalendarEvent(gCalEventId);
+            const eventId = await createGoogleCalendarEvent(shootObj);
+            gCalEventId = eventId || "";
+          } else if (!gCalEventId && typeof createGoogleCalendarEvent === 'function') {
+            const eventId = await createGoogleCalendarEvent(shootObj);
+            gCalEventId = eventId || "";
+          }
+        }
+
         await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "shoots", id), {
           clientName: clientName.trim(),
           date: date,
@@ -3389,7 +3618,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           balanceAmount: parseFloat(balanceAmount) || 0,
           balanceAccount: balanceAccount,
           specialRequests: specialRequests.trim(),
-          albumIncluded: !!albumIncluded
+          albumIncluded: !!albumIncluded,
+          gCalEventId: gCalEventId
         });
         showToast(`Shoot details for <strong>${clientName}</strong> updated!`, '📷');
       } catch (err) {
@@ -3421,6 +3651,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (targetBooking.gCalEventId && typeof deleteGoogleCalendarEvent === 'function') {
               await deleteGoogleCalendarEvent(targetBooking.gCalEventId);
             }
+          }
+          if (s.gCalEventId && typeof deleteGoogleCalendarEvent === 'function' && (!targetBooking || targetBooking.gCalEventId !== s.gCalEventId)) {
+            await deleteGoogleCalendarEvent(s.gCalEventId);
           }
         }
         
@@ -3896,9 +4129,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast(`Gallery <strong>${clientName}</strong> registered`, '📸');
     };
 
-    window.moveGallery = (id, nextStatus) => {
+    window.moveGallery = async (id, nextStatus) => {
       const galleryIndex = galleries.findIndex(g => g.id === id);
       if (galleryIndex === -1) return;
+
+      const chosenTimestamp = await window.promptTransitionDate();
+      if (chosenTimestamp === null) return; // User cancelled
 
       const existing = galleries[galleryIndex];
       existing.status = nextStatus;
@@ -3906,22 +4142,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         existing.selectionDate = null;
         existing.editedDate = null;
         existing.deliveredDate = null;
-        if (!existing.arrivedDate) existing.arrivedDate = Date.now();
+        existing.arrivedDate = chosenTimestamp;
       } else if (nextStatus === 'selected') {
         existing.editedDate = null;
         existing.deliveredDate = null;
-        if (!existing.arrivedDate) existing.arrivedDate = Date.now();
-        if (!existing.selectionDate) existing.selectionDate = Date.now();
+        if (!existing.arrivedDate) existing.arrivedDate = chosenTimestamp;
+        existing.selectionDate = chosenTimestamp;
       } else if (nextStatus === 'edited') {
         existing.deliveredDate = null;
-        if (!existing.arrivedDate) existing.arrivedDate = Date.now();
-        if (!existing.selectionDate) existing.selectionDate = Date.now();
-        if (!existing.editedDate) existing.editedDate = Date.now();
+        if (!existing.arrivedDate) existing.arrivedDate = chosenTimestamp;
+        if (!existing.selectionDate) existing.selectionDate = chosenTimestamp;
+        existing.editedDate = chosenTimestamp;
       } else if (nextStatus === 'delivered') {
-        if (!existing.arrivedDate) existing.arrivedDate = Date.now();
-        if (!existing.selectionDate) existing.selectionDate = Date.now();
-        if (!existing.editedDate) existing.editedDate = Date.now();
-        if (!existing.deliveredDate) existing.deliveredDate = Date.now();
+        if (!existing.arrivedDate) existing.arrivedDate = chosenTimestamp;
+        if (!existing.selectionDate) existing.selectionDate = chosenTimestamp;
+        if (!existing.editedDate) existing.editedDate = chosenTimestamp;
+        existing.deliveredDate = chosenTimestamp;
       }
 
       saveLocalGalleries();
@@ -4219,7 +4455,46 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.addShoot = (bookingId, clientName, date, time, photosCount, advanceAmount, advanceAccount, balanceAmount, balanceAccount, specialRequests, albumIncluded) => {
+    window.addShoot = async (bookingId, clientName, date, time, photosCount, advanceAmount, advanceAccount, balanceAmount, balanceAccount, specialRequests, albumIncluded) => {
+      let gCalEventId = "";
+
+      // Auto Sync with Google Calendar if connected
+      if (gcalAccessToken) {
+        let targetBooking = null;
+        if (bookingId) {
+          targetBooking = bookings.find(b => b.id === bookingId);
+        } else {
+          targetBooking = bookings.find(b => 
+            b.clientName && b.clientName.toLowerCase().trim() === clientName.toLowerCase().trim() && b.date === date
+          );
+        }
+
+        if (targetBooking && targetBooking.gCalEventId) {
+          gCalEventId = targetBooking.gCalEventId;
+        } else if (typeof createGoogleCalendarEvent === 'function') {
+          let shootType = "Completed";
+          if (targetBooking && targetBooking.shootType) {
+            shootType = targetBooking.shootType;
+          }
+          const shootObj = {
+            clientName: clientName,
+            shootType: shootType,
+            date: date,
+            time: time,
+            package: `${photosCount} photos`,
+            advance: advanceAmount + balanceAmount
+          };
+          const eventId = await createGoogleCalendarEvent(shootObj);
+          if (eventId) {
+            gCalEventId = eventId;
+            if (targetBooking) {
+              targetBooking.gCalEventId = eventId;
+              saveLocalBookings();
+            }
+          }
+        }
+      }
+
       const newShoot = {
         id: 'shoot_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         bookingId: bookingId || "",
@@ -4233,6 +4508,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         balanceAccount: balanceAccount,
         specialRequests: specialRequests.trim(),
         albumIncluded: !!albumIncluded,
+        gCalEventId: gCalEventId,
         timestamp: Date.now()
       };
 
@@ -4252,7 +4528,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.addGallery(clientName, `Auto-created from completed shoot logged on ${date}`);
     };
 
-    window.updateShoot = (id, clientName, date, time, photosCount, advanceAmount, advanceAccount, balanceAmount, balanceAccount, specialRequests, albumIncluded) => {
+    window.updateShoot = async (id, clientName, date, time, photosCount, advanceAmount, advanceAccount, balanceAmount, balanceAccount, specialRequests, albumIncluded) => {
       const existing = shoots.find(s => s.id === id);
       if (!existing) return;
 
@@ -4266,6 +4542,42 @@ document.addEventListener('DOMContentLoaded', async () => {
       existing.balanceAccount = balanceAccount;
       existing.specialRequests = specialRequests.trim();
       existing.albumIncluded = !!albumIncluded;
+
+      // Auto Sync with Google Calendar if connected
+      if (gcalAccessToken) {
+        let shootType = "Completed";
+        if (existing.bookingId) {
+          const booking = bookings.find(b => b.id === existing.bookingId);
+          if (booking && booking.shootType) shootType = booking.shootType;
+        } else {
+          const booking = bookings.find(b => b.clientName && b.clientName.toLowerCase().trim() === clientName.toLowerCase().trim() && b.date === date);
+          if (booking && booking.shootType) shootType = booking.shootType;
+        }
+
+        const shootObj = {
+          clientName: clientName,
+          shootType: shootType,
+          date: date,
+          time: time,
+          package: `${photosCount} photos`,
+          advance: advanceAmount + balanceAmount
+        };
+
+        if (existing.gCalEventId && typeof deleteGoogleCalendarEvent === 'function' && typeof createGoogleCalendarEvent === 'function') {
+          await deleteGoogleCalendarEvent(existing.gCalEventId);
+          const eventId = await createGoogleCalendarEvent(shootObj);
+          if (eventId) {
+            existing.gCalEventId = eventId;
+          } else {
+            delete existing.gCalEventId;
+          }
+        } else if (!existing.gCalEventId && typeof createGoogleCalendarEvent === 'function') {
+          const eventId = await createGoogleCalendarEvent(shootObj);
+          if (eventId) {
+            existing.gCalEventId = eventId;
+          }
+        }
+      }
 
       saveLocalShoots();
       renderShoots();
@@ -4306,6 +4618,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (targetBooking.gCalEventId && typeof deleteGoogleCalendarEvent === 'function') {
             deleteGoogleCalendarEvent(targetBooking.gCalEventId);
           }
+        }
+        if (s.gCalEventId && typeof deleteGoogleCalendarEvent === 'function' && (!targetBooking || targetBooking.gCalEventId !== s.gCalEventId)) {
+          deleteGoogleCalendarEvent(s.gCalEventId);
         }
       }
 
@@ -4349,9 +4664,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast(`Album for <strong>${clientName}</strong> registered`, '📖');
     };
 
-    window.moveAlbum = (id, nextStatus, deliveryMethod = '') => {
+    window.moveAlbum = async (id, nextStatus, deliveryMethod = '') => {
       const albumIndex = albums.findIndex(a => a.id === id);
       if (albumIndex === -1) return;
+
+      const chosenTimestamp = await window.promptTransitionDate();
+      if (chosenTimestamp === null) return; // User cancelled
 
       const existing = albums[albumIndex];
       existing.status = nextStatus;
@@ -4366,24 +4684,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         existing.arrivedDate = null;
         existing.deliveredDate = null;
         existing.deliveredMethod = '';
-        if (!existing.approvalDate) existing.approvalDate = Date.now();
+        existing.approvalDate = chosenTimestamp;
       } else if (nextStatus === 'printing') {
         existing.arrivedDate = null;
         existing.deliveredDate = null;
         existing.deliveredMethod = '';
-        if (!existing.approvalDate) existing.approvalDate = Date.now();
-        if (!existing.printingDate) existing.printingDate = Date.now();
+        if (!existing.approvalDate) existing.approvalDate = chosenTimestamp;
+        existing.printingDate = chosenTimestamp;
       } else if (nextStatus === 'arrived') {
         existing.deliveredDate = null;
         existing.deliveredMethod = '';
-        if (!existing.approvalDate) existing.approvalDate = Date.now();
-        if (!existing.printingDate) existing.printingDate = Date.now();
-        if (!existing.arrivedDate) existing.arrivedDate = Date.now();
+        if (!existing.approvalDate) existing.approvalDate = chosenTimestamp;
+        if (!existing.printingDate) existing.printingDate = chosenTimestamp;
+        existing.arrivedDate = chosenTimestamp;
       } else if (nextStatus === 'delivered') {
-        if (!existing.approvalDate) existing.approvalDate = Date.now();
-        if (!existing.printingDate) existing.printingDate = Date.now();
-        if (!existing.arrivedDate) existing.arrivedDate = Date.now();
-        if (!existing.deliveredDate) existing.deliveredDate = Date.now();
+        if (!existing.approvalDate) existing.approvalDate = chosenTimestamp;
+        if (!existing.printingDate) existing.printingDate = chosenTimestamp;
+        if (!existing.arrivedDate) existing.arrivedDate = chosenTimestamp;
+        existing.deliveredDate = chosenTimestamp;
         existing.deliveredMethod = deliveryMethod || 'In-Hand';
       }
 
@@ -4647,9 +4965,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Global Search Input ---
   const globalSearch = document.getElementById('global-search');
+  const clearSearchBtn = document.getElementById('clear-search-btn');
+
+  const toggleClearBtn = () => {
+    if (clearSearchBtn) {
+      if (globalSearch && globalSearch.value) {
+        clearSearchBtn.style.display = 'flex';
+      } else {
+        clearSearchBtn.style.display = 'none';
+      }
+    }
+  };
+
   if (globalSearch) {
     globalSearch.addEventListener('input', (e) => {
       searchFilter = e.target.value.toLowerCase().trim();
+      toggleClearBtn();
+      renderDashboard();
+      renderGalleries();
+      renderContacts();
+      renderBookings();
+      if (typeof renderAlbums === 'function') renderAlbums();
+      renderSearchPipeline();
+    });
+  }
+
+  if (clearSearchBtn && globalSearch) {
+    clearSearchBtn.addEventListener('click', () => {
+      globalSearch.value = '';
+      searchFilter = '';
+      toggleClearBtn();
+      globalSearch.focus();
       renderDashboard();
       renderGalleries();
       renderContacts();
