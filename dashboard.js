@@ -1811,18 +1811,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!gcalAccessToken) return null;
 
     try {
-      const startDateTime = new Date(`${booking.date}T${booking.time}`);
-      const endDateTime = new Date(startDateTime.getTime() + 2 * 60 * 60 * 1000); // add 2 hours
+      if (!booking.date || !booking.time) {
+        throw new Error('Missing date or time in booking/shoot details.');
+      }
+
+      // Compute end time timezone-independently (add 2 hours)
+      const [hourStr, minStr] = booking.time.split(':');
+      let hr = parseInt(hourStr);
+      let min = parseInt(minStr);
+      if (isNaN(hr) || isNaN(min)) {
+        throw new Error(`Invalid time format: ${booking.time}`);
+      }
+      hr += 2;
+      let nextDate = booking.date;
+      if (hr >= 24) {
+        hr -= 24;
+        // Parse date as local timezone beginning of day to avoid overflow timezone shifts
+        const d = new Date(booking.date + 'T00:00:00');
+        if (isNaN(d.getTime())) {
+          throw new Error(`Invalid date format: ${booking.date}`);
+        }
+        d.setDate(d.getDate() + 1);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        nextDate = `${y}-${m}-${day}`;
+      }
+      const startISO = `${booking.date}T${booking.time}:00`;
+      const endISO = `${nextDate}T${String(hr).padStart(2, '0')}:${String(min).padStart(2, '0')}:00`;
 
       const eventResource = {
         summary: `${booking.clientName} - ${booking.shootType} Shoot`,
         description: `Rhythm Clicks Studio booking.\nPackage: ${booking.package}\nAdvance Paid: ₹${booking.advance}`,
         start: {
-          dateTime: startDateTime.toISOString(),
+          dateTime: startISO,
           timeZone: 'Asia/Kolkata'
         },
         end: {
-          dateTime: endDateTime.toISOString(),
+          dateTime: endISO,
           timeZone: 'Asia/Kolkata'
         }
       };
@@ -1836,14 +1862,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         body: JSON.stringify(eventResource)
       });
 
+      if (response.status === 401) {
+        localStorage.removeItem('gcal_access_token');
+        gcalAccessToken = null;
+        const loginCard = document.getElementById('google-login-card');
+        const calContainer = document.getElementById('google-calendar-container');
+        if (loginCard) loginCard.style.display = 'flex';
+        if (calContainer) calContainer.style.display = 'none';
+        showToast('Google Calendar session expired. Please connect again.', '⚠️');
+        throw new Error('Google Calendar session expired. Please connect again.');
+      }
+
       if (!response.ok) {
-        throw new Error('Failed to create calendar event');
+        let errMsg = `HTTP error ${response.status}`;
+        try {
+          const errData = await response.json();
+          if (errData && errData.error && errData.error.message) {
+            errMsg += `: ${errData.error.message}`;
+          }
+        } catch(e) {
+          try {
+            const errText = await response.text();
+            if (errText) errMsg += `: ${errText}`;
+          } catch(e2) {}
+        }
+        throw new Error(errMsg);
       }
 
       const createdEvent = await response.json();
       return createdEvent.id;
     } catch (err) {
       console.error('Failed to create calendar event:', err);
+      showToast(`Failed to create Google Calendar event: ${err.message}`, '⚠️');
       return null;
     }
   };
