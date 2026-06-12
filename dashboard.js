@@ -2452,10 +2452,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const filteredBookings = bookings.filter(b => {
       return !searchFilter ||
-        b.clientName.toLowerCase().includes(searchFilter) ||
-        b.shootType.toLowerCase().includes(searchFilter) ||
-        b.package.toLowerCase().includes(searchFilter) ||
-        b.date.includes(searchFilter);
+        (b.clientName && b.clientName.toLowerCase().includes(searchFilter)) ||
+        (b.shootType && b.shootType.toLowerCase().includes(searchFilter)) ||
+        (b.package && b.package.toLowerCase().includes(searchFilter)) ||
+        (b.date && b.date.includes(searchFilter));
     });
 
     if (filteredBookings.length === 0) {
@@ -5900,9 +5900,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const filteredPending = pendingBookings.filter(b => {
       return !searchFilter ||
-        b.clientName.toLowerCase().includes(searchFilter) ||
-        b.shootType.toLowerCase().includes(searchFilter) ||
-        b.package.toLowerCase().includes(searchFilter);
+        (b.clientName && b.clientName.toLowerCase().includes(searchFilter)) ||
+        (b.shootType && b.shootType.toLowerCase().includes(searchFilter)) ||
+        (b.package && b.package.toLowerCase().includes(searchFilter));
     });
 
     const pendingCountSpan = document.getElementById('pending-shoots-count');
@@ -6036,8 +6036,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 2. Render Completed Shoots (sort newest first)
     const filteredCompleted = shoots.filter(s => {
       return !searchFilter ||
-        s.clientName.toLowerCase().includes(searchFilter) ||
-        s.date.includes(searchFilter);
+        (s.clientName && s.clientName.toLowerCase().includes(searchFilter)) ||
+        (s.date && s.date.includes(searchFilter));
     });
 
     const completedCountSpan = document.getElementById('completed-shoots-count');
