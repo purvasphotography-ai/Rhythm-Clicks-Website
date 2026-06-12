@@ -2399,24 +2399,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const checkBookingOverlap = (id, date, time) => {
-    if (!time || !date) return false;
-    const [tHours, tMinutes] = time.split(':').map(Number);
-    const targetMin = tHours * 60 + tMinutes;
-
-    for (let b of bookings) {
-      if (b.id !== id && b.date === date && b.time) {
-        const [bHours, bMinutes] = b.time.split(':').map(Number);
-        const bMin = bHours * 60 + bMinutes;
-        if (Math.abs(targetMin - bMin) < 120) {
-          const conflictHrs = parseInt(bHours);
-          const ampm = conflictHrs >= 12 ? 'PM' : 'AM';
-          const formattedConflictTime = `${conflictHrs % 12 || 12}:${String(bMinutes).padStart(2, '0')} ${ampm}`;
-          showToast(`⚠️ Schedule conflict! <strong>${b.clientName}</strong> already booked on this date at ${formattedConflictTime}.`, '⚠️');
-          return true;
-        }
-      }
-    }
-    return false;
+    return false; // Removed 2 hour warning/conflict check for now
   };
 
   const renderBookings = () => {
