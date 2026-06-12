@@ -5849,7 +5849,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       editBookingPaymentAccount.value = b.paymentAccount || 'Cash';
     }
 
-    editBookingStatusMsg.textContent = 'Modify shoot details, date, time, package, or advance amount.';
+    if (editBookingStatusMsg) {
+      editBookingStatusMsg.textContent = 'Modify shoot details, date, time, package, or advance amount.';
+    }
     editBookingModal.style.display = 'flex';
     editBookingModal.offsetHeight; // force reflow
     editBookingModal.classList.remove('hidden');
