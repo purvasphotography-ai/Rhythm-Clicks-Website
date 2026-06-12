@@ -6200,22 +6200,47 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (addShootForm) {
     addShootForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const bookingId = shootBookingId.value;
-      const clientName = shootClientName.value;
-      const date = shootDate.value;
-      const time = convertTimeTo24H(shootTimeHour.value, shootTimeMinute.value, shootTimeAmpm.value);
-      const photosCount = parseInt(shootPhotosCount.value) || 0;
-      const advanceAmount = parseFloat(shootAdvanceAmount.value) || 0;
-      const advanceAccount = shootAdvanceAccount.value;
-      const balanceAmount = parseFloat(shootBalanceAmount.value) || 0;
-      const balanceAccount = shootBalanceAccount.value;
-      const specialRequests = shootSpecialRequests.value;
-      const albumIncluded = shootAlbumIncluded.checked;
+      
+      const submitBtn = addShootForm.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        if (submitBtn.disabled) return;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Logging Shoot...';
+      }
 
-      if (!clientName.trim() || !date || !time) return;
+      try {
+        const bookingId = shootBookingId.value;
+        const clientName = shootClientName.value;
+        const date = shootDate.value;
+        const time = convertTimeTo24H(shootTimeHour.value, shootTimeMinute.value, shootTimeAmpm.value);
+        const photosCount = parseInt(shootPhotosCount.value) || 0;
+        const advanceAmount = parseFloat(shootAdvanceAmount.value) || 0;
+        const advanceAccount = shootAdvanceAccount.value;
+        const balanceAmount = parseFloat(shootBalanceAmount.value) || 0;
+        const balanceAccount = shootBalanceAccount.value;
+        const specialRequests = shootSpecialRequests.value;
+        const albumIncluded = shootAlbumIncluded.checked;
 
-      await window.addShoot(bookingId, clientName, date, time, photosCount, advanceAmount, advanceAccount, balanceAmount, balanceAccount, specialRequests, albumIncluded);
-      closeShoot();
+        if (!clientName.trim() || !date || !time) return;
+
+        // Check if shoot already exists to prevent duplication
+        const alreadyExists = shoots.some(s => 
+          (bookingId && s.bookingId === bookingId) || 
+          (s.clientName && s.clientName.toLowerCase().trim() === clientName.toLowerCase().trim() && s.date === date)
+        );
+        if (alreadyExists) {
+          showToast("Shoot already logged for this client and date.", "⚠️");
+          return;
+        }
+
+        await window.addShoot(bookingId, clientName, date, time, photosCount, advanceAmount, advanceAccount, balanceAmount, balanceAccount, specialRequests, albumIncluded);
+        closeShoot();
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Log Shoot';
+        }
+      }
     });
   }
 
