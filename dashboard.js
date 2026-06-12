@@ -5813,7 +5813,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     editBookingClientName.value = b.clientName;
     
     // Find matching contact phone
-    const clientContact = contacts.find(c => c.name.toLowerCase() === b.clientName.toLowerCase());
+    const clientContact = contacts.find(c => c.name && b.clientName && c.name.toLowerCase() === b.clientName.toLowerCase());
     if (editBookingPhone) {
       editBookingPhone.value = clientContact ? clientContact.phone : '';
     }
