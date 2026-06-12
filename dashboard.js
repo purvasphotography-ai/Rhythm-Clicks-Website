@@ -3127,7 +3127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.updateGallery = async (id, clientName, notes, status) => {
+    window.updateGallery = async (id, clientName, notes, status, chosenTimestamp = Date.now()) => {
       try {
         const existing = galleries.find(g => g.id === id);
         const updateFields = {
@@ -3145,22 +3145,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateFields.selectionDate = null;
             updateFields.editedDate = null;
             updateFields.deliveredDate = null;
-            if (!existing.arrivedDate) updateFields.arrivedDate = Date.now();
+            if (!existing.arrivedDate) updateFields.arrivedDate = chosenTimestamp;
           } else if (status === 'selected') {
             updateFields.editedDate = null;
             updateFields.deliveredDate = null;
-            if (!existing.arrivedDate) updateFields.arrivedDate = Date.now();
-            if (!existing.selectionDate) updateFields.selectionDate = Date.now();
+            if (!existing.arrivedDate) updateFields.arrivedDate = chosenTimestamp;
+            if (!existing.selectionDate) updateFields.selectionDate = chosenTimestamp;
           } else if (status === 'edited') {
             updateFields.deliveredDate = null;
-            if (!existing.arrivedDate) updateFields.arrivedDate = Date.now();
-            if (!existing.selectionDate) updateFields.selectionDate = Date.now();
-            if (!existing.editedDate) updateFields.editedDate = Date.now();
+            if (!existing.arrivedDate) updateFields.arrivedDate = chosenTimestamp;
+            if (!existing.selectionDate) updateFields.selectionDate = chosenTimestamp;
+            if (!existing.editedDate) updateFields.editedDate = chosenTimestamp;
           } else if (status === 'delivered') {
-            if (!existing.arrivedDate) updateFields.arrivedDate = Date.now();
-            if (!existing.selectionDate) updateFields.selectionDate = Date.now();
-            if (!existing.editedDate) updateFields.editedDate = Date.now();
-            if (!existing.deliveredDate) updateFields.deliveredDate = Date.now();
+            if (!existing.arrivedDate) updateFields.arrivedDate = chosenTimestamp;
+            if (!existing.selectionDate) updateFields.selectionDate = chosenTimestamp;
+            if (!existing.editedDate) updateFields.editedDate = chosenTimestamp;
+            if (!existing.deliveredDate) updateFields.deliveredDate = chosenTimestamp;
           }
         }
         await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "galleries", id), updateFields);
@@ -3251,7 +3251,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.updateAlbum = async (id, clientName, notes, status, deliveryMethod = '') => {
+    window.updateAlbum = async (id, clientName, notes, status, deliveryMethod = '', chosenTimestamp = Date.now()) => {
       try {
         const existing = albums.find(a => a.id === id);
         const updateFields = {
@@ -3271,24 +3271,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateFields.arrivedDate = null;
             updateFields.deliveredDate = null;
             updateFields.deliveredMethod = '';
-            if (!existing.approvalDate) updateFields.approvalDate = Date.now();
+            if (!existing.approvalDate) updateFields.approvalDate = chosenTimestamp;
           } else if (status === 'printing') {
             updateFields.arrivedDate = null;
             updateFields.deliveredDate = null;
             updateFields.deliveredMethod = '';
-            if (!existing.approvalDate) updateFields.approvalDate = Date.now();
-            if (!existing.printingDate) updateFields.printingDate = Date.now();
+            if (!existing.approvalDate) updateFields.approvalDate = chosenTimestamp;
+            if (!existing.printingDate) updateFields.printingDate = chosenTimestamp;
           } else if (status === 'arrived') {
             updateFields.deliveredDate = null;
             updateFields.deliveredMethod = '';
-            if (!existing.approvalDate) updateFields.approvalDate = Date.now();
-            if (!existing.printingDate) updateFields.printingDate = Date.now();
-            if (!existing.arrivedDate) updateFields.arrivedDate = Date.now();
+            if (!existing.approvalDate) updateFields.approvalDate = chosenTimestamp;
+            if (!existing.printingDate) updateFields.printingDate = chosenTimestamp;
+            if (!existing.arrivedDate) updateFields.arrivedDate = chosenTimestamp;
           } else if (status === 'delivered') {
-            if (!existing.approvalDate) updateFields.approvalDate = Date.now();
-            if (!existing.printingDate) updateFields.printingDate = Date.now();
-            if (!existing.arrivedDate) updateFields.arrivedDate = Date.now();
-            if (!existing.deliveredDate) updateFields.deliveredDate = Date.now();
+            if (!existing.approvalDate) updateFields.approvalDate = chosenTimestamp;
+            if (!existing.printingDate) updateFields.printingDate = chosenTimestamp;
+            if (!existing.arrivedDate) updateFields.arrivedDate = chosenTimestamp;
+            if (!existing.deliveredDate) updateFields.deliveredDate = chosenTimestamp;
             updateFields.deliveredMethod = deliveryMethod || 'In-Hand';
           }
         }
@@ -4175,7 +4175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.updateGallery = (id, clientName, notes, status) => {
+    window.updateGallery = (id, clientName, notes, status, chosenTimestamp = Date.now()) => {
       const gIndex = galleries.findIndex(g => g.id === id);
       if (gIndex === -1) return;
 
@@ -4193,22 +4193,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         existing.selectionDate = null;
         existing.editedDate = null;
         existing.deliveredDate = null;
-        if (!existing.arrivedDate) existing.arrivedDate = Date.now();
+        if (!existing.arrivedDate) existing.arrivedDate = chosenTimestamp;
       } else if (status === 'selected') {
         existing.editedDate = null;
         existing.deliveredDate = null;
-        if (!existing.arrivedDate) existing.arrivedDate = Date.now();
-        if (!existing.selectionDate) existing.selectionDate = Date.now();
+        if (!existing.arrivedDate) existing.arrivedDate = chosenTimestamp;
+        if (!existing.selectionDate) existing.selectionDate = chosenTimestamp;
       } else if (status === 'edited') {
         existing.deliveredDate = null;
-        if (!existing.arrivedDate) existing.arrivedDate = Date.now();
-        if (!existing.selectionDate) existing.selectionDate = Date.now();
-        if (!existing.editedDate) existing.editedDate = Date.now();
+        if (!existing.arrivedDate) existing.arrivedDate = chosenTimestamp;
+        if (!existing.selectionDate) existing.selectionDate = chosenTimestamp;
+        if (!existing.editedDate) existing.editedDate = chosenTimestamp;
       } else if (status === 'delivered') {
-        if (!existing.arrivedDate) existing.arrivedDate = Date.now();
-        if (!existing.selectionDate) existing.selectionDate = Date.now();
-        if (!existing.editedDate) existing.editedDate = Date.now();
-        if (!existing.deliveredDate) existing.deliveredDate = Date.now();
+        if (!existing.arrivedDate) existing.arrivedDate = chosenTimestamp;
+        if (!existing.selectionDate) existing.selectionDate = chosenTimestamp;
+        if (!existing.editedDate) existing.editedDate = chosenTimestamp;
+        if (!existing.deliveredDate) existing.deliveredDate = chosenTimestamp;
       }
 
       saveLocalGalleries();
@@ -4718,7 +4718,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast(`Moved to <strong>${nextStatus}</strong>`, '➡️');
     };
 
-    window.updateAlbum = (id, clientName, notes, status, deliveryMethod = '') => {
+    window.updateAlbum = (id, clientName, notes, status, deliveryMethod = '', chosenTimestamp = Date.now()) => {
       const aIndex = albums.findIndex(a => a.id === id);
       if (aIndex === -1) return;
 
@@ -4738,24 +4738,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         existing.arrivedDate = null;
         existing.deliveredDate = null;
         existing.deliveredMethod = '';
-        if (!existing.approvalDate) existing.approvalDate = Date.now();
+        if (!existing.approvalDate) existing.approvalDate = chosenTimestamp;
       } else if (status === 'printing') {
         existing.arrivedDate = null;
         existing.deliveredDate = null;
         existing.deliveredMethod = '';
-        if (!existing.approvalDate) existing.approvalDate = Date.now();
-        if (!existing.printingDate) existing.printingDate = Date.now();
+        if (!existing.approvalDate) existing.approvalDate = chosenTimestamp;
+        if (!existing.printingDate) existing.printingDate = chosenTimestamp;
       } else if (status === 'arrived') {
         existing.deliveredDate = null;
         existing.deliveredMethod = '';
-        if (!existing.approvalDate) existing.approvalDate = Date.now();
-        if (!existing.printingDate) existing.printingDate = Date.now();
-        if (!existing.arrivedDate) existing.arrivedDate = Date.now();
+        if (!existing.approvalDate) existing.approvalDate = chosenTimestamp;
+        if (!existing.printingDate) existing.printingDate = chosenTimestamp;
+        if (!existing.arrivedDate) existing.arrivedDate = chosenTimestamp;
       } else if (status === 'delivered') {
-        if (!existing.approvalDate) existing.approvalDate = Date.now();
-        if (!existing.printingDate) existing.printingDate = Date.now();
-        if (!existing.arrivedDate) existing.arrivedDate = Date.now();
-        if (!existing.deliveredDate) existing.deliveredDate = Date.now();
+        if (!existing.approvalDate) existing.approvalDate = chosenTimestamp;
+        if (!existing.printingDate) existing.printingDate = chosenTimestamp;
+        if (!existing.arrivedDate) existing.arrivedDate = chosenTimestamp;
+        if (!existing.deliveredDate) existing.deliveredDate = chosenTimestamp;
         existing.deliveredMethod = deliveryMethod || 'In-Hand';
       }
 
@@ -5092,7 +5092,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       const status = editGalleryStatusSelect.value;
       if (!name.trim()) return;
 
-      await window.updateGallery(id, name, notes, status);
+      const gallery = galleries.find(g => g.id === id);
+      let chosenTimestamp = Date.now();
+      if (gallery && gallery.status !== status) {
+        const promptDate = await window.promptTransitionDate();
+        if (promptDate === null) return; // User cancelled
+        chosenTimestamp = promptDate;
+      }
+
+      await window.updateGallery(id, name, notes, status, chosenTimestamp);
       closeEditGallery();
     });
   }
@@ -5169,7 +5177,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       const deliveryMethod = editAlbumDeliveryMethod.value;
       if (!name.trim()) return;
 
-      await window.updateAlbum(id, name, notes, status, deliveryMethod);
+      const album = albums.find(a => a.id === id);
+      let chosenTimestamp = Date.now();
+      if (album && album.status !== status) {
+        const promptDate = await window.promptTransitionDate();
+        if (promptDate === null) return; // User cancelled
+        chosenTimestamp = promptDate;
+      }
+
+      await window.updateAlbum(id, name, notes, status, deliveryMethod, chosenTimestamp);
       closeEditAlbum();
     });
   }
