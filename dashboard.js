@@ -1815,28 +1815,65 @@ document.addEventListener('DOMContentLoaded', async () => {
         throw new Error('Missing date or time in booking/shoot details.');
       }
 
-      // Compute end time timezone-independently (add 2 hours)
+      // Determine duration based on package/shootType
+      let durationMinutes = 120; // Default: 2 hours (120 minutes)
+      let pkg = booking.package || '';
+      const normalizedType = (booking.shootType || '').toLowerCase().trim();
+
+      // If it's a shoot (package might be "X photos"), find parent booking to get package details
+      if (pkg.toLowerCase().includes('photos') && typeof bookings !== 'undefined') {
+        const parentBooking = bookings.find(b => 
+          b.clientName && b.clientName.toLowerCase().trim() === booking.clientName.toLowerCase().trim() && b.date === booking.date
+        );
+        if (parentBooking && parentBooking.package) {
+          pkg = parentBooking.package;
+        }
+      }
+
+      if (normalizedType === 'maternity' || normalizedType === 'newborn' || normalizedType === 'kids') {
+        const pkgClean = pkg.replace(/[\s,₹]/g, '');
+        if (pkgClean.includes('12500')) {
+          durationMinutes = 240;
+        } else if (pkgClean.includes('9500')) {
+          durationMinutes = 180;
+        } else if (pkgClean.includes('10500') || pkgClean.includes('6000')) {
+          durationMinutes = 120;
+        } else if (pkgClean.includes('8000')) {
+          durationMinutes = 90;
+        } else if (pkgClean.includes('5500')) {
+          durationMinutes = 45;
+        }
+      }
+
+      // Compute end time timezone-independently based on duration minutes
       const [hourStr, minStr] = booking.time.split(':');
       let hr = parseInt(hourStr);
       let min = parseInt(minStr);
       if (isNaN(hr) || isNaN(min)) {
         throw new Error(`Invalid time format: ${booking.time}`);
       }
-      hr += 2;
+
+      min += durationMinutes;
+      if (min >= 60) {
+        hr += Math.floor(min / 60);
+        min = min % 60;
+      }
+
       let nextDate = booking.date;
       if (hr >= 24) {
-        hr -= 24;
-        // Parse date as local timezone beginning of day to avoid overflow timezone shifts
+        const daysToAdd = Math.floor(hr / 24);
+        hr = hr % 24;
         const d = new Date(booking.date + 'T00:00:00');
         if (isNaN(d.getTime())) {
           throw new Error(`Invalid date format: ${booking.date}`);
         }
-        d.setDate(d.getDate() + 1);
+        d.setDate(d.getDate() + daysToAdd);
         const y = d.getFullYear();
         const m = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
         nextDate = `${y}-${m}-${day}`;
       }
+
       const startISO = `${booking.date}T${booking.time}:00`;
       const endISO = `${nextDate}T${String(hr).padStart(2, '0')}:${String(min).padStart(2, '0')}:00`;
 

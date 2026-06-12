@@ -356,7 +356,15 @@
             <!-- Package -->
             <div class="form-group">
               <label for="booking-package" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Package *</label>
-              <input type="text" id="booking-package" placeholder="e.g., Premium Candid + Video" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+              <input type="text" id="booking-package" list="booking-packages-list" placeholder="e.g., Premium Candid + Video" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+              <datalist id="booking-packages-list">
+                <option value="5500">5500 (45 mins)</option>
+                <option value="6000">6000 (120 mins)</option>
+                <option value="8000">8000 (90 mins)</option>
+                <option value="9500">9500 (180 mins)</option>
+                <option value="10500">10500 (120 mins)</option>
+                <option value="12500">12500 (240 mins)</option>
+              </datalist>
             </div>
           </div>
 
@@ -489,7 +497,15 @@
             <!-- Package -->
             <div class="form-group">
               <label for="edit-booking-package" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Package *</label>
-              <input type="text" id="edit-booking-package" placeholder="e.g., Premium Candid + Video" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+              <input type="text" id="edit-booking-package" list="edit-booking-packages-list" placeholder="e.g., Premium Candid + Video" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5);">
+              <datalist id="edit-booking-packages-list">
+                <option value="5500">5500 (45 mins)</option>
+                <option value="6000">6000 (120 mins)</option>
+                <option value="8000">8000 (90 mins)</option>
+                <option value="9500">9500 (180 mins)</option>
+                <option value="10500">10500 (120 mins)</option>
+                <option value="12500">12500 (240 mins)</option>
+              </datalist>
             </div>
           </div>
 
