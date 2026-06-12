@@ -1649,11 +1649,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         callback: (tokenResponse) => {
           if (tokenResponse.error) {
             console.error('Google OAuth error:', tokenResponse.error);
-            showToast('Google login failed.', '⚠️');
+            localStorage.removeItem('gcal_access_token');
+            localStorage.removeItem('google_connected');
+            gcalAccessToken = null;
+            const loginCard = document.getElementById('google-login-card');
+            const calContainer = document.getElementById('google-calendar-container');
+            if (loginCard) loginCard.style.display = 'flex';
+            if (calContainer) calContainer.style.display = 'none';
+            updateDriveUIStatus('Disconnected', 'Connection lost. Please reconnect.');
             return;
           }
           gcalAccessToken = tokenResponse.access_token;
           localStorage.setItem('gcal_access_token', gcalAccessToken);
+          localStorage.setItem('google_connected', 'true');
           
           document.getElementById('google-login-card').style.display = 'none';
           document.getElementById('google-calendar-container').style.display = 'block';
@@ -1674,6 +1682,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         fetchGoogleCalendarEvents();
         checkGoogleDriveBackupStatus();
         autoRestoreFromGoogleDrive();
+      } else if (localStorage.getItem('google_connected') === 'true') {
+        tokenClient.requestAccessToken({ prompt: '' });
       }
     }
   }, 500);
@@ -1711,13 +1721,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       if (response.status === 401) {
-        localStorage.removeItem('gcal_access_token');
-        gcalAccessToken = null;
-        const loginCard = document.getElementById('google-login-card');
-        const calContainer = document.getElementById('google-calendar-container');
-        if (loginCard) loginCard.style.display = 'flex';
-        if (calContainer) calContainer.style.display = 'none';
-        showToast('Google Calendar session expired. Please connect again.', '⚠️');
+        handleGoogleTokenExpiry();
         return;
       }
 
@@ -1900,13 +1904,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       if (response.status === 401) {
-        localStorage.removeItem('gcal_access_token');
-        gcalAccessToken = null;
-        const loginCard = document.getElementById('google-login-card');
-        const calContainer = document.getElementById('google-calendar-container');
-        if (loginCard) loginCard.style.display = 'flex';
-        if (calContainer) calContainer.style.display = 'none';
-        showToast('Google Calendar session expired. Please connect again.', '⚠️');
+        handleGoogleTokenExpiry();
         throw new Error('Google Calendar session expired. Please connect again.');
       }
 
@@ -2114,7 +2112,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   const handleGoogleTokenExpiry = () => {
+    if (tokenClient && localStorage.getItem('google_connected') === 'true') {
+      console.log('Google token expired, attempting silent renewal...');
+      tokenClient.requestAccessToken({ prompt: '' });
+      return;
+    }
     localStorage.removeItem('gcal_access_token');
+    localStorage.removeItem('google_connected');
     gcalAccessToken = null;
     const loginCard = document.getElementById('google-login-card');
     const calContainer = document.getElementById('google-calendar-container');
@@ -2420,6 +2424,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
       localStorage.removeItem('gcal_access_token');
+      localStorage.removeItem('google_connected');
       gcalAccessToken = null;
       
       const loginCard = document.getElementById('google-login-card');
