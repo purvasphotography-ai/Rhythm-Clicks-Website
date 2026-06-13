@@ -256,7 +256,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Helper to prevent HTML injection XSS
   const escapeHtml = (text) => {
-    return text
+    if (text === undefined || text === null) return '';
+    return String(text)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
@@ -801,6 +802,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       });
     });
+    renderSearchPipeline();
   };
 
   function renderSearchPipeline() {
@@ -997,15 +999,15 @@ document.addEventListener('DOMContentLoaded', async () => {
               ${galleryDateStr ? `<div class="node-date">${escapeHtml(galleryDateStr)}</div>` : ''}
               ${hasGallery ? `
                 <div class="mini-sub-pipeline">
-                  <span class="sub-step ${galleryProgress >= 1 ? 'done' : ''}" title="Pending Selection">Pend</span>
+                  <span class="sub-step ${galleryProgress >= 1 ? 'done' : ''}" title="Pending Selection" style="cursor: pointer;" data-type="gallery" data-id="${gal.id}" data-status="pending">Pend</span>
                   <span class="sub-step-arrow">→</span>
-                  <span class="sub-step ${galleryProgress >= 2 ? 'done' : ''}" title="Arrived">Arr</span>
+                  <span class="sub-step ${galleryProgress >= 2 ? 'done' : ''}" title="Arrived" style="cursor: pointer;" data-type="gallery" data-id="${gal.id}" data-status="arrived">Arr</span>
                   <span class="sub-step-arrow">→</span>
-                  <span class="sub-step ${galleryProgress >= 3 ? 'done' : ''}" title="Selected on PC">Sel</span>
+                  <span class="sub-step ${galleryProgress >= 3 ? 'done' : ''}" title="Selected on PC" style="cursor: pointer;" data-type="gallery" data-id="${gal.id}" data-status="selected">Sel</span>
                   <span class="sub-step-arrow">→</span>
-                  <span class="sub-step ${galleryProgress >= 4 ? 'done' : ''}" title="Edited by Priya">Edit</span>
+                  <span class="sub-step ${galleryProgress >= 4 ? 'done' : ''}" title="Edited by Priya" style="cursor: pointer;" data-type="gallery" data-id="${gal.id}" data-status="edited">Edit</span>
                   <span class="sub-step-arrow">→</span>
-                  <span class="sub-step ${galleryProgress >= 5 ? 'done' : ''}" title="Delivered">Del</span>
+                  <span class="sub-step ${galleryProgress >= 5 ? 'done' : ''}" title="Delivered" style="cursor: pointer;" data-type="gallery" data-id="${gal.id}" data-status="delivered">Del</span>
                 </div>
               ` : ''}
             </div>
@@ -1022,15 +1024,15 @@ document.addEventListener('DOMContentLoaded', async () => {
               ${albumDateStr ? `<div class="node-date">${escapeHtml(albumDateStr)}</div>` : ''}
               ${hasAlbum ? `
                 <div class="mini-sub-pipeline">
-                  <span class="sub-step ${albumProgress >= 1 ? 'done' : ''}" title="Pending Approval">Pend</span>
+                  <span class="sub-step ${albumProgress >= 1 ? 'done' : ''}" title="Pending Approval" style="cursor: pointer;" data-type="album" data-id="${alb.id}" data-status="pending">Pend</span>
                   <span class="sub-step-arrow">→</span>
-                  <span class="sub-step ${albumProgress >= 2 ? 'done' : ''}" title="Approved">Appr</span>
+                  <span class="sub-step ${albumProgress >= 2 ? 'done' : ''}" title="Approved" style="cursor: pointer;" data-type="album" data-id="${alb.id}" data-status="approval">Appr</span>
                   <span class="sub-step-arrow">→</span>
-                  <span class="sub-step ${albumProgress >= 3 ? 'done' : ''}" title="Printing">Prnt</span>
+                  <span class="sub-step ${albumProgress >= 3 ? 'done' : ''}" title="Printing" style="cursor: pointer;" data-type="album" data-id="${alb.id}" data-status="printing">Prnt</span>
                   <span class="sub-step-arrow">→</span>
-                  <span class="sub-step ${albumProgress >= 4 ? 'done' : ''}" title="Arrived">Arr</span>
+                  <span class="sub-step ${albumProgress >= 4 ? 'done' : ''}" title="Arrived" style="cursor: pointer;" data-type="album" data-id="${alb.id}" data-status="arrived">Arr</span>
                   <span class="sub-step-arrow">→</span>
-                  <span class="sub-step ${albumProgress >= 5 ? 'done' : ''}" title="Delivered">Del</span>
+                  <span class="sub-step ${albumProgress >= 5 ? 'done' : ''}" title="Delivered" style="cursor: pointer;" data-type="album" data-id="${alb.id}" data-status="delivered">Del</span>
                 </div>
               ` : ''}
             </div>
@@ -1041,6 +1043,46 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     html += `</div>`;
     container.innerHTML = html;
+
+    // Attach click listeners to pipeline sub-steps
+    container.querySelectorAll('.mini-sub-pipeline .sub-step').forEach(span => {
+      span.addEventListener('click', async (e) => {
+        const type = span.getAttribute('data-type');
+        const id = span.getAttribute('data-id');
+        const status = span.getAttribute('data-status');
+        
+        if (type === 'gallery') {
+          const gal = galleries.find(g => g.id === id);
+          if (gal) {
+            try {
+              span.style.opacity = '0.5';
+              await window.updateGallery(id, gal.clientName, gal.notes || '', status);
+              // In offline mode we must call renderSearchPipeline() manually
+              if (typeof firebaseFirestore === 'undefined' || !auth.currentUser) {
+                renderSearchPipeline();
+              }
+            } catch (err) {
+              console.error('Failed to update gallery status from pipeline:', err);
+              showToast('Error updating gallery: ' + err.message, '⚠️');
+            }
+          }
+        } else if (type === 'album') {
+          const alb = albums.find(a => a.id === id);
+          if (alb) {
+            try {
+              span.style.opacity = '0.5';
+              await window.updateAlbum(id, alb.clientName, alb.notes || '', status, alb.deliveredMethod || '');
+              if (typeof firebaseFirestore === 'undefined' || !auth.currentUser) {
+                renderSearchPipeline();
+              }
+            } catch (err) {
+              console.error('Failed to update album status from pipeline:', err);
+              showToast('Error updating album: ' + err.message, '⚠️');
+            }
+          }
+        }
+      });
+    });
 
     // Attach clear search event
     const clearBtn = document.getElementById('clear-pipeline-search');
@@ -3670,15 +3712,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Auto Sync with Google Calendar if connected
         if (gcalAccessToken) {
-          let shootType = "Completed";
+          let targetBooking = null;
           if (existing) {
             if (existing.bookingId) {
-              const booking = bookings.find(b => b.id === existing.bookingId);
-              if (booking && booking.shootType) shootType = booking.shootType;
+              targetBooking = bookings.find(b => b.id === existing.bookingId);
             } else {
-              const booking = bookings.find(b => b.clientName && b.clientName.toLowerCase().trim() === clientName.toLowerCase().trim() && b.date === date);
-              if (booking && booking.shootType) shootType = booking.shootType;
+              targetBooking = bookings.find(b => b.clientName && b.clientName.toLowerCase().trim() === clientName.toLowerCase().trim() && b.date === date);
             }
+          }
+
+          let shootType = "Completed";
+          if (targetBooking && targetBooking.shootType) {
+            shootType = targetBooking.shootType;
           }
 
           const shootObj = {
@@ -5952,11 +5997,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       pendingShootsGrid.innerHTML = filteredPending.map(b => {
         const dateObj = new Date(b.date);
-        const formattedDate = dateObj.toLocaleDateString('en-IN', {
+        const isValidDate = dateObj instanceof Date && !isNaN(dateObj.getTime());
+        const formattedDate = isValidDate ? dateObj.toLocaleDateString('en-IN', {
           day: 'numeric',
           month: 'short',
           year: 'numeric'
-        });
+        }) : 'Invalid Date';
         const [hours, minutes] = (b.time || '10:00').split(':');
         const timeHrs = parseInt(hours);
         const ampm = timeHrs >= 12 ? 'PM' : 'AM';
@@ -6059,11 +6105,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       shootsGrid.innerHTML = filteredCompleted.map(s => {
         const dateObj = new Date(s.date);
-        const formattedDate = dateObj.toLocaleDateString('en-IN', {
+        const isValidDate = dateObj instanceof Date && !isNaN(dateObj.getTime());
+        const formattedDate = isValidDate ? dateObj.toLocaleDateString('en-IN', {
           day: 'numeric',
           month: 'short',
           year: 'numeric'
-        });
+        }) : 'Invalid Date';
         const [hours, minutes] = (s.time || '10:00').split(':');
         const timeHrs = parseInt(hours);
         const ampm = timeHrs >= 12 ? 'PM' : 'AM';
