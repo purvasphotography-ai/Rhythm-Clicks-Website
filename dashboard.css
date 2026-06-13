@@ -2083,3 +2083,108 @@ option, datalist option {
   background: rgba(255, 255, 255, 0.85);
   transform: translateX(2px);
 }
+
+/* Spreadsheet Calendar Table Styles */
+.spreadsheet-table {
+  border-collapse: collapse;
+  width: 100%;
+  background: white;
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.spreadsheet-table th, 
+.spreadsheet-table td {
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  padding: 0.65rem 1rem;
+}
+
+.spreadsheet-table th {
+  background: rgba(0, 0, 0, 0.03);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+}
+
+.spreadsheet-table tr.date-header-row {
+  border-top: 2px solid var(--text-primary) !important;
+  border-bottom: 2px solid var(--text-primary) !important;
+  background-color: rgba(0, 0, 0, 0.02) !important;
+  font-weight: bold;
+}
+
+.spreadsheet-table tr.date-header-row td {
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.spreadsheet-table tr.booking-row {
+  background-color: #ffffff;
+}
+
+.spreadsheet-table tr.booking-row:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.spreadsheet-table tr.completed-shoot-row {
+  background-color: #fce8e6 !important; /* Soft pink/red */
+}
+
+.spreadsheet-table tr.completed-shoot-row:hover {
+  background-color: #fadad6 !important;
+}
+
+.spreadsheet-table tr.available-row {
+  background-color: #e6f4ea !important; /* Soft green */
+}
+
+.spreadsheet-table tr.available-row:hover {
+  background-color: #d2ebd9 !important;
+}
+
+.spreadsheet-table tr.gcal-row {
+  background-color: #e8f0fe !important; /* Soft Google Blue */
+}
+
+.spreadsheet-table tr.gcal-row:hover {
+  background-color: #d2e3fc !important;
+}
+
+.btn-book-sheet-slot,
+.btn-log-pending-shoot-sheet,
+.btn-edit-sheet-booking,
+.btn-edit-sheet-shoot {
+  transition: all 0.2s ease;
+}
+
+.btn-book-sheet-slot:hover,
+.btn-log-pending-shoot-sheet:hover {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+}
+
+.btn-edit-sheet-booking:hover,
+.btn-edit-sheet-shoot:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  transform: translateY(-1px);
+}
+
+/* Calendar View Toggle Button Styles */
+.toggle-view-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.toggle-view-btn.active {
+  background: var(--text-primary) !important;
+  color: white !important;
+  box-shadow: var(--shadow-sm);
+}
+

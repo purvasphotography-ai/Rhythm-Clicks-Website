@@ -1293,19 +1293,28 @@
 
       <!-- Section 5: Google Services Integration (Calendar & Backup) -->
       <div id="calendar-section" class="tab-content">
-        <div class="gallery-tracker-header">
+        <div class="gallery-tracker-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
           <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Visual Shoot Calendar & Slots</h2>
+          
+          <!-- Month/Year Navigation (Shared) -->
+          <div class="calendar-month-navigation" style="display: flex; align-items: center; gap: 1rem; background: rgba(255,255,255,0.5); padding: 4px 12px; border-radius: var(--border-radius-md); border: 1px solid rgba(0,0,0,0.05); box-shadow: var(--shadow-sm);">
+            <button id="calendar-prev-month" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; border-radius: 50%; font-size: 0.85rem; border: none; background: transparent; cursor: pointer; color: var(--text-primary); font-weight: bold;">&lt;</button>
+            <span id="calendar-month-year" style="font-family: var(--font-serif); font-size: 1.1rem; font-weight: 600; color: var(--text-primary); min-width: 120px; text-align: center; display: inline-block;">June 2026</span>
+            <button id="calendar-next-month" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; border-radius: 50%; font-size: 0.85rem; border: none; background: transparent; cursor: pointer; color: var(--text-primary); font-weight: bold;">&gt;</button>
+          </div>
+
+          <!-- View Toggle Buttons -->
+          <div class="calendar-view-toggle" style="display: flex; background: rgba(0,0,0,0.04); padding: 4px; border-radius: var(--border-radius-md); border: 1px solid rgba(0,0,0,0.05);">
+            <button id="btn-calendar-grid-view" class="toggle-view-btn active" style="padding: 0.4rem 1rem; font-size: 0.8rem; border-radius: 6px;">📅 Grid View</button>
+            <button id="btn-calendar-sheet-view" class="toggle-view-btn" style="padding: 0.4rem 1rem; font-size: 0.8rem; border-radius: 6px;">📊 Sheet View</button>
+          </div>
         </div>
         
         <!-- Interactive Visual Slots Calendar -->
-        <div class="visual-calendar-wrapper" style="display: flex; gap: 1.5rem; margin-top: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <div class="visual-calendar-wrapper" id="calendar-grid-view-container" style="display: flex; gap: 1.5rem; margin-top: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
           <!-- Left Part: Calendar Grid -->
           <div class="visual-calendar-grid-container" style="flex: 1.4; min-width: 360px; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); padding: 1.5rem; box-shadow: var(--shadow-sm);">
-            <div class="visual-calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-              <button id="calendar-prev-month" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; border-radius: 50%; font-size: 0.9rem; line-height: 1; border: 1px solid rgba(0,0,0,0.08); background: rgba(255,255,255,0.5); cursor: pointer; color: var(--text-primary);">&lt;</button>
-              <h3 id="calendar-month-year" style="margin: 0; font-family: var(--font-serif); font-size: 1.25rem; color: var(--text-primary);">June 2026</h3>
-              <button id="calendar-next-month" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; border-radius: 50%; font-size: 0.9rem; line-height: 1; border: 1px solid rgba(0,0,0,0.08); background: rgba(255,255,255,0.5); cursor: pointer; color: var(--text-primary);">&gt;</button>
-            </div>
+            <div style="margin-top: 0.5rem;"></div>
             <div class="visual-calendar-weekdays" style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 600; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.75rem; opacity: 0.8;">
               <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
             </div>
@@ -1334,6 +1343,42 @@
             <div id="selected-day-actions">
               <!-- Action button (e.g. Add Booking) pre-filled -->
             </div>
+          </div>
+        </div>
+
+        <!-- Tabular Sheet View -->
+        <div id="calendar-sheet-view-container" style="display: none; margin-top: 1.5rem; margin-bottom: 2rem;">
+          <!-- Controls: Filter available days only -->
+          <div class="sheet-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              <label for="sheet-day-filter" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Filter Days:</label>
+              <select id="sheet-day-filter" style="padding: 0.5rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.7); font-size: 0.85rem; font-family: var(--font-sans); cursor: pointer;">
+                <option value="all">Show All Days</option>
+                <option value="available">Show Empty Days Only</option>
+                <option value="booked">Show Booked Days Only</option>
+              </select>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;">
+              Total Days Shown: <span id="sheet-total-days-count" style="font-weight: 700; color: var(--text-primary);">0</span>
+            </div>
+          </div>
+          
+          <div class="grid-card" style="padding: 1.5rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); overflow-x: auto; box-shadow: var(--shadow-sm);">
+            <table class="spreadsheet-table" style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; min-width: 700px; border: 1px solid rgba(0,0,0,0.15);">
+              <thead>
+                <tr style="background: rgba(0,0,0,0.03); color: var(--text-secondary); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; border-bottom: 1.5px solid rgba(0,0,0,0.15);">
+                  <th style="padding: 0.75rem 1rem; border-right: 1px solid rgba(0,0,0,0.15); width: 40%;">Client / Event Details</th>
+                  <th style="padding: 0.75rem 1rem; border-right: 1px solid rgba(0,0,0,0.15); text-align: center; width: 15%;">Date</th>
+                  <th style="padding: 0.75rem 1rem; border-right: 1px solid rgba(0,0,0,0.15); text-align: center; width: 12%;">Day</th>
+                  <th style="padding: 0.75rem 1rem; border-right: 1px solid rgba(0,0,0,0.15); text-align: center; width: 13%;">Time</th>
+                  <th style="padding: 0.75rem 1rem; border-right: 1px solid rgba(0,0,0,0.15); width: 12%;">Package</th>
+                  <th style="padding: 0.75rem 1rem; text-align: center; width: 8%;">Status / Actions</th>
+                </tr>
+              </thead>
+              <tbody id="calendar-sheet-body">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

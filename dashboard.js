@@ -6871,6 +6871,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupAutocomplete(editAlbumClientName, editAlbumClientNameAutocomplete);
 
   // --- Visual Calendar Core Functions ---
+  const formatTime12H = (timeStr) => {
+    if (!timeStr || timeStr === 'All Day' || timeStr === 'N/A') return timeStr;
+    const parts = timeStr.split(':');
+    if (parts.length < 2) return timeStr;
+    const hrs = parseInt(parts[0]);
+    const mins = parts[1];
+    const ampm = hrs >= 12 ? 'PM' : 'AM';
+    return `${hrs % 12 || 12}:${mins} ${ampm}`;
+  };
+
   const getGcalTimeDisplay = (event) => {
     if (!event.start.dateTime) return 'All Day';
     const start = new Date(event.start.dateTime);
@@ -7083,7 +7093,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               <div>
                 <strong style="color: var(--text-primary); font-size: 0.95rem; text-transform: capitalize; line-height: 1.3;">${escapeHtml(clientName)}</strong>
                 <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px;">
-                  <span>⏰ Time: <strong>${time}</strong></span>
+                  <span>⏰ Time: <strong>${formatTime12H(time)}</strong></span>
                   <span>📦 Package: <strong>${escapeHtml(packageVal)}</strong></span>
                 </div>
               </div>
@@ -7289,6 +7299,270 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize the details side-panel for active date
     renderSelectedDayDetails(calendarSelectedDate, selectedDayBookings, selectedDayShoots, selectedDayGcalEvents);
+
+    // Render sheet view
+    renderSheetCalendar();
+  };
+
+  // --- Spreadsheet Sheet Calendar View Functions ---
+  const formatSheetDate = (day, month, year) => {
+    const d = String(day).padStart(2, '0');
+    const m = String(month + 1).padStart(2, '0');
+    return `${d}/${m}/${year}`;
+  };
+
+  const getWeekdayName = (day, month, year) => {
+    const dateObj = new Date(year, month, day);
+    return dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+  };
+
+  const renderSheetCalendar = () => {
+    const sheetBody = document.getElementById('calendar-sheet-body');
+    const totalDaysCount = document.getElementById('sheet-total-days-count');
+    const dayFilter = document.getElementById('sheet-day-filter');
+    if (!sheetBody) return;
+
+    sheetBody.innerHTML = '';
+
+    const filterVal = dayFilter ? dayFilter.value : 'all'; // 'all', 'available', 'booked'
+    
+    // Render for the currently selected calendarYear and calendarMonth
+    const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+    let renderedDaysCount = 0;
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      const cellDateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      
+      const cellBookings = bookings.filter(b => b.date === cellDateStr);
+      const cellShoots = shoots.filter(s => s.date === cellDateStr);
+      const cellGcalEvents = gcalEvents.filter(event => {
+        const eventDateStr = (event.start.dateTime || event.start.date || '').split('T')[0];
+        return eventDateStr === cellDateStr;
+      });
+
+      const hasEvents = cellBookings.length > 0 || cellShoots.length > 0 || cellGcalEvents.length > 0;
+      
+      // Check filters
+      if (filterVal === 'available' && hasEvents) continue;
+      if (filterVal === 'booked' && !hasEvents) continue;
+
+      renderedDaysCount++;
+
+      const dateDisplay = formatSheetDate(day, calendarMonth, calendarYear);
+      const weekdayDisplay = getWeekdayName(day, calendarMonth, calendarYear);
+
+      // Render Date Header Row
+      const headerRow = document.createElement('tr');
+      headerRow.className = 'date-header-row';
+      headerRow.innerHTML = `
+        <td></td>
+        <td style="text-align: center; font-size: 0.9rem; font-weight: 700; text-decoration: underline; color: var(--text-primary);">${dateDisplay}</td>
+        <td style="text-align: center; font-size: 0.9rem; font-weight: 700; color: var(--text-primary);">${weekdayDisplay}</td>
+        <td></td>
+        <td></td>
+        <td></td>
+      `;
+      sheetBody.appendChild(headerRow);
+
+      if (hasEvents) {
+        // Render completed shoots
+        cellShoots.forEach(shoot => {
+          const shootRow = document.createElement('tr');
+          shootRow.className = 'completed-shoot-row';
+          
+          const formattedTime = formatTime12H(shoot.time || '10:00');
+          const matchedBooking = bookings.find(b => b.id === shoot.bookingId);
+          const pkg = matchedBooking ? matchedBooking.package : 'Completed Shoot';
+
+          shootRow.innerHTML = `
+            <td style="font-weight: 600; text-transform: capitalize; color: var(--text-primary);">
+              ${escapeHtml(shoot.clientName)} 
+              <span class="booking-shoot-badge" style="background: rgba(46,125,50,0.1); color: #2e7d32; margin-left: 8px;">Completed</span>
+            </td>
+            <td></td>
+            <td></td>
+            <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
+            <td style="color: var(--text-secondary);">${escapeHtml(pkg)}</td>
+            <td style="text-align: center;">
+              <button class="btn btn-secondary btn-edit-sheet-shoot" data-id="${shoot.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
+            </td>
+          `;
+          sheetBody.appendChild(shootRow);
+        });
+
+        // Render bookings (that don't have shoots completed yet)
+        const completedBookingIds = cellShoots.map(s => s.bookingId).filter(id => id);
+        const activeBookings = cellBookings.filter(b => !completedBookingIds.includes(b.id));
+        activeBookings.forEach(booking => {
+          const bookingRow = document.createElement('tr');
+          bookingRow.className = 'booking-row';
+
+          const formattedTime = formatTime12H(booking.time || '10:00');
+
+          bookingRow.innerHTML = `
+            <td style="font-weight: 600; text-transform: capitalize; color: var(--text-primary);">
+              ${escapeHtml(booking.clientName)} 
+              <span class="booking-shoot-badge" style="background: rgba(168,138,58,0.1); color: #a88a3a; margin-left: 8px;">Booked</span>
+            </td>
+            <td></td>
+            <td></td>
+            <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
+            <td style="color: var(--text-secondary);">${escapeHtml(booking.package)}</td>
+            <td style="text-align: center; display: flex; gap: 4px; justify-content: center; align-items: center; padding: 0.65rem 0.5rem; border: none !important;">
+              <button class="btn btn-primary btn-log-pending-shoot-sheet" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; white-space: nowrap; font-weight: bold;">Log Shoot</button>
+              <button class="btn btn-secondary btn-edit-sheet-booking" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
+            </td>
+          `;
+          sheetBody.appendChild(bookingRow);
+        });
+
+        // Render Google Calendar events
+        const syncedEventIds = new Set();
+        cellBookings.forEach(b => { if (b.gCalEventId) syncedEventIds.add(b.gCalEventId); });
+        cellShoots.forEach(s => { if (s.gCalEventId) syncedEventIds.add(s.gCalEventId); });
+
+        const filteredGcal = cellGcalEvents.filter(e => !syncedEventIds.has(e.id));
+        filteredGcal.forEach(event => {
+          const gcalRow = document.createElement('tr');
+          gcalRow.className = 'gcal-row';
+          const formattedTime = getGcalTimeDisplay(event);
+
+          gcalRow.innerHTML = `
+            <td style="font-weight: 600; color: var(--text-primary);">
+              ${escapeHtml(event.summary || 'Google Event')} 
+              <span class="booking-shoot-badge" style="background: rgba(66, 133, 244, 0.1); color: #4285F4; margin-left: 8px;">Google Cal</span>
+            </td>
+            <td></td>
+            <td></td>
+            <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
+            <td style="color: var(--text-light); font-style: italic;">Google Sync</td>
+            <td style="text-align: center;">
+              <span style="font-size: 0.75rem; color: var(--text-light); font-weight: bold;">Google Sync</span>
+            </td>
+          `;
+          sheetBody.appendChild(gcalRow);
+        });
+      } else {
+        // Available day
+        const availableRow = document.createElement('tr');
+        availableRow.className = 'available-row';
+        availableRow.innerHTML = `
+          <td style="font-weight: 600; color: #2E7D32; font-style: italic;">
+            ✨ Available (No shoots scheduled)
+          </td>
+          <td></td>
+          <td></td>
+          <td style="text-align: center; color: var(--text-light); font-size: 0.75rem;">AM & PM Available</td>
+          <td style="color: var(--text-light); font-size: 0.75rem;">All Packages</td>
+          <td style="text-align: center;">
+            <button class="btn btn-primary btn-book-sheet-slot" data-date="${cellDateStr}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; font-weight: bold; background: #2E7D32; border-color: #2E7D32; color: white;">Book Slot</button>
+          </td>
+        `;
+        sheetBody.appendChild(availableRow);
+      }
+    }
+
+    if (totalDaysCount) {
+      totalDaysCount.textContent = renderedDaysCount;
+    }
+
+    // Attach event listeners to elements inside sheet view
+    sheetBody.querySelectorAll('.btn-edit-sheet-shoot').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.getAttribute('data-id');
+        window.editShoot(id);
+      });
+    });
+
+    sheetBody.querySelectorAll('.btn-edit-sheet-booking').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.getAttribute('data-id');
+        window.editBooking(id);
+      });
+    });
+
+    sheetBody.querySelectorAll('.btn-log-pending-shoot-sheet').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.getAttribute('data-id');
+        const booking = bookings.find(b => b.id === id);
+        if (booking) {
+          addShootForm.reset();
+          shootBookingId.value = booking.id;
+          shootClientName.value = booking.clientName;
+          shootDate.value = booking.date;
+          
+          const [h, m] = (booking.time || '10:00').split(':');
+          const hrs = parseInt(h);
+          shootTimeHour.value = String(hrs % 12 || 12).padStart(2, '0');
+          shootTimeMinute.value = m;
+          shootTimeAmpm.value = hrs >= 12 ? 'PM' : 'AM';
+
+          shootAdvanceAmount.value = booking.advance;
+          shootAdvanceAccount.value = booking.paymentAccount || 'Cash';
+          shootBalanceAmount.value = Math.max(0, parsePackagePrice(booking.package) - booking.advance);
+          shootBalanceAccount.value = booking.paymentAccount || 'Cash';
+
+          shootModal.style.display = 'flex';
+          shootModal.offsetHeight;
+          shootModal.classList.remove('hidden');
+        }
+      });
+    });
+
+    sheetBody.querySelectorAll('.btn-book-sheet-slot').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const date = e.target.getAttribute('data-date');
+        window.showAddBooking('', date);
+      });
+    });
+  };
+
+  const initCalendarViewToggle = () => {
+    const btnGrid = document.getElementById('btn-calendar-grid-view');
+    const btnSheet = document.getElementById('btn-calendar-sheet-view');
+    const gridContainer = document.getElementById('calendar-grid-view-container');
+    const sheetContainer = document.getElementById('calendar-sheet-view-container');
+    const dayFilter = document.getElementById('sheet-day-filter');
+
+    if (btnGrid && btnSheet && gridContainer && sheetContainer) {
+      btnGrid.addEventListener('click', () => {
+        btnGrid.classList.add('active');
+        btnGrid.style.background = 'var(--text-primary)';
+        btnGrid.style.color = 'white';
+        btnGrid.style.boxShadow = 'var(--shadow-sm)';
+        
+        btnSheet.classList.remove('active');
+        btnSheet.style.background = 'transparent';
+        btnSheet.style.color = 'var(--text-secondary)';
+        btnSheet.style.boxShadow = 'none';
+
+        gridContainer.style.display = 'flex';
+        sheetContainer.style.display = 'none';
+      });
+
+      btnSheet.addEventListener('click', () => {
+        btnSheet.classList.add('active');
+        btnSheet.style.background = 'var(--text-primary)';
+        btnSheet.style.color = 'white';
+        btnSheet.style.boxShadow = 'var(--shadow-sm)';
+        
+        btnGrid.classList.remove('active');
+        btnGrid.style.background = 'transparent';
+        btnGrid.style.color = 'var(--text-secondary)';
+        btnGrid.style.boxShadow = 'none';
+
+        gridContainer.style.display = 'none';
+        sheetContainer.style.display = 'block';
+        
+        renderSheetCalendar();
+      });
+    }
+
+    if (dayFilter) {
+      dayFilter.addEventListener('change', () => {
+        renderSheetCalendar();
+      });
+    }
   };
 
   const initCalendarListeners = () => {
@@ -7318,6 +7592,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Run calendar initializations
   initCalendarListeners();
+  initCalendarViewToggle();
   renderVisualCalendar();
   window.renderVisualCalendar = renderVisualCalendar;
 
