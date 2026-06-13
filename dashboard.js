@@ -1624,6 +1624,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.renderAccounts = () => {
     populateMonthFilter();
 
+    const fmt = (val) => new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(val);
+
     const filterSelect = document.getElementById('account-filter');
     const selectedAccount = filterSelect ? filterSelect.value : 'all';
 
@@ -1823,12 +1829,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       displayAdvances = accountStats[selectedAccount].advances;
       displayBalance = accountStats[selectedAccount].balance;
     }
-
-    const fmt = (val) => new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(val);
 
     // 1. Render Summary Cards (Expected, Advances, Pending, Extra Photos Balance)
     summaryGrid.innerHTML = `
