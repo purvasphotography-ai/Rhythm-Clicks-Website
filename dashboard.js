@@ -3964,8 +3964,23 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         }
 
-        // Auto Sync with Google Calendar if connected (update event if already exists, or create if not)
+        // Keep linked shoot in sync if exists
         const booking = bookings.find(b => b.id === id);
+        if (booking) {
+          const targetShoot = shoots.find(s => s.bookingId === id || (s.clientName && s.clientName.toLowerCase().trim() === booking.clientName.toLowerCase().trim() && s.date === booking.date));
+          if (targetShoot) {
+            await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "shoots", targetShoot.id), {
+              bookingId: id,
+              clientName: clientName.trim(),
+              date: date,
+              time: time,
+              advanceAmount: parseFloat(advance) || 0,
+              advanceAccount: paymentAccount || 'Cash'
+            });
+          }
+        }
+
+        // Auto Sync with Google Calendar if connected (update event if already exists, or create if not)
         if (gcalAccessToken && booking) {
           const targetShoot = shoots.find(s => s.bookingId === id || (s.clientName && s.clientName.toLowerCase().trim() === booking.clientName.toLowerCase().trim() && s.date === booking.date));
           if (booking.gCalEventId && typeof deleteGoogleCalendarEvent === 'function' && typeof createGoogleCalendarEvent === 'function') {
@@ -4112,6 +4127,25 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         const existing = shoots.find(s => s.id === id);
         let gCalEventId = existing ? (existing.gCalEventId || "") : "";
+
+        // Keep linked booking in sync if exists
+        let targetBooking = null;
+        if (existing) {
+          if (existing.bookingId) {
+            targetBooking = bookings.find(b => b.id === existing.bookingId);
+          } else {
+            targetBooking = bookings.find(b => b.clientName && b.clientName.toLowerCase().trim() === existing.clientName.toLowerCase().trim() && b.date === existing.date);
+          }
+        }
+        if (targetBooking) {
+          await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "bookings", targetBooking.id), {
+            clientName: clientName.trim(),
+            date: date,
+            time: time,
+            advance: parseFloat(advanceAmount) || 0,
+            paymentAccount: advanceAccount || 'Cash'
+          });
+        }
 
         // Auto Sync with Google Calendar if connected
         if (gcalAccessToken) {
@@ -4923,6 +4957,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       const existing = bookings.find(b => b.id === id);
       if (!existing) return;
 
+      // Keep linked shoot in sync if exists
+      const targetShoot = shoots.find(s => s.bookingId === id || (s.clientName && existing && s.clientName.toLowerCase().trim() === existing.clientName.toLowerCase().trim() && s.date === existing.date));
+      if (targetShoot) {
+        targetShoot.bookingId = id;
+        targetShoot.clientName = clientName.trim();
+        targetShoot.date = date;
+        targetShoot.time = time;
+        targetShoot.advanceAmount = parseFloat(advance) || 0;
+        targetShoot.advanceAccount = paymentAccount || 'Cash';
+        saveLocalShoots();
+        renderShoots();
+        localChannel.postMessage({
+          type: 'UPDATE_SHOOT',
+          shoot: targetShoot
+        });
+      }
+
       existing.clientName = clientName.trim();
       existing.shootType = shootType;
       existing.date = date;
@@ -5089,6 +5140,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.updateShoot = async (id, clientName, date, time, photosCount, advanceAmount, advanceAccount, balanceAmount, balanceAccount, specialRequests, albumIncluded) => {
       const existing = shoots.find(s => s.id === id);
       if (!existing) return;
+
+      // Keep linked booking in sync if exists
+      let targetBooking = null;
+      if (existing.bookingId) {
+        targetBooking = bookings.find(b => b.id === existing.bookingId);
+      } else {
+        targetBooking = bookings.find(b => b.clientName && existing && b.clientName.toLowerCase().trim() === existing.clientName.toLowerCase().trim() && b.date === existing.date);
+      }
+      if (targetBooking) {
+        targetBooking.clientName = clientName.trim();
+        targetBooking.date = date;
+        targetBooking.time = time;
+        targetBooking.advance = parseFloat(advanceAmount) || 0;
+        targetBooking.paymentAccount = advanceAccount || 'Cash';
+        saveLocalBookings();
+        renderBookings();
+        localChannel.postMessage({
+          type: 'UPDATE_BOOKING',
+          booking: targetBooking
+        });
+      }
 
       existing.clientName = clientName.trim();
       existing.date = date;
