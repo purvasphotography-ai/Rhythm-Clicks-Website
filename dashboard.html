@@ -16,7 +16,7 @@
   
   <!-- CSS Stylesheets -->
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="dashboard.css?v=3.0">
+  <link rel="stylesheet" href="dashboard.css?v=3.1">
   <!-- SheetJS client-side Excel utility library -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -982,6 +982,7 @@
         <button class="tab-btn" id="tab-albums"><span class="tab-icon">📖</span> <span class="tab-text">Albums</span></button>
         <button class="tab-btn" id="tab-contacts"><span class="tab-icon">📞</span> <span class="tab-text">Contacts</span></button>
         <button class="tab-btn" id="tab-accounts"><span class="tab-icon">💰</span> <span class="tab-text">Accounts</span></button>
+        <button class="tab-btn" id="tab-settings"><span class="tab-icon">⚙️</span> <span class="tab-text">Settings</span></button>
       </div>
       <div class="search-bar-container" style="position: relative; min-width: 250px; flex-grow: 1; max-width: 350px;">
         <input type="text" id="global-search" placeholder="Search tasks, galleries, contacts, or bookings..." style="width: 100%; padding: 0.6rem 2.2rem 0.6rem 2.2rem; border: 1px solid rgba(0,0,0,0.08); border-radius: 50px; background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); font-size: 0.85rem; color: var(--text-primary); transition: all 0.3s ease;">
@@ -1261,8 +1262,7 @@
       <!-- Section 5: Google Services Integration (Calendar & Backup) -->
       <div id="calendar-section" class="tab-content">
         <div class="gallery-tracker-header">
-          <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Google Services Integration</h2>
-          <div id="google-auth-status"></div>
+          <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Visual Shoot Calendar & Slots</h2>
         </div>
         
         <!-- Interactive Visual Slots Calendar -->
@@ -1303,57 +1303,6 @@
               <!-- Action button (e.g. Add Booking) pre-filled -->
             </div>
           </div>
-        </div>
-        
-        <!-- Connection overlay (if not logged in) -->
-        <div id="google-login-card" class="grid-card" style="max-width: 500px; margin: 2rem auto; padding: 2.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); box-shadow: var(--shadow-lg);">
-          <div style="font-size: 3.5rem;">☁️</div>
-          <h3 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Connect Google Services</h3>
-          <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem; margin: 0 0 0.5rem 0;">
-            Connect Rhythm Clicks to Google Calendar (to auto-sync shoots and bookings) and Google Drive (to automatically and safely back up your local database files).
-          </p>
-          <button id="connect-google-btn" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 0.95rem; border-radius: 50px;">
-            Sign In with Google
-          </button>
-        </div>
-
-        <!-- Active Calendar Feed & Backup Container (if logged in) -->
-        <div id="google-calendar-container" style="display: none;">
-          <!-- Google Drive Backup Controls -->
-          <div class="drive-backup-bar" style="margin-bottom: 1.5rem; padding: 1.25rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(15px); border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.35); box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div style="display: flex; align-items: center; gap: 12px; text-align: left;">
-              <span style="font-size: 1.8rem;">💾</span>
-              <div>
-                <h4 style="margin: 0; font-size: 0.95rem; color: var(--text-primary); font-weight: 600;">Google Drive Database Auto-Backup</h4>
-                <p id="drive-backup-status" style="margin: 0.2rem 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
-                  Status: Checking backup...
-                </p>
-              </div>
-            </div>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-              <button id="drive-backup-btn" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 50px; background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.1); color: var(--text-primary); cursor: pointer; transition: all 0.2s;">
-                Backup Now
-              </button>
-              <button id="drive-restore-btn" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 50px; background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.1); color: var(--text-primary); cursor: pointer; transition: all 0.2s;">
-                Restore from Drive
-              </button>
-            </div>
-          </div>
-
-          <div class="calendar-controls-bar" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.3); backdrop-filter: blur(10px); border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.2);">
-            <span style="font-size: 0.9rem; color: var(--text-primary); font-weight: 500;" id="google-user-info">Connected</span>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-              <button id="sync-existing-bookings-btn" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 50px; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08);">
-                Bulk Push Bookings to Google Cal
-              </button>
-              <button id="disconnect-google-btn" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 50px; background: rgba(211, 47, 47, 0.08); border: 1px solid rgba(211, 47, 47, 0.15); color: #d32f2f; cursor: pointer; transition: all 0.2s;">
-                Disconnect
-              </button>
-            </div>
-          </div>
-          <ul id="calendar-events-list" class="bookings-grid">
-            <!-- Rendered dynamically as list cards -->
-          </ul>
         </div>
       </div>
 
@@ -1482,6 +1431,64 @@
         </div>
       </div>
 
+      <!-- Section 9: Settings (Google Integration & Backups) -->
+      <div id="settings-section" class="tab-content">
+        <div class="gallery-tracker-header">
+          <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Google Services Integration & Backup Settings</h2>
+          <div id="google-auth-status"></div>
+        </div>
+
+        <!-- Connection overlay (if not logged in) -->
+        <div id="google-login-card" class="grid-card" style="max-width: 500px; margin: 2rem auto; padding: 2.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); box-shadow: var(--shadow-lg);">
+          <div style="font-size: 3.5rem;">☁️</div>
+          <h3 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Connect Google Services</h3>
+          <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem; margin: 0 0 0.5rem 0;">
+            Connect Rhythm Clicks to Google Calendar (to auto-sync shoots and bookings) and Google Drive (to automatically and safely back up your local database files).
+          </p>
+          <button id="connect-google-btn" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 0.95rem; border-radius: 50px;">
+            Sign In with Google
+          </button>
+        </div>
+
+        <!-- Active Calendar Feed & Backup Container (if logged in) -->
+        <div id="google-calendar-container" style="display: none;">
+          <!-- Google Drive Backup Controls -->
+          <div class="drive-backup-bar" style="margin-bottom: 1.5rem; padding: 1.25rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(15px); border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.35); box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 12px; text-align: left;">
+              <span style="font-size: 1.8rem;">💾</span>
+              <div>
+                <h4 style="margin: 0; font-size: 0.95rem; color: var(--text-primary); font-weight: 600;">Google Drive Database Auto-Backup</h4>
+                <p id="drive-backup-status" style="margin: 0.2rem 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
+                  Status: Checking backup...
+                </p>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <button id="drive-backup-btn" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 50px; background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.1); color: var(--text-primary); cursor: pointer; transition: all 0.2s;">
+                Backup Now
+              </button>
+              <button id="drive-restore-btn" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 50px; background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.1); color: var(--text-primary); cursor: pointer; transition: all 0.2s;">
+                Restore from Drive
+              </button>
+            </div>
+          </div>
+
+          <div class="calendar-controls-bar" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.3); backdrop-filter: blur(10px); border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.2);">
+            <span style="font-size: 0.9rem; color: var(--text-primary); font-weight: 500;" id="google-user-info">Connected</span>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <button id="sync-existing-bookings-btn" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 50px; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08);">
+                Bulk Push Bookings to Google Cal
+              </button>
+              <button id="disconnect-google-btn" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 50px; background: rgba(211, 47, 47, 0.08); border: 1px solid rgba(211, 47, 47, 0.15); color: #d32f2f; cursor: pointer; transition: all 0.2s;">
+                Disconnect
+              </button>
+            </div>
+          </div>
+          <ul id="calendar-events-list" class="bookings-grid">
+            <!-- Rendered dynamically as list cards -->
+          </ul>
+        </div>
+      </div>
     </main>
 
     <!-- Footer -->
@@ -1520,6 +1527,6 @@
   <!-- Google Identity Services client library -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Script Files (Loaded as ES6 Module for Firebase support) -->
-  <script type="module" src="dashboard.js?v=3.0"></script>
+  <script type="module" src="dashboard.js?v=3.1"></script>
 </body>
 </html>

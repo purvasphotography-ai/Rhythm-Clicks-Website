@@ -5089,6 +5089,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tabAlbums = document.getElementById('tab-albums');
   const tabContacts = document.getElementById('tab-contacts');
   const tabAccounts = document.getElementById('tab-accounts');
+  const tabSettings = document.getElementById('tab-settings');
 
   const tasksSection = document.getElementById('tasks-section');
   const shootsSection = document.getElementById('shoots-section');
@@ -5097,6 +5098,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const albumsSection = document.getElementById('albums-section');
   const contactsSection = document.getElementById('contacts-section');
   const accountsSection = document.getElementById('accounts-section');
+  const settingsSection = document.getElementById('settings-section');
 
   const tabs = [
     { button: tabTasks, section: tasksSection },
@@ -5106,7 +5108,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     { button: tabGalleries, section: galleriesSection },
     { button: tabAlbums, section: albumsSection },
     { button: tabContacts, section: contactsSection },
-    { button: tabAccounts, section: accountsSection }
+    { button: tabAccounts, section: accountsSection },
+    { button: tabSettings, section: settingsSection }
   ];
 
   const switchTab = (activeTab, activeSection) => {
@@ -5123,7 +5126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Trigger specific rendering/fetch logic if needed
-    if (activeTab === tabCalendar) {
+    if (activeTab === tabCalendar || activeTab === tabSettings) {
       if (typeof fetchGoogleCalendarEvents === 'function') {
         fetchGoogleCalendarEvents();
       }
