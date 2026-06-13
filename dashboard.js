@@ -123,6 +123,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const editAlbumDeliveryMethod = document.getElementById('edit-album-delivery-method');
   const bookingShootTypeCustomContainer = document.getElementById('booking-shoot-type-custom-container');
   const bookingShootTypeCustom = document.getElementById('booking-shoot-type-custom');
+  const bookingKidAgeContainer = document.getElementById('booking-kid-age-container');
+  const bookingKidAge = document.getElementById('booking-kid-age');
   const bookingPaymentAccount = document.getElementById('booking-payment-account');
   
   const editBookingModal = document.getElementById('edit-booking-modal');
@@ -141,6 +143,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const editBookingStatusMsg = document.getElementById('edit-booking-status-msg');
   const editBookingShootTypeCustomContainer = document.getElementById('edit-booking-shoot-type-custom-container');
   const editBookingShootTypeCustom = document.getElementById('edit-booking-shoot-type-custom');
+  const editBookingKidAgeContainer = document.getElementById('edit-booking-kid-age-container');
+  const editBookingKidAge = document.getElementById('edit-booking-kid-age');
   const editBookingPaymentAccount = document.getElementById('edit-booking-payment-account');
 
   // Shoots Tracker UI Elements
@@ -934,6 +938,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (prefilledDate) {
         document.getElementById('booking-date').value = prefilledDate;
       }
+      if (bookingShootTypeCustomContainer) bookingShootTypeCustomContainer.style.display = 'none';
+      if (bookingShootTypeCustom) bookingShootTypeCustom.removeAttribute('required');
+      if (bookingKidAgeContainer) bookingKidAgeContainer.style.display = 'none';
+      if (bookingKidAge) bookingKidAge.removeAttribute('required');
       addBookingModal.style.display = 'flex';
       addBookingModal.offsetHeight;
       addBookingModal.classList.remove('hidden');
@@ -6009,27 +6017,69 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Listeners to show/hide custom shoot type fields
-  if (bookingShootType && bookingShootTypeCustomContainer) {
+  // Listeners to show/hide custom shoot type fields and kid age fields
+  if (bookingShootType) {
     bookingShootType.addEventListener('change', () => {
       if (bookingShootType.value === 'Other') {
-        bookingShootTypeCustomContainer.style.display = 'block';
-        bookingShootTypeCustom.setAttribute('required', 'true');
+        if (bookingShootTypeCustomContainer) {
+          bookingShootTypeCustomContainer.style.display = 'block';
+          bookingShootTypeCustom.setAttribute('required', 'true');
+        }
+        if (bookingKidAgeContainer) {
+          bookingKidAgeContainer.style.display = 'none';
+          bookingKidAge.removeAttribute('required');
+        }
+      } else if (bookingShootType.value === 'Kids') {
+        if (bookingShootTypeCustomContainer) {
+          bookingShootTypeCustomContainer.style.display = 'none';
+          bookingShootTypeCustom.removeAttribute('required');
+        }
+        if (bookingKidAgeContainer) {
+          bookingKidAgeContainer.style.display = 'block';
+          bookingKidAge.setAttribute('required', 'true');
+        }
       } else {
-        bookingShootTypeCustomContainer.style.display = 'none';
-        bookingShootTypeCustom.removeAttribute('required');
+        if (bookingShootTypeCustomContainer) {
+          bookingShootTypeCustomContainer.style.display = 'none';
+          bookingShootTypeCustom.removeAttribute('required');
+        }
+        if (bookingKidAgeContainer) {
+          bookingKidAgeContainer.style.display = 'none';
+          bookingKidAge.removeAttribute('required');
+        }
       }
     });
   }
 
-  if (editBookingShootType && editBookingShootTypeCustomContainer) {
+  if (editBookingShootType) {
     editBookingShootType.addEventListener('change', () => {
       if (editBookingShootType.value === 'Other') {
-        editBookingShootTypeCustomContainer.style.display = 'block';
-        editBookingShootTypeCustom.setAttribute('required', 'true');
+        if (editBookingShootTypeCustomContainer) {
+          editBookingShootTypeCustomContainer.style.display = 'block';
+          editBookingShootTypeCustom.setAttribute('required', 'true');
+        }
+        if (editBookingKidAgeContainer) {
+          editBookingKidAgeContainer.style.display = 'none';
+          editBookingKidAge.removeAttribute('required');
+        }
+      } else if (editBookingShootType.value === 'Kids') {
+        if (editBookingShootTypeCustomContainer) {
+          editBookingShootTypeCustomContainer.style.display = 'none';
+          editBookingShootTypeCustom.removeAttribute('required');
+        }
+        if (editBookingKidAgeContainer) {
+          editBookingKidAgeContainer.style.display = 'block';
+          editBookingKidAge.setAttribute('required', 'true');
+        }
       } else {
-        editBookingShootTypeCustomContainer.style.display = 'none';
-        editBookingShootTypeCustom.removeAttribute('required');
+        if (editBookingShootTypeCustomContainer) {
+          editBookingShootTypeCustomContainer.style.display = 'none';
+          editBookingShootTypeCustom.removeAttribute('required');
+        }
+        if (editBookingKidAgeContainer) {
+          editBookingKidAgeContainer.style.display = 'none';
+          editBookingKidAge.removeAttribute('required');
+        }
       }
     });
   }
@@ -6042,6 +6092,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       let shootType = bookingShootType.value;
       if (shootType === 'Other' && bookingShootTypeCustom) {
         shootType = bookingShootTypeCustom.value.trim();
+      } else if (shootType === 'Kids' && bookingKidAge) {
+        shootType = `Kids (${bookingKidAge.value.trim()})`;
       }
       const date = bookingDate.value;
       const time = convertTimeTo24H(bookingTimeHour.value, bookingTimeMinute.value, bookingTimeAmpm.value);
@@ -6091,6 +6143,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       let shootType = editBookingShootType.value;
       if (shootType === 'Other' && editBookingShootTypeCustom) {
         shootType = editBookingShootTypeCustom.value.trim();
+      } else if (shootType === 'Kids' && editBookingKidAge) {
+        shootType = `Kids (${editBookingKidAge.value.trim()})`;
       }
       const date = editBookingDate.value;
       const time = convertTimeTo24H(editBookingTimeHour.value, editBookingTimeMinute.value, editBookingTimeAmpm.value);
@@ -6123,9 +6177,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       editBookingPhone.value = clientContact ? clientContact.phone : '';
     }
     
-    const standardTypes = ['Maternity', 'Newborn', 'Kids'];
+    const standardTypes = ['Maternity', 'Newborn'];
     if (standardTypes.includes(b.shootType)) {
       editBookingShootType.value = b.shootType;
+      if (editBookingShootTypeCustomContainer) {
+        editBookingShootTypeCustomContainer.style.display = 'none';
+        editBookingShootTypeCustom.removeAttribute('required');
+        editBookingShootTypeCustom.value = '';
+      }
+      if (editBookingKidAgeContainer) {
+        editBookingKidAgeContainer.style.display = 'none';
+        editBookingKidAge.removeAttribute('required');
+        editBookingKidAge.value = '';
+      }
+    } else if (b.shootType && (b.shootType === 'Kids' || b.shootType.startsWith('Kids ('))) {
+      editBookingShootType.value = 'Kids';
+      if (editBookingKidAgeContainer) {
+        editBookingKidAgeContainer.style.display = 'block';
+        editBookingKidAge.setAttribute('required', 'true');
+        const ageMatch = b.shootType.match(/Kids \(([^)]+)\)/);
+        editBookingKidAge.value = ageMatch ? ageMatch[1] : '';
+      }
       if (editBookingShootTypeCustomContainer) {
         editBookingShootTypeCustomContainer.style.display = 'none';
         editBookingShootTypeCustom.removeAttribute('required');
@@ -6137,6 +6209,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         editBookingShootTypeCustomContainer.style.display = 'block';
         editBookingShootTypeCustom.setAttribute('required', 'true');
         editBookingShootTypeCustom.value = b.shootType;
+      }
+      if (editBookingKidAgeContainer) {
+        editBookingKidAgeContainer.style.display = 'none';
+        editBookingKidAge.removeAttribute('required');
+        editBookingKidAge.value = '';
       }
     }
 
