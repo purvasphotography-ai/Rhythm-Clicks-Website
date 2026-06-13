@@ -6632,17 +6632,63 @@ document.addEventListener('DOMContentLoaded', async () => {
     slotsList.innerHTML = '';
     selectedDayActions.innerHTML = '';
 
-    // Collect Google Calendar Event IDs already associated with local bookings/shoots
-    const syncedEventIds = new Set();
-    dayBookings.forEach(b => {
-      if (b.gCalEventId) syncedEventIds.add(b.gCalEventId);
-    });
-    dayShoots.forEach(s => {
-      if (s.gCalEventId) syncedEventIds.add(s.gCalEventId);
+    // Group bookings and shoots by client
+    const groups = {};
+    const normalizeName = (name) => name ? name.toLowerCase().replace(/[^a-z0-9]/g, '').trim() : '';
+
+    const getGroup = (clientName, gCalEventId) => {
+      const normName = normalizeName(clientName);
+      if (gCalEventId) {
+        for (const key in groups) {
+          if (groups[key].gCalEventIds.has(gCalEventId)) return groups[key];
+        }
+      }
+      if (normName) {
+        for (const key in groups) {
+          if (groups[key].normalizedName === normName) return groups[key];
+        }
+      }
+      const key = 'group_' + Math.random().toString(36).substr(2, 9);
+      groups[key] = {
+        key,
+        clientName: clientName,
+        normalizedName: normName,
+        gCalEventIds: new Set(),
+        bookings: [],
+        shoots: []
+      };
+      if (gCalEventId) groups[key].gCalEventIds.add(gCalEventId);
+      return groups[key];
+    };
+
+    dayBookings.forEach(booking => {
+      const g = getGroup(booking.clientName, booking.gCalEventId);
+      g.bookings.push(booking);
+      if (booking.gCalEventId) g.gCalEventIds.add(booking.gCalEventId);
     });
 
+    dayShoots.forEach(shoot => {
+      const g = getGroup(shoot.clientName, shoot.gCalEventId);
+      g.shoots.push(shoot);
+      if (shoot.gCalEventId) g.gCalEventIds.add(shoot.gCalEventId);
+    });
+
+    // Match each group with global galleries and albums
+    for (const key in groups) {
+      const g = groups[key];
+      g.gallery = galleries.find(gal => normalizeName(gal.clientName) === g.normalizedName);
+      g.album = albums.find(alb => normalizeName(alb.clientName) === g.normalizedName);
+    }
+
+    // Google Calendar Event IDs already associated with local bookings/shoots
+    const syncedEventIds = new Set();
+    for (const key in groups) {
+      groups[key].gCalEventIds.forEach(id => syncedEventIds.add(id));
+    }
+
     const filteredGcalEvents = dayGcalEvents.filter(event => !syncedEventIds.has(event.id));
-    const totalEvents = dayBookings.length + dayShoots.length + filteredGcalEvents.length;
+    const groupKeys = Object.keys(groups);
+    const totalEvents = groupKeys.length + filteredGcalEvents.length;
 
     if (totalEvents === 0) {
       slotsList.innerHTML = `
@@ -6658,54 +6704,168 @@ document.addEventListener('DOMContentLoaded', async () => {
         </button>
       `;
     } else {
-      // Local bookings
-      dayBookings.forEach(booking => {
-        const isSynced = !!booking.gCalEventId;
-        slotsList.innerHTML += `
-          <div class="calendar-slot-item" style="border-left-color: #a88a3a; padding: 1rem; margin-bottom: 0.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-              <strong style="color: var(--text-primary); font-size: 0.95rem; text-transform: capitalize;">${escapeHtml(booking.clientName)}</strong>
-              <div style="display: flex; gap: 6px; align-items: center;">
-                <span style="font-size: 0.7rem; background: rgba(168, 138, 58, 0.1); color: #a88a3a; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Booking</span>
-                ${isSynced ? `<span style="font-size: 0.7rem; background: rgba(66, 133, 244, 0.1); color: #4285F4; padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;">🔵 Synced</span>` : ''}
-              </div>
-            </div>
-            <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span>⏰ Time: <strong>${booking.time}</strong></span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span>📦 Package: <strong>${escapeHtml(booking.package || 'N/A')}</strong></span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span>📷 Shoot Type: <strong>${escapeHtml(booking.shootType)}</strong></span>
-              </div>
-            </div>
-          </div>
-        `;
-      });
+      // Map for gallery status display labels
+      const galleryStatusLabels = {
+        'pending': 'Pending Selection',
+        'arrived': 'Arrived',
+        'selected': 'Selected on PC',
+        'edited': 'Edited',
+        'delivered': 'Delivered'
+      };
 
-      // Completed shoots
-      dayShoots.forEach(shoot => {
-        const isSynced = !!shoot.gCalEventId;
+      // Map for album status display labels
+      const albumStatusLabels = {
+        'pending': 'Pending Approval',
+        'approval': 'Approved',
+        'printing': 'Printing',
+        'arrived': 'Arrived',
+        'delivered': 'Delivered'
+      };
+
+      // Loop over grouped clients and render a combined project progress card
+      groupKeys.forEach(key => {
+        const g = groups[key];
+        const primaryBooking = g.bookings[0];
+        const primaryShoot = g.shoots[0];
+        
+        const clientName = g.clientName;
+        const time = primaryShoot ? (primaryShoot.time || 'All Day') : (primaryBooking ? primaryBooking.time : 'N/A');
+        const packageVal = primaryBooking ? (primaryBooking.package || 'N/A') : (primaryShoot ? (primaryShoot.package || 'N/A') : 'N/A');
+        const shootType = primaryBooking ? (primaryBooking.shootType || 'N/A') : (primaryShoot ? (primaryShoot.shootType || 'N/A') : 'N/A');
+        const isSynced = g.gCalEventIds.size > 0;
+
+        let phaseBadge = 'Booked';
+        let badgeBg = 'rgba(168, 138, 58, 0.1)';
+        let badgeColor = '#a88a3a';
+
+        if (g.album && g.album.status === 'delivered') {
+          phaseBadge = 'Album Delivered';
+          badgeBg = 'rgba(46, 125, 50, 0.1)';
+          badgeColor = '#2E7D32';
+        } else if (g.album) {
+          phaseBadge = 'Album Phase';
+          badgeBg = 'rgba(25, 118, 210, 0.1)';
+          badgeColor = '#1976D2';
+        } else if (g.gallery && g.gallery.status === 'delivered') {
+          phaseBadge = 'Gallery Delivered';
+          badgeBg = 'rgba(46, 125, 50, 0.1)';
+          badgeColor = '#2E7D32';
+        } else if (g.gallery) {
+          phaseBadge = 'Gallery Phase';
+          badgeBg = 'rgba(230, 74, 25, 0.1)';
+          badgeColor = '#E64A19';
+        } else if (primaryShoot) {
+          phaseBadge = 'Shoot Logged';
+          badgeBg = 'rgba(46, 125, 50, 0.1)';
+          badgeColor = '#2E7D32';
+        }
+
+        const borderLeftColor = primaryShoot ? '#2E7D32' : '#a88a3a';
+
+        // Compute Gallery Status display
+        let galleryStatusText = 'Not started';
+        let galleryColor = 'var(--text-light)';
+        let galleryIcon = '○';
+        if (g.gallery) {
+          const label = galleryStatusLabels[g.gallery.status] || g.gallery.status;
+          if (g.gallery.status === 'delivered') {
+            galleryStatusText = 'Delivered';
+            galleryColor = '#2E7D32';
+            galleryIcon = '✓';
+          } else {
+            galleryStatusText = `In progress: ${label}`;
+            galleryColor = '#E64A19';
+            galleryIcon = '●';
+          }
+        } else if (primaryShoot) {
+          galleryStatusText = 'Pending creation';
+          galleryColor = 'var(--text-secondary)';
+          galleryIcon = '○';
+        } else {
+          galleryStatusText = 'Pending shoot completion';
+          galleryColor = 'var(--text-light)';
+          galleryIcon = '○';
+        }
+
+        // Compute Album Status display
+        let albumStatusText = 'Not started';
+        let albumColor = 'var(--text-light)';
+        let albumIcon = '○';
+        if (g.album) {
+          const label = albumStatusLabels[g.album.status] || g.album.status;
+          if (g.album.status === 'delivered') {
+            albumStatusText = 'Delivered';
+            albumColor = '#2E7D32';
+            albumIcon = '✓';
+          } else {
+            albumStatusText = `In progress: ${label}`;
+            albumColor = '#1976D2';
+            albumIcon = '●';
+          }
+        } else if (g.gallery && g.gallery.status === 'delivered') {
+          albumStatusText = 'Pending creation';
+          albumColor = 'var(--text-secondary)';
+          albumIcon = '○';
+        } else {
+          albumStatusText = 'Pending gallery delivery';
+          albumColor = 'var(--text-light)';
+          albumIcon = '○';
+        }
+
         slotsList.innerHTML += `
-          <div class="calendar-slot-item" style="border-left-color: #2E7D32; padding: 1rem; margin-bottom: 0.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-              <strong style="color: var(--text-primary); font-size: 0.95rem; text-transform: capitalize;">${escapeHtml(shoot.clientName)}</strong>
-              <div style="display: flex; gap: 6px; align-items: center;">
-                <span style="font-size: 0.7rem; background: rgba(46, 125, 50, 0.1); color: #2E7D32; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Shoot</span>
-                ${isSynced ? `<span style="font-size: 0.7rem; background: rgba(66, 133, 244, 0.1); color: #4285F4; padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;">🔵 Synced</span>` : ''}
+          <div class="calendar-slot-item" style="border-left-color: ${borderLeftColor}; padding: 1rem; margin-bottom: 0.75rem; border-left-width: 4px; border-left-style: solid; background: var(--panel-bg); border-radius: var(--border-radius-sm); border: 1px solid rgba(0,0,0,0.03); border-left-color: ${borderLeftColor};">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.6rem; gap: 8px;">
+              <strong style="color: var(--text-primary); font-size: 0.95rem; text-transform: capitalize; line-height: 1.3;">${escapeHtml(clientName)}</strong>
+              <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
+                <span style="font-size: 0.68rem; background: ${badgeBg}; color: ${badgeColor}; padding: 2px 6px; border-radius: 4px; font-weight: 700; white-space: nowrap;">${phaseBadge}</span>
+                ${isSynced ? `<span style="font-size: 0.68rem; background: rgba(66, 133, 244, 0.1); color: #4285F4; padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; white-space: nowrap;">🔵 Synced</span>` : ''}
               </div>
             </div>
-            <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
+            
+            <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px; margin-bottom: 0.8rem;">
               <div style="display: flex; align-items: center; gap: 6px;">
-                <span>⏰ Time: <strong>${shoot.time || 'All Day'}</strong></span>
+                <span>⏰ Time: <strong>${time}</strong></span>
               </div>
               <div style="display: flex; align-items: center; gap: 6px;">
-                <span>📦 Package: <strong>${escapeHtml(shoot.package || 'N/A')}</strong></span>
+                <span>📦 Package: <strong>${escapeHtml(packageVal)}</strong></span>
               </div>
               <div style="display: flex; align-items: center; gap: 6px;">
-                <span>📷 Shoot Type: <strong>${escapeHtml(shoot.shootType || 'Photos')}</strong></span>
+                <span>📷 Shoot Type: <strong>${escapeHtml(shootType)}</strong></span>
+              </div>
+            </div>
+
+            <!-- Visual Workflow Progress Timeline -->
+            <div style="margin-top: 0.6rem; display: flex; flex-direction: column; gap: 6px; border-top: 1px dashed rgba(0,0,0,0.06); padding-top: 0.6rem;">
+              <div style="font-size: 0.72rem; color: var(--text-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 2px;">Workflow Progress</div>
+              
+              <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem;">
+                <!-- Step 1: Booking -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="color: #2E7D32; font-weight: bold; font-size: 0.85rem;">✓</span>
+                  <span style="color: var(--text-secondary); font-size: 0.78rem;">Booking:</span>
+                  <strong style="color: var(--text-primary); font-size: 0.78rem;">Confirmed</strong>
+                </div>
+
+                <!-- Step 2: Shoot -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="${primaryShoot ? 'color: #2E7D32; font-weight: bold;' : 'color: var(--text-light);'} font-size: 0.85rem;">${primaryShoot ? '✓' : '○'}</span>
+                  <span style="color: var(--text-secondary); font-size: 0.78rem;">Shoot:</span>
+                  <strong style="${primaryShoot ? 'color: #2E7D32;' : 'color: var(--text-light);'} font-size: 0.78rem;">${primaryShoot ? 'Logged' : 'Scheduled'}</strong>
+                </div>
+
+                <!-- Step 3: Gallery -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="${g.gallery ? (g.gallery.status === 'delivered' ? 'color: #2E7D32; font-weight: bold;' : 'color: #E64A19;') : 'color: var(--text-light);'} font-size: 0.85rem;">${g.gallery ? (g.gallery.status === 'delivered' ? '✓' : '●') : '○'}</span>
+                  <span style="color: var(--text-secondary); font-size: 0.78rem;">Gallery:</span>
+                  <strong style="font-size: 0.78rem; color: ${galleryColor};">${galleryStatusText}</strong>
+                </div>
+
+                <!-- Step 4: Album -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="${g.album ? (g.album.status === 'delivered' ? 'color: #2E7D32; font-weight: bold;' : 'color: #1976D2;') : 'color: var(--text-light);'} font-size: 0.85rem;">${g.album ? (g.album.status === 'delivered' ? '✓' : '●') : '○'}</span>
+                  <span style="color: var(--text-secondary); font-size: 0.78rem;">Album:</span>
+                  <strong style="font-size: 0.78rem; color: ${albumColor};">${albumStatusText}</strong>
+                </div>
               </div>
             </div>
           </div>
@@ -6715,7 +6875,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Google events (filtered to exclude synced duplicates)
       filteredGcalEvents.forEach(event => {
         slotsList.innerHTML += `
-          <div class="calendar-slot-item" style="border-left-color: #4285F4; padding: 1rem; margin-bottom: 0.5rem;">
+          <div class="calendar-slot-item" style="border-left-color: #4285F4; padding: 1rem; margin-bottom: 0.5rem; border-left-width: 4px; border-left-style: solid; background: var(--panel-bg); border-radius: var(--border-radius-sm); border: 1px solid rgba(0,0,0,0.03);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
               <strong style="color: var(--text-primary); font-size: 0.95rem;">${escapeHtml(event.summary || 'Google Event')}</strong>
               <span style="font-size: 0.7rem; background: rgba(66, 133, 244, 0.1); color: #4285F4; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Google Cal</span>
