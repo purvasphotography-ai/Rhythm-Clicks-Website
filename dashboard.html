@@ -33,7 +33,7 @@
     <div class="login-card" id="login-credentials-card">
       <div class="login-header">
         <img src="assets/logo.webp" alt="Rhythm Clicks Studio Logo" class="login-logo">
-        <h2>Rhythm Clicks</h2>
+        <h2 id="login-studio-title">Rhythm Clicks</h2>
         <p>Secure Studio Workspace</p>
       </div>
       
@@ -982,7 +982,7 @@
           Back to Website
         </a>
         <div class="brand-text">
-          <h1>Rhythm Clicks</h1>
+          <h1 id="dashboard-studio-title">Rhythm Clicks</h1>
           <span class="badge">Workflow Hub</span>
         </div>
       </div>
@@ -1542,6 +1542,67 @@
         <div class="gallery-tracker-header">
           <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Google Services Integration & Backup Settings</h2>
           <div id="google-auth-status"></div>
+        </div>
+
+        <!-- Studio Preferences Card -->
+        <div class="grid-card" style="margin-bottom: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); box-shadow: var(--shadow-sm);">
+          <h3 style="font-family: var(--font-serif); font-size: 1.15rem; margin: 0 0 1.25rem 0; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+            ⚙️ Studio & Preferences Configuration
+          </h3>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; text-align: left;">
+            <!-- Studio Name -->
+            <div>
+              <label for="settings-studio-name" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">Studio Brand Name</label>
+              <input type="text" id="settings-studio-name" placeholder="e.g., Rhythm Clicks" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.7); font-family: var(--font-sans); font-size: 0.85rem; color: var(--text-primary);">
+              <p style="margin: 0.4rem 0 0 0; font-size: 0.75rem; color: var(--text-light); line-height: 1.4;">
+                Changes the active brand name displayed in headers and messages.
+              </p>
+            </div>
+
+            <!-- Currency Preference -->
+            <div>
+              <label for="settings-currency" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">Currency Symbol</label>
+              <select id="settings-currency" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.7); font-family: var(--font-sans); cursor: pointer; font-size: 0.85rem; color: var(--text-primary);">
+                <option value="INR">Rupee (₹)</option>
+                <option value="USD">Dollar ($)</option>
+                <option value="EUR">Euro (€)</option>
+                <option value="GBP">Pound (£)</option>
+              </select>
+              <p style="margin: 0.4rem 0 0 0; font-size: 0.75rem; color: var(--text-light); line-height: 1.4;">
+                Sets the active currency formatting across bookings, calendar, and billing details.
+              </p>
+            </div>
+            
+            <!-- Default Advance -->
+            <div>
+              <label for="settings-default-advance" id="label-settings-default-advance" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">Default Advance Amount (₹)</label>
+              <input type="number" id="settings-default-advance" placeholder="e.g., 5000" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.7); font-family: var(--font-sans); font-size: 0.85rem; color: var(--text-primary);">
+              <p style="margin: 0.4rem 0 0 0; font-size: 0.75rem; color: var(--text-light); line-height: 1.4;">
+                Default advance amount pre-filled when booking a new shoot.
+              </p>
+            </div>
+
+            <!-- Extra Charge per Photo -->
+            <div>
+              <label for="settings-extra-photo-rate" id="label-settings-extra-photo-rate" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">Extra Photo Rate (₹/photo)</label>
+              <input type="number" id="settings-extra-photo-rate" placeholder="e.g., 200" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.7); font-family: var(--font-sans); font-size: 0.85rem; color: var(--text-primary);">
+              <p style="margin: 0.4rem 0 0 0; font-size: 0.75rem; color: var(--text-light); line-height: 1.4;">
+                Rate charged for each photo selected beyond the package limit.
+              </p>
+            </div>
+
+            <!-- Packages Count Info -->
+            <div style="grid-column: 1 / -1; display: flex; align-items: center; gap: 1rem; border-top: 1px dashed rgba(0,0,0,0.08); padding-top: 1rem; margin-top: 0.5rem;">
+              <div style="flex: 1;">
+                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.2rem;">Packages Offered</span>
+                <div style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">6 Standard Packages</div>
+                <p id="settings-packages-desc" style="margin: 0.2rem 0 0 0; font-size: 0.75rem; color: var(--text-light); line-height: 1.4;">
+                  Standard package tier datalists: 5500, 6000, 8000, 9500, 10500, and 12500.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Connection overlay (if not logged in) -->

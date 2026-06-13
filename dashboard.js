@@ -275,6 +275,191 @@ document.addEventListener('DOMContentLoaded', async () => {
       .replace(/'/g, "&#039;");
   };
 
+  // --- Studio & Preference Settings Helpers ---
+  const getStudioName = () => {
+    return localStorage.getItem('rhythm_clicks_studio_name') || 'Rhythm Clicks';
+  };
+
+  const getCurrencyCode = () => {
+    return localStorage.getItem('rhythm_clicks_currency') || 'INR';
+  };
+
+  const getLocaleForCurrency = (code) => {
+    switch (code) {
+      case 'USD': return 'en-US';
+      case 'EUR': return 'de-DE';
+      case 'GBP': return 'en-GB';
+      case 'INR':
+      default:
+        return 'en-IN';
+    }
+  };
+
+  const getCurrencySymbol = () => {
+    const code = getCurrencyCode();
+    switch (code) {
+      case 'USD': return '$';
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'INR':
+      default:
+        return '₹';
+    }
+  };
+
+  const getDefaultAdvance = () => {
+    const val = localStorage.getItem('rhythm_clicks_default_advance');
+    return val !== null ? parseInt(val, 10) : 5000;
+  };
+
+  const getExtraPhotoRate = () => {
+    const val = localStorage.getItem('rhythm_clicks_extra_photo_rate');
+    return val !== null ? parseInt(val, 10) : 200;
+  };
+
+  const formatCurrency = (val) => {
+    const code = getCurrencyCode();
+    return new Intl.NumberFormat(getLocaleForCurrency(code), {
+      style: 'currency',
+      currency: code,
+      maximumFractionDigits: 0
+    }).format(val || 0);
+  };
+
+  const applyStudioName = (name) => {
+    const loginTitle = document.getElementById('login-studio-title');
+    if (loginTitle) loginTitle.textContent = name;
+    const dashTitle = document.getElementById('dashboard-studio-title');
+    if (dashTitle) dashTitle.textContent = name;
+  };
+
+  const updateFormLabelsCurrencySymbol = () => {
+    const symbol = getCurrencySymbol();
+    
+    const labelBookingAdvance = document.querySelector('label[for="booking-advance"]');
+    if (labelBookingAdvance) labelBookingAdvance.innerHTML = `Advance Amount (${symbol}) *`;
+    
+    const labelEditBookingAdvance = document.querySelector('label[for="edit-booking-advance"]');
+    if (labelEditBookingAdvance) labelEditBookingAdvance.innerHTML = `Advance Amount (${symbol}) *`;
+    
+    const labelShootAdvance = document.querySelector('label[for="shoot-advance-amount"]');
+    if (labelShootAdvance) labelShootAdvance.innerHTML = `Advance Paid (${symbol}) *`;
+    
+    const labelShootBalance = document.querySelector('label[for="shoot-balance-amount"]');
+    if (labelShootBalance) labelShootBalance.innerHTML = `Balance Paid (${symbol}) *`;
+    
+    const labelEditShootAdvance = document.querySelector('label[for="edit-shoot-advance-amount"]');
+    if (labelEditShootAdvance) labelEditShootAdvance.innerHTML = `Advance Paid (${symbol}) *`;
+    
+    const labelEditShootBalance = document.querySelector('label[for="edit-shoot-balance-amount"]');
+    if (labelEditShootBalance) labelEditShootBalance.innerHTML = `Balance Paid (${symbol}) *`;
+
+    const labelSettingsDefaultAdvance = document.getElementById('label-settings-default-advance');
+    if (labelSettingsDefaultAdvance) labelSettingsDefaultAdvance.innerHTML = `Default Advance Amount (${symbol})`;
+
+    const labelSettingsExtraPhotoRate = document.getElementById('label-settings-extra-photo-rate');
+    if (labelSettingsExtraPhotoRate) labelSettingsExtraPhotoRate.innerHTML = `Extra Photo Rate (${symbol}/photo)`;
+  };
+
+  const updateDatalistsCurrency = () => {
+    const symbol = getCurrencySymbol();
+    const packages = [
+      { val: 5500, time: 45 },
+      { val: 6000, time: 120 },
+      { val: 8000, time: 90 },
+      { val: 9500, time: 180 },
+      { val: 10500, time: 120 },
+      { val: 12500, time: 240 }
+    ];
+    
+    const lists = ['booking-packages-list', 'edit-booking-packages-list'];
+    lists.forEach(listId => {
+      const dl = document.getElementById(listId);
+      if (dl) {
+        dl.innerHTML = packages.map(pkg => {
+          return `<option value="${symbol}${pkg.val}">${symbol}${pkg.val} (${pkg.time} mins)</option>`;
+        }).join('');
+      }
+    });
+
+    const settingsDesc = document.getElementById('settings-packages-desc');
+    if (settingsDesc) {
+      settingsDesc.innerHTML = `Standard package tier datalists: ${symbol}5500, ${symbol}6000, ${symbol}8000, ${symbol}9500, ${symbol}10500, and ${symbol}12500.`;
+    }
+  };
+
+  const syncSettingsFields = () => {
+    const inputName = document.getElementById('settings-studio-name');
+    if (inputName) inputName.value = getStudioName();
+
+    const selectCurrency = document.getElementById('settings-currency');
+    if (selectCurrency) selectCurrency.value = getCurrencyCode();
+
+    const inputAdvance = document.getElementById('settings-default-advance');
+    if (inputAdvance) inputAdvance.value = getDefaultAdvance();
+
+    const inputExtraRate = document.getElementById('settings-extra-photo-rate');
+    if (inputExtraRate) inputExtraRate.value = getExtraPhotoRate();
+
+    applyStudioName(getStudioName());
+    updateFormLabelsCurrencySymbol();
+    updateDatalistsCurrency();
+  };
+
+  const initPreferencesListeners = () => {
+    const inputName = document.getElementById('settings-studio-name');
+    if (inputName) {
+      inputName.addEventListener('input', (e) => {
+        const val = e.target.value.trim() || 'Rhythm Clicks';
+        localStorage.setItem('rhythm_clicks_studio_name', val);
+        applyStudioName(val);
+      });
+    }
+
+    const selectCurrency = document.getElementById('settings-currency');
+    if (selectCurrency) {
+      selectCurrency.addEventListener('change', (e) => {
+        localStorage.setItem('rhythm_clicks_currency', e.target.value);
+        updateFormLabelsCurrencySymbol();
+        updateDatalistsCurrency();
+        
+        if (typeof renderBookings === 'function') renderBookings();
+        if (typeof renderShoots === 'function') renderShoots();
+        if (typeof renderAccounts === 'function') renderAccounts();
+        if (typeof renderVisualCalendar === 'function') renderVisualCalendar();
+        if (typeof renderGalleries === 'function') renderGalleries();
+        
+        showToast(`Currency updated to ${e.target.value}`, '⚙️');
+      });
+    }
+
+    const inputAdvance = document.getElementById('settings-default-advance');
+    if (inputAdvance) {
+      inputAdvance.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        if (!isNaN(val) && val >= 0) {
+          localStorage.setItem('rhythm_clicks_default_advance', val);
+        } else if (e.target.value === '') {
+          localStorage.setItem('rhythm_clicks_default_advance', 0);
+        }
+      });
+    }
+
+    const inputExtraRate = document.getElementById('settings-extra-photo-rate');
+    if (inputExtraRate) {
+      inputExtraRate.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        if (!isNaN(val) && val >= 0) {
+          localStorage.setItem('rhythm_clicks_extra_photo_rate', val);
+          if (typeof renderGalleries === 'function') renderGalleries();
+        } else if (e.target.value === '') {
+          localStorage.setItem('rhythm_clicks_extra_photo_rate', 0);
+          if (typeof renderGalleries === 'function') renderGalleries();
+        }
+      });
+    }
+  };
+
   // Determine user identity from email address
   const getIdentityFromEmail = (email) => {
     const cleanEmail = email.toLowerCase();
@@ -590,9 +775,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       let extraPhotos = 0;
       let extraCost = 0;
+      const extraPhotoRate = getExtraPhotoRate();
       if (shootAllowed > 0 && photosSelectedCount > shootAllowed) {
         extraPhotos = photosSelectedCount - shootAllowed;
-        extraCost = extraPhotos * 200;
+        extraCost = extraPhotos * extraPhotoRate;
       }
 
       photoSelectionHtml = `
@@ -605,8 +791,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (extraCost > 0) {
         photoSelectionHtml += `
           <div style="display: flex; justify-content: space-between; align-items: center; color: #d93838; font-weight: 600; margin-top: 4px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 4px;">
-            <span>Extra Charges (₹200/photo):</span>
-            <span style="font-family: var(--font-sans);">₹${extraCost} (${extraPhotos} extra)</span>
+            <span>Extra Charges (${getCurrencySymbol()}${extraPhotoRate}/photo):</span>
+            <span style="font-family: var(--font-sans);">${formatCurrency(extraCost)} (${extraPhotos} extra)</span>
           </div>
         `;
       }
@@ -1634,11 +1820,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       populateMonthFilter();
 
-      const fmt = (val) => new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        maximumFractionDigits: 0
-      }).format(val);
+      const fmt = (val) => formatCurrency(val);
 
       const safeFormatDate = (dateVal) => {
         if (!dateVal) return 'N/A';
@@ -2291,7 +2473,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       if (normalizedType === 'maternity' || normalizedType === 'newborn' || normalizedType === 'kids') {
-        const pkgClean = pkg.replace(/[\s,₹]/g, '');
+        const pkgClean = pkg.replace(/[\s,₹$€£]/g, '');
         if (pkgClean.includes('12500')) {
           durationMinutes = 240;
         } else if (pkgClean.includes('9500')) {
@@ -2339,7 +2521,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const eventResource = {
         summary: `${booking.clientName} - ${booking.shootType} Shoot`,
-        description: `Rhythm Clicks Studio booking.\nPackage: ${booking.package}\nAdvance Paid: ₹${booking.advance}`,
+        description: `${getStudioName()} booking.\nPackage: ${booking.package}\nAdvance Paid: ${formatCurrency(booking.advance)}`,
         start: {
           dateTime: startISO,
           timeZone: 'Asia/Kolkata'
@@ -2947,11 +3129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const formattedTime = `${timeHrs % 12 || 12}:${minutes} ${ampm}`;
 
       // Currency format (e.g. ₹ 5,000)
-      const formattedAdvance = new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        maximumFractionDigits: 0
-      }).format(booking.advance);
+      const formattedAdvance = formatCurrency(booking.advance);
 
       // Booked on date formatting
       const bookedOnDate = booking.timestamp ? new Date(booking.timestamp).toLocaleDateString('en-IN', {
@@ -2970,11 +3148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const parsedPrice = parsePackagePrice(booking.package);
       const isCompleted = !!linkedShoot;
       const balance = isCompleted ? 0 : Math.max(0, parsedPrice - booking.advance);
-      const formattedBalance = new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        maximumFractionDigits: 0
-      }).format(balance);
+      const formattedBalance = formatCurrency(balance);
 
       let accountDisplay = booking.paymentAccount || 'Cash';
       if (linkedShoot) {
@@ -6258,6 +6432,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (addBookingBtn) {
     addBookingBtn.addEventListener('click', () => {
       addBookingForm.reset();
+      if (bookingAdvance) {
+        bookingAdvance.value = getDefaultAdvance();
+      }
       if (bookingShootTypeCustomContainer) {
         bookingShootTypeCustomContainer.style.display = 'none';
         bookingShootTypeCustom.removeAttribute('required');
@@ -6632,7 +6809,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <span>📦 Package: <strong>${escapeHtml(b.package)}</strong></span>
               </div>
               <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
-                <span>💰 Advance: <strong>₹${b.advance}</strong> (${escapeHtml(b.paymentAccount || 'Cash')})</span>
+                <span>💰 Advance: <strong>${formatCurrency(b.advance)}</strong> (${escapeHtml(b.paymentAccount || 'Cash')})</span>
               </div>
             </div>
             
@@ -6735,11 +6912,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <span>📷 Photos: <strong>${s.photosCount} files</strong></span>
               </div>
               <div class="booking-detail-item" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <span>💵 Advance: <strong>₹${s.advanceAmount}</strong> (${s.advanceAccount})</span>
-                <span>💵 Balance: <strong>₹${s.balanceAmount}</strong> (${s.balanceAccount})</span>
+                <span>💵 Advance: <strong>${formatCurrency(s.advanceAmount)}</strong> (${s.advanceAccount})</span>
+                <span>💵 Balance: <strong>${formatCurrency(s.balanceAmount)}</strong> (${s.balanceAccount})</span>
               </div>
               <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
-                <span>💰 Total: <strong>₹${totalPay}</strong></span>
+                <span>💰 Total: <strong>${formatCurrency(totalPay)}</strong></span>
               </div>
               ${s.albumIncluded ? `
               <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; color: #1565C0; font-weight: 600; white-space: nowrap;">
@@ -7754,6 +7931,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
   };
+
+  // Run settings and preferences initializations
+  syncSettingsFields();
+  initPreferencesListeners();
 
   // Run calendar initializations
   initCalendarListeners();
