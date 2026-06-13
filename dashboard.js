@@ -6122,26 +6122,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         return `
-          <li class="booking-card" style="border-left: 4px solid ${cardBorderColor};" data-id="${b.id}">
-            <div class="booking-card-header">
-              <div class="booking-client-info">
-                <h3 class="booking-client-name">${escapeHtml(b.clientName)}</h3>
-                ${badgeHtml}
+          <li class="booking-card" style="border-left: 4px solid ${cardBorderColor}; display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; padding: 0.75rem 1.25rem; flex-wrap: wrap;" data-id="${b.id}">
+            <div class="booking-client-info" style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px;">
+              <h3 class="booking-client-name" style="margin: 0; font-size: 0.95rem; font-weight: 600;">${escapeHtml(b.clientName)}</h3>
+              ${badgeHtml}
+            </div>
+            
+            <div class="booking-card-body-horizontal" style="display: flex; align-items: center; gap: 1.5rem; flex: 2; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-secondary);">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+                <span>📅 <strong>${formattedDate} • ${formattedTime}</strong></span>
+              </div>
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+                <span>📦 Package: <strong>${escapeHtml(b.package)}</strong></span>
+              </div>
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+                <span>💰 Advance: <strong>₹${b.advance}</strong> (${escapeHtml(b.paymentAccount || 'Cash')})</span>
               </div>
             </div>
-            <div class="booking-card-body" style="padding: 0.4rem 0; display: flex; flex-direction: column; gap: 3px;">
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; font-size: 0.74rem; color: var(--text-secondary);">
-                <span>📅 ${formattedDate} • ${formattedTime}</span>
-              </div>
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; font-size: 0.74rem; color: var(--text-secondary);">
-                <span>📦 Package: ${escapeHtml(b.package)}</span>
-              </div>
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; font-size: 0.74rem; color: var(--text-secondary);">
-                <span>💰 Advance: ₹${b.advance} (${escapeHtml(b.paymentAccount || 'Cash')})</span>
-              </div>
-            </div>
-            <div style="margin-top: 0.4rem;">
-              <button class="btn btn-primary btn-log-pending-shoot" data-id="${b.id}" style="width: 100%; padding: 0.45rem; font-size: 0.72rem; border-radius: 6px;">
+            
+            <div class="booking-card-actions" style="display: flex; align-items: center; gap: 10px; margin-left: auto;">
+              <button class="btn btn-primary btn-log-pending-shoot" data-id="${b.id}" style="padding: 0.5rem 1rem; font-size: 0.75rem; border-radius: 6px; white-space: nowrap;">
                 Log Shoot & Payments
               </button>
             </div>
@@ -6218,51 +6218,51 @@ document.addEventListener('DOMContentLoaded', async () => {
         const totalPay = (s.advanceAmount || 0) + (s.balanceAmount || 0);
 
         return `
-          <li class="booking-card" style="border-left: 4px solid #2e7d32;" data-id="${s.id}">
-            <div class="booking-card-header">
-              <div class="booking-client-info">
-                <h3 class="booking-client-name">${escapeHtml(s.clientName)}</h3>
-                <span class="booking-shoot-badge" style="background: rgba(46,125,50,0.1); color: #2e7d32;">Completed Shoot</span>
-              </div>
-              <div class="booking-actions">
-                <button class="btn-edit-contact btn-edit-shoot" data-id="${s.id}" title="Edit shoot log">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                </button>
-                <button class="btn-delete-gallery btn-delete-shoot" data-id="${s.id}" title="Delete shoot log">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
-                </button>
-              </div>
+          <li class="booking-card" style="border-left: 4px solid #2e7d32; display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; padding: 0.75rem 1.25rem; flex-wrap: wrap;" data-id="${s.id}">
+            <div class="booking-client-info" style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px;">
+              <h3 class="booking-client-name" style="margin: 0; font-size: 0.95rem; font-weight: 600;">${escapeHtml(s.clientName)}</h3>
+              <span class="booking-shoot-badge" style="background: rgba(46,125,50,0.1); color: #2e7d32;">Completed Shoot</span>
             </div>
-            <div class="booking-card-body" style="padding: 0.4rem 0; display: flex; flex-direction: column; gap: 3px;">
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; font-size: 0.74rem; color: var(--text-secondary);">
-                <span>📅 ${formattedDate} • ${formattedTime}</span>
+            
+            <div class="booking-card-body-horizontal" style="display: flex; align-items: center; gap: 1.5rem; flex: 2; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-secondary);">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+                <span>📅 <strong>${formattedDate} • ${formattedTime}</strong></span>
               </div>
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; font-size: 0.74rem; color: var(--text-secondary);">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
                 <span>📷 Photos: <strong>${s.photosCount} files</strong></span>
               </div>
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; font-size: 0.74rem; color: var(--text-secondary);">
-                <span>💵 Advance: ₹${s.advanceAmount} (${s.advanceAccount})</span>
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+                <span>💵 Advance: <strong>₹${s.advanceAmount}</strong> (${s.advanceAccount})</span>
               </div>
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; font-size: 0.74rem; color: var(--text-secondary);">
-                <span>💵 Balance: ₹${s.balanceAmount} (${s.balanceAccount})</span>
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+                <span>💵 Balance: <strong>₹${s.balanceAmount}</strong> (${s.balanceAccount})</span>
               </div>
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; font-size: 0.74rem; color: var(--text-secondary);">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
                 <span>💰 Total: <strong>₹${totalPay}</strong></span>
               </div>
               ${s.albumIncluded ? `
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; font-size: 0.74rem; color: #1565C0; font-weight: 600; margin-top: 2px;">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; color: #1565C0; font-weight: 600;">
                 <span>📖 Album Included</span>
               </div>` : ''}
               ${s.specialRequests ? `
-              <div class="booking-detail-item" style="display: flex; align-items: flex-start; gap: 4px; font-size: 0.72rem; color: var(--text-light); margin-top: 3px;">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; color: var(--text-light); font-style: italic;">
                 <span>📝 ${escapeHtml(s.specialRequests)}</span>
               </div>` : ''}
+            </div>
+            
+            <div class="booking-card-actions" style="display: flex; align-items: center; gap: 10px; margin-left: auto;">
+              <button class="btn-edit-contact btn-edit-shoot" data-id="${s.id}" title="Edit shoot log" style="padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--text-light); cursor: pointer; transition: all var(--transition-fast);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button class="btn-delete-gallery btn-delete-shoot" data-id="${s.id}" title="Delete shoot log" style="padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--text-light); cursor: pointer; transition: all var(--transition-fast);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
             </div>
           </li>
         `;
