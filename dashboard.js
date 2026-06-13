@@ -569,6 +569,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
       }
 
+      // Match with shoot to find allowed photos count
+      const normalizeName = (name) => name ? name.toLowerCase().replace(/[^a-z0-9]/g, '').trim() : '';
+      const normGalName = normalizeName(gallery.clientName);
+      const matchingShoot = typeof shoots !== 'undefined' ? shoots.find(s => normalizeName(s.clientName) === normGalName) : null;
+
+      let photoSelectionHtml = '';
+      const selectedCount = parseInt(gallery.photosSelected) || 0;
+      let shootAllowed = 0;
+      if (matchingShoot && matchingShoot.photosCount) {
+        shootAllowed = parseInt(matchingShoot.photosCount) || 0;
+      }
+
+      let extraPhotos = 0;
+      let extraCost = 0;
+      if (shootAllowed > 0 && selectedCount > shootAllowed) {
+        extraPhotos = selectedCount - shootAllowed;
+        extraCost = extraPhotos * 200;
+      }
+
+      photoSelectionHtml = `
+        <div class="gallery-photo-selection-info" style="margin-top: 8px; font-size: 0.8rem; background: rgba(0, 0, 0, 0.02); padding: 8px; border-radius: var(--border-radius-sm); border: 1px dashed rgba(0, 0, 0, 0.05);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+            <span style="color: var(--text-secondary);">Selected Photos:</span>
+            <strong style="color: var(--text-primary); font-family: var(--font-sans);">${selectedCount}${shootAllowed ? ` / ${shootAllowed}` : ''}</strong>
+          </div>
+      `;
+      if (extraCost > 0) {
+        photoSelectionHtml += `
+          <div style="display: flex; justify-content: space-between; align-items: center; color: #d93838; font-weight: 600; margin-top: 4px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 4px;">
+            <span>Extra Charges (₹200/photo):</span>
+            <span style="font-family: var(--font-sans);">₹${extraCost} (${extraPhotos} extra)</span>
+          </div>
+        `;
+      }
+      photoSelectionHtml += `</div>`;
+
       const item = document.createElement('li');
       item.className = 'gallery-card';
       item.innerHTML = `
@@ -576,6 +612,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ${currentStatusHtml}
         ${historyDetailsHtml}
         ${gallery.notes ? `<p class="gallery-notes" style="margin-top: 4px;">${escapeHtml(gallery.notes)}</p>` : ''}
+        ${photoSelectionHtml}
         <div class="gallery-actions">
           ${actionBtn}
           <button class="btn-edit-gallery" data-id="${gallery.id}" title="Edit gallery" style="margin-right: 0.25rem;">
@@ -639,6 +676,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('edit-gallery-client-name').value = gallery.clientName;
         document.getElementById('edit-gallery-notes-input').value = gallery.notes || '';
         document.getElementById('edit-gallery-status-select').value = gallery.status;
+        if (document.getElementById('edit-gallery-photos-selected')) {
+          document.getElementById('edit-gallery-photos-selected').value = gallery.photosSelected || 0;
+        }
         
         const editGalleryDate = document.getElementById('edit-gallery-date-input');
         if (editGalleryDate && gallery.timestamp) {
@@ -3332,7 +3372,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // --- Gallery database actions ---
-    window.addGallery = async (clientName, notes, customTimestamp = null) => {
+    window.addGallery = async (clientName, notes, customTimestamp = null, photosSelected = 0) => {
       try {
         await firebaseFirestore.addDoc(firebaseFirestore.collection(db, "galleries"), {
           clientName: clientName.trim(),
@@ -3342,7 +3382,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           arrivedDate: null,
           selectionDate: null,
           editedDate: null,
-          deliveredDate: null
+          deliveredDate: null,
+          photosSelected: parseInt(photosSelected) || 0
         });
         showToast(`Gallery <strong>${clientName}</strong> registered`, '📸');
       } catch (err) {
@@ -3451,13 +3492,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.updateGallery = async (id, clientName, notes, status, chosenTimestamp = Date.now(), customCreationTimestamp = null) => {
+    window.updateGallery = async (id, clientName, notes, status, chosenTimestamp = Date.now(), customCreationTimestamp = null, photosSelected = 0) => {
       try {
         const existing = galleries.find(g => g.id === id);
         const updateFields = {
           clientName: clientName.trim(),
           notes: notes.trim(),
-          status: status
+          status: status,
+          photosSelected: parseInt(photosSelected) || 0
         };
         if (customCreationTimestamp !== null) {
           updateFields.timestamp = customCreationTimestamp;
@@ -4465,7 +4507,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Custom Galleries operations mapping for Local mode
-    window.addGallery = (clientName, notes, customTimestamp = null) => {
+    window.addGallery = (clientName, notes, customTimestamp = null, photosSelected = 0) => {
       const newGallery = {
         id: 'gallery_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         clientName: clientName.trim(),
@@ -4475,7 +4517,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         arrivedDate: null,
         selectionDate: null,
         editedDate: null,
-        deliveredDate: null
+        deliveredDate: null,
+        photosSelected: parseInt(photosSelected) || 0
       };
 
       galleries.push(newGallery);
@@ -4536,7 +4579,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.updateGallery = (id, clientName, notes, status, chosenTimestamp = Date.now(), customCreationTimestamp = null) => {
+    window.updateGallery = (id, clientName, notes, status, chosenTimestamp = Date.now(), customCreationTimestamp = null, photosSelected = 0) => {
       const gIndex = galleries.findIndex(g => g.id === id);
       if (gIndex === -1) return;
 
@@ -4544,6 +4587,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       existing.clientName = clientName.trim();
       existing.notes = notes.trim();
       existing.status = status;
+      existing.photosSelected = parseInt(photosSelected) || 0;
       if (customCreationTimestamp !== null) {
         existing.timestamp = customCreationTimestamp;
       }
@@ -5383,6 +5427,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const galleryClientName = document.getElementById('gallery-client-name');
   const galleryNotesInput = document.getElementById('gallery-notes-input');
   const galleryStatusMsg = document.getElementById('gallery-status-msg');
+  const galleryPhotosSelected = document.getElementById('gallery-photos-selected');
 
   if (addGalleryBtn) {
     addGalleryBtn.addEventListener('click', () => {
@@ -5427,8 +5472,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const dateInput = document.getElementById('gallery-date-input');
       const customTimestamp = dateInput && dateInput.value ? new Date(dateInput.value).getTime() : Date.now();
+      const photosSelected = galleryPhotosSelected ? parseInt(galleryPhotosSelected.value) || 0 : 0;
 
-      await window.addGallery(name, notes, customTimestamp);
+      await window.addGallery(name, notes, customTimestamp, photosSelected);
       closeGallery();
     });
   }
@@ -5441,6 +5487,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const editGalleryClientName = document.getElementById('edit-gallery-client-name');
   const editGalleryNotesInput = document.getElementById('edit-gallery-notes-input');
   const editGalleryStatusSelect = document.getElementById('edit-gallery-status-select');
+  const editGalleryPhotosSelected = document.getElementById('edit-gallery-photos-selected');
 
   const closeEditGallery = () => {
     editGalleryModal.classList.add('hidden');
@@ -5480,8 +5527,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const editGalleryDate = document.getElementById('edit-gallery-date-input');
       const customCreationTimestamp = editGalleryDate && editGalleryDate.value ? new Date(editGalleryDate.value).getTime() : (gallery ? gallery.timestamp : Date.now());
+      const photosSelected = editGalleryPhotosSelected ? parseInt(editGalleryPhotosSelected.value) || 0 : 0;
 
-      await window.updateGallery(id, name, notes, status, chosenTimestamp, customCreationTimestamp);
+      await window.updateGallery(id, name, notes, status, chosenTimestamp, customCreationTimestamp, photosSelected);
       closeEditGallery();
     });
   }
