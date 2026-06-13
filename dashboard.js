@@ -3474,6 +3474,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         if (typeof renderShoots === 'function') renderShoots();
         if (typeof renderAccounts === 'function') renderAccounts();
+        if (typeof renderVisualCalendar === 'function') renderVisualCalendar();
       }, (error) => {
         console.error('Firestore shoots subscription error:', error);
       });
@@ -4610,6 +4611,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       shoots = raw ? JSON.parse(raw) : [];
       if (typeof renderShoots === 'function') renderShoots();
       if (typeof renderAccounts === 'function') renderAccounts();
+      if (typeof renderVisualCalendar === 'function') renderVisualCalendar();
     };
 
     const saveLocalShoots = () => {
@@ -5299,6 +5301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       saveLocalShoots();
       renderShoots();
       if (typeof renderAccounts === 'function') renderAccounts();
+      if (typeof renderVisualCalendar === 'function') renderVisualCalendar();
 
       localChannel.postMessage({
         type: 'ADD_SHOOT',
@@ -5386,6 +5389,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       saveLocalShoots();
       renderShoots();
       if (typeof renderAccounts === 'function') renderAccounts();
+      if (typeof renderVisualCalendar === 'function') renderVisualCalendar();
 
       localChannel.postMessage({
         type: 'UPDATE_SHOOT',
@@ -5432,6 +5436,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       saveLocalShoots();
       renderShoots();
       if (typeof renderAccounts === 'function') renderAccounts();
+      if (typeof renderVisualCalendar === 'function') renderVisualCalendar();
 
       localChannel.postMessage({
         type: 'DELETE_SHOOT',
