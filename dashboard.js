@@ -6492,7 +6492,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     slotsList.innerHTML = '';
     selectedDayActions.innerHTML = '';
 
-    const totalEvents = dayBookings.length + dayShoots.length + dayGcalEvents.length;
+    // Collect Google Calendar Event IDs already associated with local bookings/shoots
+    const syncedEventIds = new Set();
+    dayBookings.forEach(b => {
+      if (b.gCalEventId) syncedEventIds.add(b.gCalEventId);
+    });
+    dayShoots.forEach(s => {
+      if (s.gCalEventId) syncedEventIds.add(s.gCalEventId);
+    });
+
+    const filteredGcalEvents = dayGcalEvents.filter(event => !syncedEventIds.has(event.id));
+    const totalEvents = dayBookings.length + dayShoots.length + filteredGcalEvents.length;
 
     if (totalEvents === 0) {
       slotsList.innerHTML = `
@@ -6510,11 +6520,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       // Local bookings
       dayBookings.forEach(booking => {
+        const isSynced = !!booking.gCalEventId;
         slotsList.innerHTML += `
           <div class="calendar-slot-item" style="border-left-color: #a88a3a; padding: 1rem; margin-bottom: 0.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
               <strong style="color: var(--text-primary); font-size: 0.95rem; text-transform: capitalize;">${escapeHtml(booking.clientName)}</strong>
-              <span style="font-size: 0.7rem; background: rgba(168, 138, 58, 0.1); color: #a88a3a; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Booking</span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <span style="font-size: 0.7rem; background: rgba(168, 138, 58, 0.1); color: #a88a3a; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Booking</span>
+                ${isSynced ? `<span style="font-size: 0.7rem; background: rgba(66, 133, 244, 0.1); color: #4285F4; padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;">🔵 Synced</span>` : ''}
+              </div>
             </div>
             <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
               <div style="display: flex; align-items: center; gap: 6px;">
@@ -6533,11 +6547,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Completed shoots
       dayShoots.forEach(shoot => {
+        const isSynced = !!shoot.gCalEventId;
         slotsList.innerHTML += `
           <div class="calendar-slot-item" style="border-left-color: #2E7D32; padding: 1rem; margin-bottom: 0.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
               <strong style="color: var(--text-primary); font-size: 0.95rem; text-transform: capitalize;">${escapeHtml(shoot.clientName)}</strong>
-              <span style="font-size: 0.7rem; background: rgba(46, 125, 50, 0.1); color: #2E7D32; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Shoot</span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <span style="font-size: 0.7rem; background: rgba(46, 125, 50, 0.1); color: #2E7D32; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Shoot</span>
+                ${isSynced ? `<span style="font-size: 0.7rem; background: rgba(66, 133, 244, 0.1); color: #4285F4; padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;">🔵 Synced</span>` : ''}
+              </div>
             </div>
             <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
               <div style="display: flex; align-items: center; gap: 6px;">
@@ -6554,8 +6572,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
       });
 
-      // Google events
-      dayGcalEvents.forEach(event => {
+      // Google events (filtered to exclude synced duplicates)
+      filteredGcalEvents.forEach(event => {
         slotsList.innerHTML += `
           <div class="calendar-slot-item" style="border-left-color: #4285F4; padding: 1rem; margin-bottom: 0.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
