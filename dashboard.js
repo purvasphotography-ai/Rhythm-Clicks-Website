@@ -470,6 +470,56 @@ document.addEventListener('DOMContentLoaded', async () => {
         deliveredCount++;
       }
 
+      // Build workflow phase timeline
+      let timelineHtml = `
+        <div class="gallery-timestamps-timeline">
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Pending</span>
+            <span class="gallery-timestamp-val">${dateStr} • ${timeStr}</span>
+          </div>
+      `;
+      if (gallery.arrivedDate) {
+        const aDate = new Date(gallery.arrivedDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        const aTime = new Date(gallery.arrivedDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        timelineHtml += `
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Arrived</span>
+            <span class="gallery-timestamp-val">${aDate} • ${aTime}</span>
+          </div>
+        `;
+      }
+      if (gallery.selectionDate) {
+        const sDate = new Date(gallery.selectionDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        const sTime = new Date(gallery.selectionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        timelineHtml += `
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Selected</span>
+            <span class="gallery-timestamp-val">${sDate} • ${sTime}</span>
+          </div>
+        `;
+      }
+      if (gallery.editedDate) {
+        const eDate = new Date(gallery.editedDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        const eTime = new Date(gallery.editedDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        timelineHtml += `
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Edited</span>
+            <span class="gallery-timestamp-val">${eDate} • ${eTime}</span>
+          </div>
+        `;
+      }
+      if (gallery.deliveredDate) {
+        const dDate = new Date(gallery.deliveredDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        const dTime = new Date(gallery.deliveredDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        timelineHtml += `
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Delivered</span>
+            <span class="gallery-timestamp-val">${dDate} • ${dTime}</span>
+          </div>
+        `;
+      }
+      timelineHtml += `</div>`;
+
       // Find latest status transition date/time for galleries
       let latestLabel = 'Pending';
       let latestVal = `${dateStr} • ${timeStr}`;
@@ -663,6 +713,56 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else if (album.status === 'delivered') {
         deliveredCount++;
       }
+
+      // Build workflow phase timeline
+      let timelineHtml = `
+        <div class="gallery-timestamps-timeline">
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Pending Approval</span>
+            <span class="gallery-timestamp-val">${dateStr} • ${timeStr}</span>
+          </div>
+      `;
+      if (album.approvalDate) {
+        const apDate = new Date(album.approvalDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        const apTime = new Date(album.approvalDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        timelineHtml += `
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Approved</span>
+            <span class="gallery-timestamp-val">${apDate} • ${apTime}</span>
+          </div>
+        `;
+      }
+      if (album.printingDate) {
+        const pDate = new Date(album.printingDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        const pTime = new Date(album.printingDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        timelineHtml += `
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Printing</span>
+            <span class="gallery-timestamp-val">${pDate} • ${pTime}</span>
+          </div>
+        `;
+      }
+      if (album.arrivedDate) {
+        const arDate = new Date(album.arrivedDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        const arTime = new Date(album.arrivedDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        timelineHtml += `
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Arrived</span>
+            <span class="gallery-timestamp-val">${arDate} • ${arTime}</span>
+          </div>
+        `;
+      }
+      if (album.deliveredDate) {
+        const dDate = new Date(album.deliveredDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        const dTime = new Date(album.deliveredDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        timelineHtml += `
+          <div class="gallery-timestamp-row">
+            <span class="gallery-timestamp-label">Delivered</span>
+            <span class="gallery-timestamp-val">${dDate} • ${dTime}</span>
+          </div>
+        `;
+      }
+      timelineHtml += `</div>`;
 
       // Find latest status transition date/time for albums
       let latestLabel = 'Pending Approval';
