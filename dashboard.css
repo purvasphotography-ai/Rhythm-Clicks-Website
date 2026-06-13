@@ -871,6 +871,10 @@ body {
   padding-right: 6px;
 }
 
+.tab-content > * {
+  flex-shrink: 0;
+}
+
 .tab-content.active {
   display: flex;
 }
