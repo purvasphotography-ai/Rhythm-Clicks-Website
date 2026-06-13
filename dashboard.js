@@ -6107,41 +6107,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         const ampm = timeHrs >= 12 ? 'PM' : 'AM';
         const formattedTime = `${timeHrs % 12 || 12}:${minutes} ${ampm}`;
 
-        let badgeHtml = `<span class="booking-shoot-badge" style="background: rgba(245,124,0,0.1); color: #f57c00;">Pending Shoot</span>`;
+        let badgeHtml = `<span class="booking-shoot-badge" style="margin: 0; background: rgba(245,124,0,0.1); color: #f57c00;">Pending Shoot</span>`;
         let cardBorderColor = '#f57c00';
 
         if (b.date === todayStr) {
-          badgeHtml = `<span class="booking-shoot-badge" style="background: rgba(211,47,47,0.1); color: #d32f2f; font-weight: 700;">🔴 Today</span>`;
+          badgeHtml = `<span class="booking-shoot-badge" style="margin: 0; background: rgba(211,47,47,0.1); color: #d32f2f; font-weight: 700;">🔴 Today</span>`;
           cardBorderColor = '#d32f2f';
         } else if (b.date === tomorrowStr) {
-          badgeHtml = `<span class="booking-shoot-badge" style="background: rgba(25,118,210,0.1); color: #1976D2; font-weight: 700;">🔵 Tomorrow</span>`;
+          badgeHtml = `<span class="booking-shoot-badge" style="margin: 0; background: rgba(25,118,210,0.1); color: #1976D2; font-weight: 700;">🔵 Tomorrow</span>`;
           cardBorderColor = '#1976D2';
         } else if (b.date < todayStr) {
-          badgeHtml = `<span class="booking-shoot-badge" style="background: rgba(97,97,97,0.1); color: #616161; font-weight: 700;">⏳ Overdue</span>`;
+          badgeHtml = `<span class="booking-shoot-badge" style="margin: 0; background: rgba(97,97,97,0.1); color: #616161; font-weight: 700;">⏳ Overdue</span>`;
           cardBorderColor = '#616161';
         }
 
         return `
-          <li class="booking-card" style="border-left: 4px solid ${cardBorderColor}; display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; padding: 0.75rem 1.25rem; flex-wrap: wrap;" data-id="${b.id}">
-            <div class="booking-client-info" style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px;">
-              <h3 class="booking-client-name" style="margin: 0; font-size: 0.95rem; font-weight: 600;">${escapeHtml(b.clientName)}</h3>
+          <li class="booking-card" style="border-left: 4px solid ${cardBorderColor}; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 1rem; padding: 0.5rem 1rem; flex-wrap: wrap;" data-id="${b.id}">
+            <div class="booking-client-info" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 8px; flex-shrink: 0; min-width: auto;">
+              <h3 class="booking-client-name" style="margin: 0; font-size: 0.88rem; font-weight: 600; white-space: nowrap;">${escapeHtml(b.clientName)}</h3>
               ${badgeHtml}
             </div>
             
-            <div class="booking-card-body-horizontal" style="display: flex; align-items: center; gap: 1.5rem; flex: 2; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-secondary);">
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+            <div class="booking-card-body-horizontal" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 1.25rem; flex-grow: 1; justify-content: flex-start; font-size: 0.78rem; color: var(--text-secondary); margin-left: 1rem; flex-wrap: wrap;">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
                 <span>📅 <strong>${formattedDate} • ${formattedTime}</strong></span>
               </div>
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
                 <span>📦 Package: <strong>${escapeHtml(b.package)}</strong></span>
               </div>
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
                 <span>💰 Advance: <strong>₹${b.advance}</strong> (${escapeHtml(b.paymentAccount || 'Cash')})</span>
               </div>
             </div>
             
-            <div class="booking-card-actions" style="display: flex; align-items: center; gap: 10px; margin-left: auto;">
-              <button class="btn btn-primary btn-log-pending-shoot" data-id="${b.id}" style="padding: 0.5rem 1rem; font-size: 0.75rem; border-radius: 6px; white-space: nowrap;">
+            <div class="booking-card-actions" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 10px; flex-shrink: 0; margin-left: auto;">
+              <button class="btn btn-primary btn-log-pending-shoot" data-id="${b.id}" style="padding: 0.4rem 0.8rem; font-size: 0.72rem; border-radius: 6px; white-space: nowrap;">
                 Log Shoot & Payments
               </button>
             </div>
@@ -6218,46 +6218,46 @@ document.addEventListener('DOMContentLoaded', async () => {
         const totalPay = (s.advanceAmount || 0) + (s.balanceAmount || 0);
 
         return `
-          <li class="booking-card" style="border-left: 4px solid #2e7d32; display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; padding: 0.75rem 1.25rem; flex-wrap: wrap;" data-id="${s.id}">
-            <div class="booking-client-info" style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px;">
-              <h3 class="booking-client-name" style="margin: 0; font-size: 0.95rem; font-weight: 600;">${escapeHtml(s.clientName)}</h3>
-              <span class="booking-shoot-badge" style="background: rgba(46,125,50,0.1); color: #2e7d32;">Completed Shoot</span>
+          <li class="booking-card" style="border-left: 4px solid #2e7d32; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 1rem; padding: 0.5rem 1rem; flex-wrap: wrap;" data-id="${s.id}">
+            <div class="booking-client-info" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 8px; flex-shrink: 0; min-width: auto;">
+              <h3 class="booking-client-name" style="margin: 0; font-size: 0.88rem; font-weight: 600; white-space: nowrap;">${escapeHtml(s.clientName)}</h3>
+              <span class="booking-shoot-badge" style="margin: 0; background: rgba(46,125,50,0.1); color: #2e7d32;">Completed Shoot</span>
             </div>
             
-            <div class="booking-card-body-horizontal" style="display: flex; align-items: center; gap: 1.5rem; flex: 2; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-secondary);">
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+            <div class="booking-card-body-horizontal" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 1.25rem; flex-grow: 1; justify-content: flex-start; font-size: 0.78rem; color: var(--text-secondary); margin-left: 1rem; flex-wrap: wrap;">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
                 <span>📅 <strong>${formattedDate} • ${formattedTime}</strong></span>
               </div>
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
                 <span>📷 Photos: <strong>${s.photosCount} files</strong></span>
               </div>
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
                 <span>💵 Advance: <strong>₹${s.advanceAmount}</strong> (${s.advanceAccount})</span>
               </div>
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
                 <span>💵 Balance: <strong>₹${s.balanceAmount}</strong> (${s.balanceAccount})</span>
               </div>
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px;">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
                 <span>💰 Total: <strong>₹${totalPay}</strong></span>
               </div>
               ${s.albumIncluded ? `
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; color: #1565C0; font-weight: 600;">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; color: #1565C0; font-weight: 600; white-space: nowrap;">
                 <span>📖 Album Included</span>
               </div>` : ''}
               ${s.specialRequests ? `
-              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; color: var(--text-light); font-style: italic;">
+              <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; color: var(--text-light); font-style: italic; white-space: nowrap;">
                 <span>📝 ${escapeHtml(s.specialRequests)}</span>
               </div>` : ''}
             </div>
             
-            <div class="booking-card-actions" style="display: flex; align-items: center; gap: 10px; margin-left: auto;">
-              <button class="btn-edit-contact btn-edit-shoot" data-id="${s.id}" title="Edit shoot log" style="padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--text-light); cursor: pointer; transition: all var(--transition-fast);">
+            <div class="booking-card-actions" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 8px; flex-shrink: 0; margin-left: auto;">
+              <button class="btn-edit-contact btn-edit-shoot" data-id="${s.id}" title="Edit shoot log" style="padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--text-light); cursor: pointer; transition: all var(--transition-fast);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                 </svg>
               </button>
-              <button class="btn-delete-gallery btn-delete-shoot" data-id="${s.id}" title="Delete shoot log" style="padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--text-light); cursor: pointer; transition: all var(--transition-fast);">
+              <button class="btn-delete-gallery btn-delete-shoot" data-id="${s.id}" title="Delete shoot log" style="padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--text-light); cursor: pointer; transition: all var(--transition-fast);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
