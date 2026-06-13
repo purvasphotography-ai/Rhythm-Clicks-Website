@@ -570,12 +570,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       // Match with shoot to find allowed photos count
-      const normalizeName = (name) => name ? name.toLowerCase().replace(/[^a-z0-9]/g, '').trim() : '';
-      const normGalName = normalizeName(gallery.clientName);
-      const matchingShoot = typeof shoots !== 'undefined' ? shoots.find(s => normalizeName(s.clientName) === normGalName) : null;
+      let matchingShoot = null;
+      try {
+        const normalizeName = (name) => name ? String(name).toLowerCase().replace(/[^a-z0-9]/g, '').trim() : '';
+        const normGalName = gallery && gallery.clientName ? normalizeName(gallery.clientName) : '';
+        if (normGalName && typeof shoots !== 'undefined' && Array.isArray(shoots)) {
+          matchingShoot = shoots.find(s => s && s.clientName && normalizeName(s.clientName) === normGalName) || null;
+        }
+      } catch (err) {
+        console.error("Error matching shoot for gallery card:", err);
+      }
 
       let photoSelectionHtml = '';
-      const selectedCount = parseInt(gallery.photosSelected) || 0;
+      const selectedCount = gallery && gallery.photosSelected ? parseInt(gallery.photosSelected) || 0 : 0;
       let shootAllowed = 0;
       if (matchingShoot && matchingShoot.photosCount) {
         shootAllowed = parseInt(matchingShoot.photosCount) || 0;
