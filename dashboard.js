@@ -2706,72 +2706,49 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       return `
-        <li class="booking-card" data-id="${booking.id}">
-          <div class="booking-card-header">
-            <div class="booking-client-info">
-              <h3 class="booking-client-name">${escapeHtml(booking.clientName)}</h3>
-              <span class="booking-shoot-badge">${escapeHtml(booking.shootType)}</span>
-            </div>
-            <div class="booking-actions">
-              <button class="btn-edit-contact btn-edit-booking" data-id="${booking.id}" title="Edit booking">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-              </button>
-              <button class="btn-delete-gallery btn-delete-booking" data-id="${booking.id}" title="Delete booking">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  <line x1="10" y1="11" x2="10" y2="17"></line>
-                  <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg>
-              </button>
-            </div>
+        <li class="booking-card" style="border-left: 4px solid #a88a3a; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 1.5rem; padding: 0.6rem 1.25rem; flex-wrap: wrap;" data-id="${booking.id}">
+          <!-- Column 1: Client Name -->
+          <div class="booking-client-info" style="display: flex !important; flex-direction: column !important; align-items: flex-start !important; flex: 1.5; min-width: 180px; gap: 4px;">
+            <h3 class="booking-client-name" style="margin: 0; font-family: var(--font-sans) !important; font-size: 0.9rem; font-weight: 600; text-transform: capitalize; white-space: nowrap;">${escapeHtml(booking.clientName)}</h3>
           </div>
           
-          <div class="booking-card-body" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.6rem 0;">
-            <div class="booking-detail-item" style="display: flex; align-items: center; gap: 6px; font-size: 0.74rem; color: var(--text-secondary);">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-              <span>${formattedDate} • ${formattedTime}</span>
+          <!-- Column 2: Status Indicator Badge -->
+          <div class="booking-status-indicator" style="display: flex !important; align-items: center !important; justify-content: flex-start !important; flex: 1; min-width: 120px;">
+            <span class="booking-shoot-badge" style="margin: 0; background-color: rgba(168, 138, 58, 0.08); color: #a88a3a;">${escapeHtml(booking.shootType)}</span>
+          </div>
+          
+          <!-- Column 3: Booking Info (stacked vertically) -->
+          <div class="booking-card-body-horizontal" style="display: flex !important; flex-direction: column !important; align-items: flex-start !important; gap: 4px; flex: 3; min-width: 250px; font-size: 0.76rem; color: var(--text-secondary); margin-left: 1rem;">
+            <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+              <span>📅 <strong>${formattedDate} • ${formattedTime}</strong></span>
             </div>
-            <div class="booking-detail-item" style="display: flex; align-items: center; gap: 6px; font-size: 0.74rem; color: var(--text-secondary);">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-              </svg>
-              <span>Pkg: ${escapeHtml(booking.package)}</span>
+            <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+              <span>📦 Package: <strong>${escapeHtml(booking.package)}</strong></span>
             </div>
-            <div class="booking-detail-item" style="display: flex; align-items: center; gap: 6px; font-size: 0.74rem; color: var(--text-secondary);">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
-                <line x1="12" y1="4" x2="12" y2="20"></line>
-              </svg>
-              <span>Acc: <strong>${escapeHtml(accountDisplay)}</strong></span>
+            <div class="booking-detail-item" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <span>💵 Advance: <strong>${formattedAdvance}</strong></span>
+              <span>💵 Balance: <strong>${isCompleted ? 'Paid ✓' : formattedBalance}</strong></span>
             </div>
-            <div class="booking-detail-item" style="display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--text-light);">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              <span>Booked: ${bookedOnDate}</span>
+            <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+              <span>🏦 Account: <strong>${escapeHtml(accountDisplay)}</strong></span>
             </div>
             ${deliveryInfoHtml}
           </div>
           
-          <div class="booking-card-footer" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 0.5rem; margin-top: 0.2rem;">
-            <div>
-              <span class="booking-advance-label" style="display: block; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Paid Adv</span>
-              <span class="booking-advance-value" style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">${formattedAdvance}</span>
-            </div>
-            <div style="text-align: right;">
-              <span style="display: block; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Bal Due</span>
-              <span style="font-size: 0.85rem; font-weight: 700; color: ${isCompleted ? '#2E7D32' : (balance === 0 ? '#2E7D32' : '#C62828')};">${isCompleted ? 'Paid ✓' : formattedBalance}</span>
-            </div>
+          <!-- Column 4: Action Buttons -->
+          <div class="booking-card-actions" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 8px; flex-shrink: 0; margin-left: auto;">
+            <button class="btn-edit-contact btn-edit-booking" data-id="${booking.id}" title="Edit booking" style="padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--text-light); cursor: pointer; transition: all var(--transition-fast);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+            <button class="btn-delete-gallery btn-delete-booking" data-id="${booking.id}" title="Delete booking" style="padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--text-light); cursor: pointer; transition: all var(--transition-fast);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
           </div>
         </li>
       `;
