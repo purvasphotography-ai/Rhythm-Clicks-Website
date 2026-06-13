@@ -16,7 +16,7 @@
   
   <!-- CSS Stylesheets -->
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="dashboard.css?v=2.9">
+  <link rel="stylesheet" href="dashboard.css?v=3.0">
   <!-- SheetJS client-side Excel utility library -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -1296,7 +1296,7 @@
           <!-- Right Part: Availability Slots Details -->
           <div class="visual-calendar-details-container" style="flex: 1; min-width: 280px; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); padding: 1.5rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;">
             <h3 id="selected-day-title" style="margin: 0 0 1rem 0; font-family: var(--font-serif); font-size: 1.15rem; color: var(--text-primary); border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 0.5rem;">Select a date</h3>
-            <div id="selected-day-slots-list" style="flex: 1; overflow-y: auto; max-height: 250px; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 8px;">
+            <div id="selected-day-slots-list" style="margin-bottom: 1rem; display: flex; flex-direction: column; gap: 8px;">
               <!-- Details rendered by JS -->
             </div>
             <div id="selected-day-actions">
@@ -1520,6 +1520,6 @@
   <!-- Google Identity Services client library -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Script Files (Loaded as ES6 Module for Firebase support) -->
-  <script type="module" src="dashboard.js?v=2.9"></script>
+  <script type="module" src="dashboard.js?v=3.0"></script>
 </body>
 </html>
