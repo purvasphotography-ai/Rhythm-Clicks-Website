@@ -7511,6 +7511,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         slotBuckets[idx].push({ type: 'gcal', data: event });
       });
 
+      // Put completed shoots in their closest slot bucket
+      cellShoots.forEach(shoot => {
+        const idx = getSlotIndex(shoot.time);
+        slotBuckets[idx].push({ type: 'shoot', data: shoot });
+      });
+
       // Render each slot bucket
       const slotTimesInfo = [
         { label: '9:00 AM Slot', hour: '09', minute: '00', ampm: 'AM' },
@@ -7541,8 +7547,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                   ${escapeHtml(booking.clientName)} 
                   ${statusBadge}
                 </td>
-                <td style="text-align: center; color: var(--text-secondary);">${dateDisplay}</td>
-                <td style="text-align: center; color: var(--text-secondary);">${weekdayDisplay}</td>
+                <td></td>
+                <td></td>
                 <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
                 <td style="color: var(--text-secondary);">${escapeHtml(booking.package)}</td>
                 <td style="text-align: center; display: flex; gap: 4px; justify-content: center; align-items: center; padding: 0.65rem 0.5rem; border: none !important;">
@@ -7551,6 +7557,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </td>
               `;
               sheetBody.appendChild(bookingRow);
+            } else if (item.type === 'shoot') {
+              const shoot = item.data;
+              const shootRow = document.createElement('tr');
+              shootRow.className = 'booking-row'; // Style as filled slot (green background)
+
+              const formattedTime = formatTime12H(shoot.time || '10:00');
+              const matchedBooking = bookings.find(b => b.id === shoot.bookingId);
+              const pkg = matchedBooking ? matchedBooking.package : `${shoot.photosCount} photos`;
+
+              shootRow.innerHTML = `
+                <td style="font-weight: 600; text-transform: capitalize; color: var(--text-primary);">
+                  ${escapeHtml(shoot.clientName)} 
+                  <span class="booking-shoot-badge" style="background: rgba(46,125,50,0.1); color: #2e7d32; margin-left: 8px;">Completed</span>
+                </td>
+                <td></td>
+                <td></td>
+                <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
+                <td style="color: var(--text-secondary);">${escapeHtml(pkg)}</td>
+                <td style="text-align: center; display: flex; gap: 4px; justify-content: center; align-items: center; padding: 0.65rem 0.5rem; border: none !important;">
+                  <button class="btn btn-secondary btn-edit-sheet-shoot" data-id="${shoot.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
+                </td>
+              `;
+              sheetBody.appendChild(shootRow);
             } else if (item.type === 'gcal') {
               const event = item.data;
               const gcalRow = document.createElement('tr');
@@ -7562,8 +7591,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                   ${escapeHtml(event.summary || 'Google Event')} 
                   <span class="booking-shoot-badge" style="background: rgba(66, 133, 244, 0.1); color: #4285F4; margin-left: 8px;">Google Cal</span>
                 </td>
-                <td style="text-align: center; color: var(--text-secondary);">${dateDisplay}</td>
-                <td style="text-align: center; color: var(--text-secondary);">${weekdayDisplay}</td>
+                <td></td>
+                <td></td>
                 <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
                 <td style="color: var(--text-light); font-style: italic;">Google Sync</td>
                 <td style="text-align: center;">
@@ -7582,8 +7611,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             <td style="font-weight: 600; color: #2E7D32; font-style: italic;">
               ✨ Empty Slot (${info.label})
             </td>
-            <td style="text-align: center; color: var(--text-secondary);">${dateDisplay}</td>
-            <td style="text-align: center; color: var(--text-secondary);">${weekdayDisplay}</td>
+            <td></td>
+            <td></td>
             <td style="text-align: center; color: var(--text-light); font-size: 0.75rem;">AM & PM Available</td>
             <td style="color: var(--text-light); font-size: 0.75rem;">All Packages</td>
             <td style="text-align: center;">
