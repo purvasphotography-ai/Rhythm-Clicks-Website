@@ -976,7 +976,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderSearchPipeline();
   };
 
-  window.showAddBooking = (clientName, prefilledDate) => {
+  window.showAddBooking = (clientName, prefilledDate, prefilledHour, prefilledMinute, prefilledAmpm) => {
     const addBookingForm = document.getElementById('add-booking-form');
     const addBookingModal = document.getElementById('booking-modal');
     if (addBookingForm && addBookingModal) {
@@ -984,6 +984,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('booking-client-name').value = clientName || '';
       if (prefilledDate) {
         document.getElementById('booking-date').value = prefilledDate;
+      }
+      if (prefilledHour) {
+        document.getElementById('booking-time-hour').value = prefilledHour;
+      }
+      if (prefilledMinute) {
+        document.getElementById('booking-time-minute').value = prefilledMinute;
+      }
+      if (prefilledAmpm) {
+        document.getElementById('booking-time-ampm').value = prefilledAmpm;
       }
       if (bookingShootTypeCustomContainer) bookingShootTypeCustomContainer.style.display = 'none';
       if (bookingShootTypeCustom) bookingShootTypeCustom.removeAttribute('required');
@@ -7373,97 +7382,159 @@ document.addEventListener('DOMContentLoaded', async () => {
       cellShoots.forEach(s => { if (s.gCalEventId) syncedEventIds.add(s.gCalEventId); });
       const filteredGcal = cellGcalEvents.filter(e => !syncedEventIds.has(e.id));
 
-      const totalEventCount = cellShoots.length + activeBookings.length + filteredGcal.length;
-
-      // 1. Render completed shoots
-      cellShoots.forEach(shoot => {
-        const shootRow = document.createElement('tr');
-        shootRow.className = 'completed-shoot-row';
+      // Standard slots array where index 0=9am, 1=12pm, 2=3pm, 3=5:30pm
+      const slotBuckets = [[], [], [], []];
+      
+      const standardTimes = [9.0, 12.0, 15.0, 17.5];
+      const getSlotIndex = (timeStr) => {
+        if (!timeStr || timeStr === 'All Day' || timeStr === 'N/A') return 0;
+        const parts = timeStr.split(':');
+        if (parts.length < 2) return 0;
+        const decimal = parseInt(parts[0]) + parseInt(parts[1])/60;
         
-        const formattedTime = formatTime12H(shoot.time || '10:00');
-        const matchedBooking = bookings.find(b => b.id === shoot.bookingId);
-        const pkg = matchedBooking ? matchedBooking.package : 'Completed Shoot';
+        let minDiff = Infinity;
+        let closestIdx = 0;
+        for (let i = 0; i < standardTimes.length; i++) {
+          const diff = Math.abs(decimal - standardTimes[i]);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestIdx = i;
+          }
+        }
+        return closestIdx;
+      };
 
-        shootRow.innerHTML = `
-          <td style="font-weight: 600; text-transform: capitalize; color: var(--text-primary);">
-            ${escapeHtml(shoot.clientName)} 
-            <span class="booking-shoot-badge" style="background: rgba(46,125,50,0.1); color: #2e7d32; margin-left: 8px;">Completed</span>
-          </td>
-          <td></td>
-          <td></td>
-          <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
-          <td style="color: var(--text-secondary);">${escapeHtml(pkg)}</td>
-          <td style="text-align: center;">
-            <button class="btn btn-secondary btn-edit-sheet-shoot" data-id="${shoot.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
-          </td>
-        `;
-        sheetBody.appendChild(shootRow);
+      const getGcalSlotIndex = (event) => {
+        if (!event.start.dateTime) return 0;
+        const start = new Date(event.start.dateTime);
+        const decimal = start.getHours() + start.getMinutes() / 60;
+        let minDiff = Infinity;
+        let closestIdx = 0;
+        for (let i = 0; i < standardTimes.length; i++) {
+          const diff = Math.abs(decimal - standardTimes[i]);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestIdx = i;
+          }
+        }
+        return closestIdx;
+      };
+
+      // Put each event in its closest slot bucket
+      cellShoots.forEach(shoot => {
+        const idx = getSlotIndex(shoot.time);
+        slotBuckets[idx].push({ type: 'shoot', data: shoot });
       });
 
-      // 2. Render bookings (that don't have shoots completed yet)
       activeBookings.forEach(booking => {
-        const bookingRow = document.createElement('tr');
-        bookingRow.className = 'booking-row';
-
-        const formattedTime = formatTime12H(booking.time || '10:00');
-
-        bookingRow.innerHTML = `
-          <td style="font-weight: 600; text-transform: capitalize; color: var(--text-primary);">
-            ${escapeHtml(booking.clientName)} 
-            <span class="booking-shoot-badge" style="background: rgba(168,138,58,0.1); color: #a88a3a; margin-left: 8px;">Booked</span>
-          </td>
-          <td></td>
-          <td></td>
-          <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
-          <td style="color: var(--text-secondary);">${escapeHtml(booking.package)}</td>
-          <td style="text-align: center; display: flex; gap: 4px; justify-content: center; align-items: center; padding: 0.65rem 0.5rem; border: none !important;">
-            <button class="btn btn-primary btn-log-pending-shoot-sheet" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; white-space: nowrap; font-weight: bold;">Log Shoot</button>
-            <button class="btn btn-secondary btn-edit-sheet-booking" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
-          </td>
-        `;
-        sheetBody.appendChild(bookingRow);
+        const idx = getSlotIndex(booking.time);
+        slotBuckets[idx].push({ type: 'booking', data: booking });
       });
 
-      // 3. Render Google Calendar events
       filteredGcal.forEach(event => {
-        const gcalRow = document.createElement('tr');
-        gcalRow.className = 'gcal-row';
-        const formattedTime = getGcalTimeDisplay(event);
-
-        gcalRow.innerHTML = `
-          <td style="font-weight: 600; color: var(--text-primary);">
-            ${escapeHtml(event.summary || 'Google Event')} 
-            <span class="booking-shoot-badge" style="background: rgba(66, 133, 244, 0.1); color: #4285F4; margin-left: 8px;">Google Cal</span>
-          </td>
-          <td></td>
-          <td></td>
-          <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
-          <td style="color: var(--text-light); font-style: italic;">Google Sync</td>
-          <td style="text-align: center;">
-            <span style="font-size: 0.75rem; color: var(--text-light); font-weight: bold;">Google Sync</span>
-          </td>
-        `;
-        sheetBody.appendChild(gcalRow);
+        const idx = getGcalSlotIndex(event);
+        slotBuckets[idx].push({ type: 'gcal', data: event });
       });
 
-      // 4. Render empty slots to bring the day's total to at least 4 slots
-      const emptySlotsToRender = Math.max(0, 4 - totalEventCount);
-      for (let sIdx = 0; sIdx < emptySlotsToRender; sIdx++) {
-        const availableRow = document.createElement('tr');
-        availableRow.className = 'available-row';
-        availableRow.innerHTML = `
-          <td style="font-weight: 600; color: #2E7D32; font-style: italic;">
-            ✨ Empty Slot (Available)
-          </td>
-          <td></td>
-          <td></td>
-          <td style="text-align: center; color: var(--text-light); font-size: 0.75rem;">AM & PM Available</td>
-          <td style="color: var(--text-light); font-size: 0.75rem;">All Packages</td>
-          <td style="text-align: center;">
-            <button class="btn btn-primary btn-book-sheet-slot" data-date="${cellDateStr}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; font-weight: bold; background: #2E7D32; border-color: #2E7D32; color: white;">Book Slot</button>
-          </td>
-        `;
-        sheetBody.appendChild(availableRow);
+      // Render each slot bucket
+      const slotTimesInfo = [
+        { label: '9:00 AM Slot', hour: '09', minute: '00', ampm: 'AM' },
+        { label: '12:00 PM Slot', hour: '12', minute: '00', ampm: 'PM' },
+        { label: '3:00 PM Slot', hour: '03', minute: '00', ampm: 'PM' },
+        { label: '5:30 PM Slot', hour: '05', minute: '30', ampm: 'PM' }
+      ];
+
+      for (let sIdx = 0; sIdx < 4; sIdx++) {
+        const bucket = slotBuckets[sIdx];
+        if (bucket.length > 0) {
+          // Render all elements in this slot bucket
+          bucket.forEach(item => {
+            if (item.type === 'shoot') {
+              const shoot = item.data;
+              const shootRow = document.createElement('tr');
+              shootRow.className = 'completed-shoot-row';
+              
+              const formattedTime = formatTime12H(shoot.time || '10:00');
+              const matchedBooking = bookings.find(b => b.id === shoot.bookingId);
+              const pkg = matchedBooking ? matchedBooking.package : 'Completed Shoot';
+
+              shootRow.innerHTML = `
+                <td style="font-weight: 600; text-transform: capitalize; color: var(--text-primary);">
+                  ${escapeHtml(shoot.clientName)} 
+                  <span class="booking-shoot-badge" style="background: rgba(46,125,50,0.1); color: #2e7d32; margin-left: 8px;">Completed</span>
+                </td>
+                <td></td>
+                <td></td>
+                <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
+                <td style="color: var(--text-secondary);">${escapeHtml(pkg)}</td>
+                <td style="text-align: center;">
+                  <button class="btn btn-secondary btn-edit-sheet-shoot" data-id="${shoot.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
+                </td>
+              `;
+              sheetBody.appendChild(shootRow);
+            } else if (item.type === 'booking') {
+              const booking = item.data;
+              const bookingRow = document.createElement('tr');
+              bookingRow.className = 'booking-row';
+
+              const formattedTime = formatTime12H(booking.time || '10:00');
+
+              bookingRow.innerHTML = `
+                <td style="font-weight: 600; text-transform: capitalize; color: var(--text-primary);">
+                  ${escapeHtml(booking.clientName)} 
+                  <span class="booking-shoot-badge" style="background: rgba(168,138,58,0.1); color: #a88a3a; margin-left: 8px;">Booked</span>
+                </td>
+                <td></td>
+                <td></td>
+                <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
+                <td style="color: var(--text-secondary);">${escapeHtml(booking.package)}</td>
+                <td style="text-align: center; display: flex; gap: 4px; justify-content: center; align-items: center; padding: 0.65rem 0.5rem; border: none !important;">
+                  <button class="btn btn-primary btn-log-pending-shoot-sheet" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; white-space: nowrap; font-weight: bold;">Log Shoot</button>
+                  <button class="btn btn-secondary btn-edit-sheet-booking" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
+                </td>
+              `;
+              sheetBody.appendChild(bookingRow);
+            } else if (item.type === 'gcal') {
+              const event = item.data;
+              const gcalRow = document.createElement('tr');
+              gcalRow.className = 'gcal-row';
+              const formattedTime = getGcalTimeDisplay(event);
+
+              gcalRow.innerHTML = `
+                <td style="font-weight: 600; color: var(--text-primary);">
+                  ${escapeHtml(event.summary || 'Google Event')} 
+                  <span class="booking-shoot-badge" style="background: rgba(66, 133, 244, 0.1); color: #4285F4; margin-left: 8px;">Google Cal</span>
+                </td>
+                <td></td>
+                <td></td>
+                <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
+                <td style="color: var(--text-light); font-style: italic;">Google Sync</td>
+                <td style="text-align: center;">
+                  <span style="font-size: 0.75rem; color: var(--text-light); font-weight: bold;">Google Sync</span>
+                </td>
+              `;
+              sheetBody.appendChild(gcalRow);
+            }
+          });
+        } else {
+          // Render this standard slot as Empty / Available
+          const info = slotTimesInfo[sIdx];
+          const availableRow = document.createElement('tr');
+          availableRow.className = 'available-row';
+          availableRow.innerHTML = `
+            <td style="font-weight: 600; color: #2E7D32; font-style: italic;">
+              ✨ Empty Slot (${info.label})
+            </td>
+            <td></td>
+            <td></td>
+            <td style="text-align: center; color: var(--text-light); font-size: 0.75rem;">AM & PM Available</td>
+            <td style="color: var(--text-light); font-size: 0.75rem;">All Packages</td>
+            <td style="text-align: center;">
+              <button class="btn btn-primary btn-book-sheet-slot" data-date="${cellDateStr}" data-hour="${info.hour}" data-minute="${info.minute}" data-ampm="${info.ampm}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; font-weight: bold; background: #2E7D32; border-color: #2E7D32; color: white;">Book Slot</button>
+            </td>
+          `;
+          sheetBody.appendChild(availableRow);
+        }
       }
     }
 
@@ -7517,7 +7588,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     sheetBody.querySelectorAll('.btn-book-sheet-slot').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const date = e.target.getAttribute('data-date');
-        window.showAddBooking('', date);
+        const hour = e.target.getAttribute('data-hour');
+        const minute = e.target.getAttribute('data-minute');
+        const ampm = e.target.getAttribute('data-ampm');
+        window.showAddBooking('', date, hour, minute, ampm);
       });
     });
   };
