@@ -2122,27 +2122,27 @@ option, datalist option {
 }
 
 .spreadsheet-table tr.booking-row {
-  background-color: #ffffff;
+  background-color: #e6f4ea !important; /* Soft green (Filled slots) */
 }
 
 .spreadsheet-table tr.booking-row:hover {
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: #d2ebd9 !important;
 }
 
-.spreadsheet-table tr.completed-shoot-row {
-  background-color: #fce8e6 !important; /* Soft pink/red */
+.spreadsheet-table tr.cancelled-booking-row {
+  background-color: #fce8e6 !important; /* Soft pink/red (Cancelled slots) */
 }
 
-.spreadsheet-table tr.completed-shoot-row:hover {
+.spreadsheet-table tr.cancelled-booking-row:hover {
   background-color: #fadad6 !important;
 }
 
 .spreadsheet-table tr.available-row {
-  background-color: #e6f4ea !important; /* Soft green */
+  background-color: #ffffff !important; /* White (Empty slots) */
 }
 
 .spreadsheet-table tr.available-row:hover {
-  background-color: #d2ebd9 !important;
+  background-color: rgba(0, 0, 0, 0.02) !important;
 }
 
 .spreadsheet-table tr.gcal-row {

@@ -3929,7 +3929,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.updateBooking = async (id, clientName, shootType, date, time, pack, advance, paymentAccount, clientPhone) => {
+    window.updateBooking = async (id, clientName, shootType, date, time, pack, advance, paymentAccount, clientPhone, status) => {
       try {
         await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "bookings", id), {
           clientName: clientName.trim(),
@@ -3938,7 +3938,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           time: time,
           package: pack.trim(),
           advance: parseFloat(advance) || 0,
-          paymentAccount: paymentAccount || 'Cash'
+          paymentAccount: paymentAccount || 'Cash',
+          status: status || 'confirmed'
         });
         showToast(`Booking for <strong>${clientName}</strong> updated`, '📅');
 
@@ -4918,7 +4919,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast(`Booking for <strong>${clientName}</strong> saved`, '📅');
     };
 
-    window.updateBooking = async (id, clientName, shootType, date, time, pack, advance, paymentAccount, clientPhone) => {
+    window.updateBooking = async (id, clientName, shootType, date, time, pack, advance, paymentAccount, clientPhone, status) => {
       const existing = bookings.find(b => b.id === id);
       if (!existing) return;
 
@@ -4929,6 +4930,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       existing.package = pack.trim();
       existing.advance = parseFloat(advance) || 0;
       existing.paymentAccount = paymentAccount || 'Cash';
+      existing.status = status || 'confirmed';
 
       // Auto Sync with Google Calendar if connected
       if (gcalAccessToken) {
@@ -6348,6 +6350,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const pack = editBookingPackage.value;
       const advance = parseFloat(editBookingAdvance.value) || 0;
       const paymentAccount = editBookingPaymentAccount ? editBookingPaymentAccount.value : 'Cash';
+      const statusEl = document.getElementById('edit-booking-status');
+      const status = statusEl ? statusEl.value : 'confirmed';
 
       if (!name.trim() || !shootType || !date || !time || !pack) return;
 
@@ -6356,7 +6360,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      await window.updateBooking(id, name, shootType, date, time, pack, advance, paymentAccount, phone);
+      await window.updateBooking(id, name, shootType, date, time, pack, advance, paymentAccount, phone, status);
       closeEditBooking();
     });
   }
@@ -6426,6 +6430,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     editBookingAdvance.value = b.advance;
     if (editBookingPaymentAccount) {
       editBookingPaymentAccount.value = b.paymentAccount || 'Cash';
+    }
+    const editBookingStatus = document.getElementById('edit-booking-status');
+    if (editBookingStatus) {
+      editBookingStatus.value = b.status || 'confirmed';
     }
 
     if (editBookingStatusMsg) {
@@ -7373,13 +7381,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
       sheetBody.appendChild(headerRow);
 
-      // Gather completed shoots
-      const completedBookingIds = cellShoots.map(s => s.bookingId).filter(id => id);
+      // Gather completed bookings globally to exclude already done shoots
+      const completedBookingIds = shoots.map(s => s.bookingId).filter(id => id);
       const activeBookings = cellBookings.filter(b => !completedBookingIds.includes(b.id));
 
       const syncedEventIds = new Set();
       cellBookings.forEach(b => { if (b.gCalEventId) syncedEventIds.add(b.gCalEventId); });
-      cellShoots.forEach(s => { if (s.gCalEventId) syncedEventIds.add(s.gCalEventId); });
       const filteredGcal = cellGcalEvents.filter(e => !syncedEventIds.has(e.id));
 
       // Standard slots array where index 0=9am, 1=12pm, 2=3pm, 3=5:30pm
@@ -7420,17 +7427,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         return closestIdx;
       };
 
-      // Put each event in its closest slot bucket
-      cellShoots.forEach(shoot => {
-        const idx = getSlotIndex(shoot.time);
-        slotBuckets[idx].push({ type: 'shoot', data: shoot });
-      });
-
+      // Put bookings in their closest slot bucket
       activeBookings.forEach(booking => {
         const idx = getSlotIndex(booking.time);
         slotBuckets[idx].push({ type: 'booking', data: booking });
       });
 
+      // Put Google Cal events in their closest slot bucket
       filteredGcal.forEach(event => {
         const idx = getGcalSlotIndex(event);
         slotBuckets[idx].push({ type: 'gcal', data: event });
@@ -7449,47 +7452,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (bucket.length > 0) {
           // Render all elements in this slot bucket
           bucket.forEach(item => {
-            if (item.type === 'shoot') {
-              const shoot = item.data;
-              const shootRow = document.createElement('tr');
-              shootRow.className = 'completed-shoot-row';
-              
-              const formattedTime = formatTime12H(shoot.time || '10:00');
-              const matchedBooking = bookings.find(b => b.id === shoot.bookingId);
-              const pkg = matchedBooking ? matchedBooking.package : 'Completed Shoot';
-
-              shootRow.innerHTML = `
-                <td style="font-weight: 600; text-transform: capitalize; color: var(--text-primary);">
-                  ${escapeHtml(shoot.clientName)} 
-                  <span class="booking-shoot-badge" style="background: rgba(46,125,50,0.1); color: #2e7d32; margin-left: 8px;">Completed</span>
-                </td>
-                <td></td>
-                <td></td>
-                <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
-                <td style="color: var(--text-secondary);">${escapeHtml(pkg)}</td>
-                <td style="text-align: center;">
-                  <button class="btn btn-secondary btn-edit-sheet-shoot" data-id="${shoot.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
-                </td>
-              `;
-              sheetBody.appendChild(shootRow);
-            } else if (item.type === 'booking') {
+            if (item.type === 'booking') {
               const booking = item.data;
               const bookingRow = document.createElement('tr');
-              bookingRow.className = 'booking-row';
+              
+              const isCancelled = booking.status === 'cancelled';
+              bookingRow.className = isCancelled ? 'cancelled-booking-row' : 'booking-row';
 
               const formattedTime = formatTime12H(booking.time || '10:00');
+              const statusBadge = isCancelled 
+                ? `<span class="booking-shoot-badge" style="background: rgba(229,115,115,0.1); color: #c62828; margin-left: 8px;">Cancelled</span>` 
+                : `<span class="booking-shoot-badge" style="background: rgba(46,125,50,0.1); color: #2e7d32; margin-left: 8px;">Booked</span>`;
 
               bookingRow.innerHTML = `
                 <td style="font-weight: 600; text-transform: capitalize; color: var(--text-primary);">
                   ${escapeHtml(booking.clientName)} 
-                  <span class="booking-shoot-badge" style="background: rgba(168,138,58,0.1); color: #a88a3a; margin-left: 8px;">Booked</span>
+                  ${statusBadge}
                 </td>
                 <td></td>
                 <td></td>
                 <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
                 <td style="color: var(--text-secondary);">${escapeHtml(booking.package)}</td>
                 <td style="text-align: center; display: flex; gap: 4px; justify-content: center; align-items: center; padding: 0.65rem 0.5rem; border: none !important;">
-                  <button class="btn btn-primary btn-log-pending-shoot-sheet" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; white-space: nowrap; font-weight: bold;">Log Shoot</button>
+                  ${isCancelled ? '' : `<button class="btn btn-primary btn-log-pending-shoot-sheet" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; white-space: nowrap; font-weight: bold;">Log Shoot</button>`}
                   <button class="btn btn-secondary btn-edit-sheet-booking" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
                 </td>
               `;
