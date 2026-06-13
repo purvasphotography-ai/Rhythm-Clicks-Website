@@ -864,10 +864,31 @@ body {
   display: none;
   flex-direction: column;
   flex-grow: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 6px;
 }
 
 .tab-content.active {
   display: flex;
+}
+
+/* Scrollbar customization for tab contents */
+.tab-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tab-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tab-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+}
+
+.tab-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 
 /* Gallery Tracker Styles */
@@ -1843,6 +1864,11 @@ option, datalist option {
     overflow-y: auto !important;
     padding: 0.5rem 1rem 1.5rem 1rem !important;
     height: 100% !important;
+  }
+
+  .tab-content {
+    overflow-y: visible !important;
+    padding-right: 0 !important;
   }
 
   .tab-navigation .tab-btn {
