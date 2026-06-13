@@ -897,8 +897,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       let galleryStatusText = 'Not started';
       let galleryProgress = 0; // 0 to 5
       let galleryDateStr = '';
+      const gal = hasGallery ? clientGalleries[0] : null;
       if (hasGallery) {
-        const gal = clientGalleries[0];
         const statusMap = {
           'pending': 'Pending Selection',
           'arrived': 'Arrived',
@@ -929,9 +929,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       let albumProgress = 0; // 0 to 5
       let albumDateStr = '';
       let albumIncluded = hasShoot && clientShoots[0].albumIncluded;
+      const alb = hasAlbum ? clientAlbums[0] : null;
       
       if (hasAlbum) {
-        const alb = clientAlbums[0];
         const statusMap = {
           'pending': 'Pending Approval',
           'approval': 'Approved',
