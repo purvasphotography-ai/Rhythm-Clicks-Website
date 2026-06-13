@@ -6813,58 +6813,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         slotsList.innerHTML += `
-          <div class="calendar-slot-item" style="border-left-color: ${borderLeftColor}; padding: 1rem; margin-bottom: 0.75rem; border-left-width: 4px; border-left-style: solid; background: var(--panel-bg); border-radius: var(--border-radius-sm); border: 1px solid rgba(0,0,0,0.03); border-left-color: ${borderLeftColor};">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.6rem; gap: 8px;">
-              <strong style="color: var(--text-primary); font-size: 0.95rem; text-transform: capitalize; line-height: 1.3;">${escapeHtml(clientName)}</strong>
-              <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
-                <span style="font-size: 0.68rem; background: ${badgeBg}; color: ${badgeColor}; padding: 2px 6px; border-radius: 4px; font-weight: 700; white-space: nowrap;">${phaseBadge}</span>
-                ${isSynced ? `<span style="font-size: 0.68rem; background: rgba(66, 133, 244, 0.1); color: #4285F4; padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; white-space: nowrap;">🔵 Synced</span>` : ''}
+          <div class="calendar-slot-item" style="border-left-color: ${borderLeftColor}; padding: 1rem; margin-bottom: 0.75rem; border-left-width: 4px; border-left-style: solid; background: var(--panel-bg); border-radius: var(--border-radius-sm); border: 1px solid rgba(0,0,0,0.03); cursor: pointer; transition: background-color 0.2s;" onclick="const exp = this.querySelector('.calendar-slot-details-expand'); const arr = this.querySelector('.toggle-arrow'); const isCollapsed = exp.style.maxHeight === '0px' || exp.style.maxHeight === ''; exp.style.maxHeight = isCollapsed ? '1000px' : '0px'; exp.style.opacity = isCollapsed ? '1' : '0'; exp.style.marginTop = isCollapsed ? '0.8rem' : '0px'; exp.style.paddingTop = isCollapsed ? '0.8rem' : '0px'; exp.style.borderTopWidth = isCollapsed ? '1px' : '0px'; arr.style.transform = isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';" onmouseover="this.style.background='var(--panel-bg-hover, rgba(255,255,255,0.85))'" onmouseout="this.style.background='var(--panel-bg)'">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+              <div>
+                <strong style="color: var(--text-primary); font-size: 0.95rem; text-transform: capitalize; line-height: 1.3;">${escapeHtml(clientName)}</strong>
+                <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px;">
+                  <span>⏰ Time: <strong>${time}</strong></span>
+                  <span>📦 Package: <strong>${escapeHtml(packageVal)}</strong></span>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                <span class="toggle-arrow" style="font-size: 0.75rem; color: var(--text-light); transition: transform 0.3s ease-in-out; display: inline-block;">▼</span>
               </div>
             </div>
             
-            <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px; margin-bottom: 0.8rem;">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span>⏰ Time: <strong>${time}</strong></span>
+            <div class="calendar-slot-details-expand" style="max-height: 0px; opacity: 0; overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-top: 0px dashed rgba(0,0,0,0.06); margin-top: 0px; padding-top: 0px;">
+              <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap;">
+                <span style="font-size: 0.68rem; background: ${badgeBg}; color: ${badgeColor}; padding: 2px 6px; border-radius: 4px; font-weight: 700; white-space: nowrap;">${phaseBadge}</span>
+                ${isSynced ? `<span style="font-size: 0.68rem; background: rgba(66, 133, 244, 0.1); color: #4285F4; padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; white-space: nowrap;">🔵 Synced</span>` : ''}
               </div>
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span>📦 Package: <strong>${escapeHtml(packageVal)}</strong></span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span>📷 Shoot Type: <strong>${escapeHtml(shootType)}</strong></span>
-              </div>
-            </div>
-
-            <!-- Visual Workflow Progress Timeline -->
-            <div style="margin-top: 0.6rem; display: flex; flex-direction: column; gap: 6px; border-top: 1px dashed rgba(0,0,0,0.06); padding-top: 0.6rem;">
-              <div style="font-size: 0.72rem; color: var(--text-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 2px;">Workflow Progress</div>
               
-              <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem;">
-                <!-- Step 1: Booking -->
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="color: #2E7D32; font-weight: bold; font-size: 0.85rem;">✓</span>
-                  <span style="color: var(--text-secondary); font-size: 0.78rem;">Booking:</span>
-                  <strong style="color: var(--text-primary); font-size: 0.78rem;">Confirmed</strong>
+              <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px; margin-bottom: 0.8rem;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span>📷 Shoot Type: <strong>${escapeHtml(shootType)}</strong></span>
                 </div>
+              </div>
 
-                <!-- Step 2: Shoot -->
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="${primaryShoot ? 'color: #2E7D32; font-weight: bold;' : 'color: var(--text-light);'} font-size: 0.85rem;">${primaryShoot ? '✓' : '○'}</span>
-                  <span style="color: var(--text-secondary); font-size: 0.78rem;">Shoot:</span>
-                  <strong style="${primaryShoot ? 'color: #2E7D32;' : 'color: var(--text-light);'} font-size: 0.78rem;">${primaryShoot ? 'Logged' : 'Scheduled'}</strong>
-                </div>
+              <!-- Visual Workflow Progress Timeline -->
+              <div style="margin-top: 0.6rem; display: flex; flex-direction: column; gap: 6px; border-top: 1px dashed rgba(0,0,0,0.06); padding-top: 0.6rem;">
+                <div style="font-size: 0.72rem; color: var(--text-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 2px;">Workflow Progress</div>
+                
+                <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem;">
+                  <!-- Step 1: Booking -->
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #2E7D32; font-weight: bold; font-size: 0.85rem;">✓</span>
+                    <span style="color: var(--text-secondary); font-size: 0.78rem;">Booking:</span>
+                    <strong style="color: var(--text-primary); font-size: 0.78rem;">Confirmed</strong>
+                  </div>
 
-                <!-- Step 3: Gallery -->
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="${g.gallery ? (g.gallery.status === 'delivered' ? 'color: #2E7D32; font-weight: bold;' : 'color: #E64A19;') : 'color: var(--text-light);'} font-size: 0.85rem;">${g.gallery ? (g.gallery.status === 'delivered' ? '✓' : '●') : '○'}</span>
-                  <span style="color: var(--text-secondary); font-size: 0.78rem;">Gallery:</span>
-                  <strong style="font-size: 0.78rem; color: ${galleryColor};">${galleryStatusText}</strong>
-                </div>
+                  <!-- Step 2: Shoot -->
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="${primaryShoot ? 'color: #2E7D32; font-weight: bold;' : 'color: var(--text-light);'} font-size: 0.85rem;">${primaryShoot ? '✓' : '○'}</span>
+                    <span style="color: var(--text-secondary); font-size: 0.78rem;">Shoot:</span>
+                    <strong style="${primaryShoot ? 'color: #2E7D32;' : 'color: var(--text-light);'} font-size: 0.78rem;">${primaryShoot ? 'Logged' : 'Scheduled'}</strong>
+                  </div>
 
-                <!-- Step 4: Album -->
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="${g.album ? (g.album.status === 'delivered' ? 'color: #2E7D32; font-weight: bold;' : 'color: #1976D2;') : 'color: var(--text-light);'} font-size: 0.85rem;">${g.album ? (g.album.status === 'delivered' ? '✓' : '●') : '○'}</span>
-                  <span style="color: var(--text-secondary); font-size: 0.78rem;">Album:</span>
-                  <strong style="font-size: 0.78rem; color: ${albumColor};">${albumStatusText}</strong>
+                  <!-- Step 3: Gallery -->
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="${g.gallery ? (g.gallery.status === 'delivered' ? 'color: #2E7D32; font-weight: bold;' : 'color: #E64A19;') : 'color: var(--text-light);'} font-size: 0.85rem;">${g.gallery ? (g.gallery.status === 'delivered' ? '✓' : '●') : '○'}</span>
+                    <span style="color: var(--text-secondary); font-size: 0.78rem;">Gallery:</span>
+                    <strong style="font-size: 0.78rem; color: ${galleryColor};">${galleryStatusText}</strong>
+                  </div>
+
+                  <!-- Step 4: Album -->
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="${g.album ? (g.album.status === 'delivered' ? 'color: #2E7D32; font-weight: bold;' : 'color: #1976D2;') : 'color: var(--text-light);'} font-size: 0.85rem;">${g.album ? (g.album.status === 'delivered' ? '✓' : '●') : '○'}</span>
+                    <span style="color: var(--text-secondary); font-size: 0.78rem;">Album:</span>
+                    <strong style="font-size: 0.78rem; color: ${albumColor};">${albumStatusText}</strong>
+                  </div>
                 </div>
               </div>
             </div>
@@ -6875,19 +6881,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Google events (filtered to exclude synced duplicates)
       filteredGcalEvents.forEach(event => {
         slotsList.innerHTML += `
-          <div class="calendar-slot-item" style="border-left-color: #4285F4; padding: 1rem; margin-bottom: 0.5rem; border-left-width: 4px; border-left-style: solid; background: var(--panel-bg); border-radius: var(--border-radius-sm); border: 1px solid rgba(0,0,0,0.03);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-              <strong style="color: var(--text-primary); font-size: 0.95rem;">${escapeHtml(event.summary || 'Google Event')}</strong>
-              <span style="font-size: 0.7rem; background: rgba(66, 133, 244, 0.1); color: #4285F4; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Google Cal</span>
-            </div>
-            <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span>⏰ Time: <strong>${getGcalTimeDisplay(event)}</strong></span>
+          <div class="calendar-slot-item" style="border-left-color: #4285F4; padding: 1rem; margin-bottom: 0.5rem; border-left-width: 4px; border-left-style: solid; background: var(--panel-bg); border-radius: var(--border-radius-sm); border: 1px solid rgba(0,0,0,0.03); cursor: pointer; transition: background-color 0.2s;" onclick="const exp = this.querySelector('.calendar-slot-details-expand'); const arr = this.querySelector('.toggle-arrow'); const isCollapsed = exp.style.maxHeight === '0px' || exp.style.maxHeight === ''; exp.style.maxHeight = isCollapsed ? '1000px' : '0px'; exp.style.opacity = isCollapsed ? '1' : '0'; exp.style.marginTop = isCollapsed ? '0.8rem' : '0px'; exp.style.paddingTop = isCollapsed ? '0.8rem' : '0px'; exp.style.borderTopWidth = isCollapsed ? '1px' : '0px'; arr.style.transform = isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';" onmouseover="this.style.background='var(--panel-bg-hover, rgba(255,255,255,0.85))'" onmouseout="this.style.background='var(--panel-bg)'">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+              <div>
+                <strong style="color: var(--text-primary); font-size: 0.95rem; line-height: 1.3;">${escapeHtml(event.summary || 'Google Event')}</strong>
+                <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px;">
+                  <span>⏰ Time: <strong>${getGcalTimeDisplay(event)}</strong></span>
+                </div>
               </div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                <span style="font-size: 0.7rem; background: rgba(66, 133, 244, 0.1); color: #4285F4; padding: 2px 6px; border-radius: 4px; font-weight: 700; white-space: nowrap;">Google Cal</span>
+                <span class="toggle-arrow" style="font-size: 0.75rem; color: var(--text-light); transition: transform 0.3s ease-in-out; display: inline-block;">▼</span>
+              </div>
+            </div>
+            
+            <div class="calendar-slot-details-expand" style="max-height: 0px; opacity: 0; overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-top: 0px dashed rgba(0,0,0,0.06); margin-top: 0px; padding-top: 0px;">
               ${event.description ? `
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span>📝 Details: <strong>${escapeHtml(event.description)}</strong></span>
-              </div>` : ''}
+              <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span>📝 Details: <strong>${escapeHtml(event.description)}</strong></span>
+                </div>
+              </div>` : '<div style="font-size: 0.78rem; color: var(--text-light);">No description details available.</div>'}
             </div>
           </div>
         `;
