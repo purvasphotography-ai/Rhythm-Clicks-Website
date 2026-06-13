@@ -470,61 +470,57 @@ document.addEventListener('DOMContentLoaded', async () => {
         deliveredCount++;
       }
 
-      // Build workflow phase timeline
-      let timelineHtml = `
-        <div class="gallery-timestamps-timeline">
-          <div class="gallery-timestamp-row">
-            <span class="gallery-timestamp-label">Pending</span>
-            <span class="gallery-timestamp-val">${dateStr} • ${timeStr}</span>
-          </div>
-      `;
-      if (gallery.arrivedDate) {
+      // Find latest status transition date/time for galleries
+      let latestLabel = 'Pending';
+      let latestVal = `${dateStr} • ${timeStr}`;
+      
+      if (gallery.status === 'arrived' && gallery.arrivedDate) {
+        latestLabel = 'Arrived';
         const aDate = new Date(gallery.arrivedDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
         const aTime = new Date(gallery.arrivedDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        timelineHtml += `
-          <div class="gallery-timestamp-row">
-            <span class="gallery-timestamp-label">Arrived</span>
-            <span class="gallery-timestamp-val">${aDate} • ${aTime}</span>
-          </div>
-        `;
-      }
-      if (gallery.selectionDate) {
+        latestVal = `${aDate} • ${aTime}`;
+      } else if (gallery.status === 'selected' && gallery.selectionDate) {
+        latestLabel = 'Selected';
         const sDate = new Date(gallery.selectionDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
         const sTime = new Date(gallery.selectionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        timelineHtml += `
-          <div class="gallery-timestamp-row">
-            <span class="gallery-timestamp-label">Selected</span>
-            <span class="gallery-timestamp-val">${sDate} • ${sTime}</span>
-          </div>
-        `;
-      }
-      if (gallery.editedDate) {
+        latestVal = `${sDate} • ${sTime}`;
+      } else if (gallery.status === 'edited' && gallery.editedDate) {
+        latestLabel = 'Edited';
         const eDate = new Date(gallery.editedDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
         const eTime = new Date(gallery.editedDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        timelineHtml += `
-          <div class="gallery-timestamp-row">
-            <span class="gallery-timestamp-label">Edited</span>
-            <span class="gallery-timestamp-val">${eDate} • ${eTime}</span>
-          </div>
-        `;
-      }
-      if (gallery.deliveredDate) {
+        latestVal = `${eDate} • ${eTime}`;
+      } else if (gallery.status === 'delivered' && gallery.deliveredDate) {
+        latestLabel = 'Delivered';
         const dDate = new Date(gallery.deliveredDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
         const dTime = new Date(gallery.deliveredDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        timelineHtml += `
-          <div class="gallery-timestamp-row">
-            <span class="gallery-timestamp-label">Delivered</span>
-            <span class="gallery-timestamp-val">${dDate} • ${dTime}</span>
-          </div>
+        latestVal = `${dDate} • ${dTime}`;
+      }
+
+      // Compact current status row html
+      const currentStatusHtml = `
+        <div class="gallery-current-status">
+          <span class="status-dot"></span>
+          <span class="status-text"><strong>${latestLabel}</strong>: ${latestVal}</span>
+        </div>
+      `;
+
+      // Collapsible history timeline details html
+      let historyDetailsHtml = '';
+      if (gallery.status !== 'pending') {
+        historyDetailsHtml = `
+          <details class="gallery-history-details">
+            <summary class="gallery-history-summary">History</summary>
+            ${timelineHtml}
+          </details>
         `;
       }
-      timelineHtml += `</div>`;
 
       const item = document.createElement('li');
       item.className = 'gallery-card';
       item.innerHTML = `
         <h4 class="gallery-title">${escapeHtml(gallery.clientName)}</h4>
-        ${timelineHtml}
+        ${currentStatusHtml}
+        ${historyDetailsHtml}
         ${gallery.notes ? `<p class="gallery-notes" style="margin-top: 4px;">${escapeHtml(gallery.notes)}</p>` : ''}
         <div class="gallery-actions">
           ${actionBtn}
@@ -590,6 +586,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('edit-gallery-notes-input').value = gallery.notes || '';
         document.getElementById('edit-gallery-status-select').value = gallery.status;
         
+        const editGalleryDate = document.getElementById('edit-gallery-date-input');
+        if (editGalleryDate && gallery.timestamp) {
+          const galleryDateVal = new Date(gallery.timestamp);
+          const localVal = new Date(galleryDateVal.getTime() - galleryDateVal.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+          editGalleryDate.value = localVal;
+        }
+
         const editGalleryModal = document.getElementById('edit-gallery-modal');
         editGalleryModal.style.display = 'flex';
         editGalleryModal.offsetHeight; // force reflow
@@ -661,55 +664,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         deliveredCount++;
       }
 
-      // Build workflow phase timeline
-      let timelineHtml = `
-        <div class="gallery-timestamps-timeline">
-          <div class="gallery-timestamp-row">
-            <span class="gallery-timestamp-label">Pending Approval</span>
-            <span class="gallery-timestamp-val">${dateStr} • ${timeStr}</span>
-          </div>
-      `;
-      if (album.approvalDate) {
+      // Find latest status transition date/time for albums
+      let latestLabel = 'Pending Approval';
+      let latestVal = `${dateStr} • ${timeStr}`;
+
+      if (album.status === 'approval' && album.approvalDate) {
+        latestLabel = 'Approved';
         const apDate = new Date(album.approvalDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
         const apTime = new Date(album.approvalDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        timelineHtml += `
-          <div class="gallery-timestamp-row">
-            <span class="gallery-timestamp-label">Approved</span>
-            <span class="gallery-timestamp-val">${apDate} • ${apTime}</span>
-          </div>
-        `;
-      }
-      if (album.printingDate) {
+        latestVal = `${apDate} • ${apTime}`;
+      } else if (album.status === 'printing' && album.printingDate) {
+        latestLabel = 'Printing';
         const pDate = new Date(album.printingDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
         const pTime = new Date(album.printingDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        timelineHtml += `
-          <div class="gallery-timestamp-row">
-            <span class="gallery-timestamp-label">Printing</span>
-            <span class="gallery-timestamp-val">${pDate} • ${pTime}</span>
-          </div>
-        `;
-      }
-      if (album.arrivedDate) {
+        latestVal = `${pDate} • ${pTime}`;
+      } else if (album.status === 'arrived' && album.arrivedDate) {
+        latestLabel = 'Arrived';
         const arDate = new Date(album.arrivedDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
         const arTime = new Date(album.arrivedDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        timelineHtml += `
-          <div class="gallery-timestamp-row">
-            <span class="gallery-timestamp-label">Arrived</span>
-            <span class="gallery-timestamp-val">${arDate} • ${arTime}</span>
-          </div>
-        `;
-      }
-      if (album.deliveredDate) {
+        latestVal = `${arDate} • ${arTime}`;
+      } else if (album.status === 'delivered' && album.deliveredDate) {
+        latestLabel = 'Delivered';
         const dDate = new Date(album.deliveredDate).toLocaleDateString([], { month: 'short', day: 'numeric' });
         const dTime = new Date(album.deliveredDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        timelineHtml += `
-          <div class="gallery-timestamp-row">
-            <span class="gallery-timestamp-label">Delivered</span>
-            <span class="gallery-timestamp-val">${dDate} • ${dTime}</span>
-          </div>
+        latestVal = `${dDate} • ${dTime}`;
+      }
+
+      // Compact current status row html
+      const currentStatusHtml = `
+        <div class="gallery-current-status">
+          <span class="status-dot"></span>
+          <span class="status-text"><strong>${latestLabel}</strong>: ${latestVal}</span>
+        </div>
+      `;
+
+      // Collapsible history timeline details html
+      let historyDetailsHtml = '';
+      if (album.status !== 'pending') {
+        historyDetailsHtml = `
+          <details class="gallery-history-details">
+            <summary class="gallery-history-summary">History</summary>
+            ${timelineHtml}
+          </details>
         `;
       }
-      timelineHtml += `</div>`;
 
       // Build delivered method tag
       let deliveryMethodHtml = '';
@@ -721,7 +719,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       item.className = 'gallery-card';
       item.innerHTML = `
         <h4 class="gallery-title">${escapeHtml(album.clientName)}</h4>
-        ${timelineHtml}
+        ${currentStatusHtml}
+        ${historyDetailsHtml}
         ${album.notes ? `<p class="gallery-notes" style="margin-top: 4px;">${escapeHtml(album.notes)}</p>` : ''}
         ${deliveryMethodHtml}
         <div class="gallery-actions">
@@ -794,6 +793,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('edit-album-notes-input').value = album.notes || '';
         document.getElementById('edit-album-status-select').value = album.status;
         document.getElementById('edit-album-delivery-method').value = album.deliveredMethod || 'In-Hand';
+
+        const editAlbumDate = document.getElementById('edit-album-date-input');
+        if (editAlbumDate && album.timestamp) {
+          const albumDateVal = new Date(album.timestamp);
+          const localVal = new Date(albumDateVal.getTime() - albumDateVal.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+          editAlbumDate.value = localVal;
+        }
 
         if (album.status === 'delivered') {
           document.getElementById('edit-album-delivery-container').style.display = 'block';
@@ -3218,13 +3224,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // --- Gallery database actions ---
-    window.addGallery = async (clientName, notes) => {
+    window.addGallery = async (clientName, notes, customTimestamp = null) => {
       try {
         await firebaseFirestore.addDoc(firebaseFirestore.collection(db, "galleries"), {
           clientName: clientName.trim(),
           notes: notes.trim(),
           status: 'pending',
-          timestamp: Date.now(),
+          timestamp: customTimestamp || Date.now(),
           arrivedDate: null,
           selectionDate: null,
           editedDate: null,
@@ -3337,7 +3343,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.updateGallery = async (id, clientName, notes, status, chosenTimestamp = Date.now()) => {
+    window.updateGallery = async (id, clientName, notes, status, chosenTimestamp = Date.now(), customCreationTimestamp = null) => {
       try {
         const existing = galleries.find(g => g.id === id);
         const updateFields = {
@@ -3345,6 +3351,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           notes: notes.trim(),
           status: status
         };
+        if (customCreationTimestamp !== null) {
+          updateFields.timestamp = customCreationTimestamp;
+        }
         if (existing) {
           if (status === 'pending') {
             updateFields.arrivedDate = null;
@@ -3394,13 +3403,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // --- Album database actions (Online) ---
-    window.addAlbum = async (clientName, notes) => {
+    window.addAlbum = async (clientName, notes, customTimestamp = null) => {
       try {
         await firebaseFirestore.addDoc(firebaseFirestore.collection(db, "albums"), {
           clientName: clientName.trim(),
           notes: notes.trim(),
           status: 'pending',
-          timestamp: Date.now(),
+          timestamp: customTimestamp || Date.now(),
           approvalDate: null,
           printingDate: null,
           arrivedDate: null,
@@ -3461,7 +3470,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.updateAlbum = async (id, clientName, notes, status, deliveryMethod = '', chosenTimestamp = Date.now()) => {
+    window.updateAlbum = async (id, clientName, notes, status, deliveryMethod = '', chosenTimestamp = Date.now(), customCreationTimestamp = null) => {
       try {
         const existing = albums.find(a => a.id === id);
         const updateFields = {
@@ -3469,6 +3478,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           notes: notes.trim(),
           status: status
         };
+        if (customCreationTimestamp !== null) {
+          updateFields.timestamp = customCreationTimestamp;
+        }
         if (existing) {
           if (status === 'pending') {
             updateFields.approvalDate = null;
@@ -4345,13 +4357,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Custom Galleries operations mapping for Local mode
-    window.addGallery = (clientName, notes) => {
+    window.addGallery = (clientName, notes, customTimestamp = null) => {
       const newGallery = {
         id: 'gallery_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         clientName: clientName.trim(),
         notes: notes.trim(),
         status: 'pending',
-        timestamp: Date.now(),
+        timestamp: customTimestamp || Date.now(),
         arrivedDate: null,
         selectionDate: null,
         editedDate: null,
@@ -4416,7 +4428,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.updateGallery = (id, clientName, notes, status, chosenTimestamp = Date.now()) => {
+    window.updateGallery = (id, clientName, notes, status, chosenTimestamp = Date.now(), customCreationTimestamp = null) => {
       const gIndex = galleries.findIndex(g => g.id === id);
       if (gIndex === -1) return;
 
@@ -4424,6 +4436,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       existing.clientName = clientName.trim();
       existing.notes = notes.trim();
       existing.status = status;
+      if (customCreationTimestamp !== null) {
+        existing.timestamp = customCreationTimestamp;
+      }
 
       if (status === 'pending') {
         existing.arrivedDate = null;
@@ -4879,13 +4894,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // Custom Albums operations mapping for Local mode
-    window.addAlbum = (clientName, notes) => {
+    window.addAlbum = (clientName, notes, customTimestamp = null) => {
       const newAlbum = {
         id: 'album_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         clientName: clientName.trim(),
         notes: notes.trim(),
         status: 'pending',
-        timestamp: Date.now(),
+        timestamp: customTimestamp || Date.now(),
         approvalDate: null,
         printingDate: null,
         arrivedDate: null,
@@ -4959,7 +4974,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast(`Moved to <strong>${nextStatus}</strong>`, '➡️');
     };
 
-    window.updateAlbum = (id, clientName, notes, status, deliveryMethod = '', chosenTimestamp = Date.now()) => {
+    window.updateAlbum = (id, clientName, notes, status, deliveryMethod = '', chosenTimestamp = Date.now(), customCreationTimestamp = null) => {
       const aIndex = albums.findIndex(a => a.id === id);
       if (aIndex === -1) return;
 
@@ -4967,6 +4982,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       existing.clientName = clientName.trim();
       existing.notes = notes.trim();
       existing.status = status;
+      if (customCreationTimestamp !== null) {
+        existing.timestamp = customCreationTimestamp;
+      }
 
       if (status === 'pending') {
         existing.approvalDate = null;
@@ -5261,6 +5279,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (addGalleryBtn) {
     addGalleryBtn.addEventListener('click', () => {
       addGalleryForm.reset();
+      const galleryDateInput = document.getElementById('gallery-date-input');
+      if (galleryDateInput) {
+        const now = new Date();
+        galleryDateInput.value = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      }
       galleryStatusMsg.textContent = 'This gallery will enter the "Arrived" column.';
       galleryModal.style.display = 'flex';
       galleryModal.offsetHeight; // force reflow
@@ -5294,7 +5317,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       const notes = galleryNotesInput.value;
       if (!name.trim()) return;
 
-      await window.addGallery(name, notes);
+      const dateInput = document.getElementById('gallery-date-input');
+      const customTimestamp = dateInput && dateInput.value ? new Date(dateInput.value).getTime() : Date.now();
+
+      await window.addGallery(name, notes, customTimestamp);
       closeGallery();
     });
   }
@@ -5344,7 +5370,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         chosenTimestamp = promptDate;
       }
 
-      await window.updateGallery(id, name, notes, status, chosenTimestamp);
+      const editGalleryDate = document.getElementById('edit-gallery-date-input');
+      const customCreationTimestamp = editGalleryDate && editGalleryDate.value ? new Date(editGalleryDate.value).getTime() : (gallery ? gallery.timestamp : Date.now());
+
+      await window.updateGallery(id, name, notes, status, chosenTimestamp, customCreationTimestamp);
       closeEditGallery();
     });
   }
@@ -5353,6 +5382,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (addAlbumBtn) {
     addAlbumBtn.addEventListener('click', () => {
       addAlbumForm.reset();
+      const albumDateInput = document.getElementById('album-date-input');
+      if (albumDateInput) {
+        const now = new Date();
+        albumDateInput.value = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      }
       albumStatusMsg.textContent = 'This album will enter the "Approval" column.';
       albumModal.style.display = 'flex';
       albumModal.offsetHeight; // force reflow
@@ -5386,7 +5420,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       const notes = albumNotesInput.value;
       if (!name.trim()) return;
 
-      await window.addAlbum(name, notes);
+      const dateInput = document.getElementById('album-date-input');
+      const customTimestamp = dateInput && dateInput.value ? new Date(dateInput.value).getTime() : Date.now();
+
+      await window.addAlbum(name, notes, customTimestamp);
       closeAlbum();
     });
   }
@@ -5429,7 +5466,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         chosenTimestamp = promptDate;
       }
 
-      await window.updateAlbum(id, name, notes, status, deliveryMethod, chosenTimestamp);
+      const editAlbumDate = document.getElementById('edit-album-date-input');
+      const customCreationTimestamp = editAlbumDate && editAlbumDate.value ? new Date(editAlbumDate.value).getTime() : (album ? album.timestamp : Date.now());
+
+      await window.updateAlbum(id, name, notes, status, deliveryMethod, chosenTimestamp, customCreationTimestamp);
       closeEditAlbum();
     });
   }

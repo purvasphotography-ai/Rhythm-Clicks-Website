@@ -932,7 +932,7 @@ body {
   backdrop-filter: blur(20px);
   border-radius: var(--border-radius-md);
   box-shadow: var(--glass-shadow);
-  padding: 1.25rem;
+  padding: 0.85rem;
   min-height: 400px;
   max-height: calc(100vh - 260px);
   overflow: hidden;
@@ -943,8 +943,8 @@ body {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  padding-bottom: 0.75rem;
-  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .column-header h3 {
@@ -971,7 +971,7 @@ body {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.5rem;
   overflow-y: auto;
   flex-grow: 1;
   padding-right: 4px;
@@ -981,12 +981,12 @@ body {
   background: rgba(255, 255, 255, 0.65);
   border: 1px solid rgba(0, 0, 0, 0.04);
   border-radius: var(--border-radius-sm);
-  padding: 0.95rem;
+  padding: 0.6rem 0.8rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
   transition: all var(--transition-fast);
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.4rem;
 }
 
 .gallery-card:hover {
@@ -998,7 +998,7 @@ body {
 
 .gallery-title {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   color: var(--text-primary);
   margin: 0;
   line-height: 1.3;
@@ -1011,24 +1011,93 @@ body {
 }
 
 .gallery-notes {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   color: var(--text-secondary);
-  background: rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.03);
-  border-radius: var(--border-radius-sm);
-  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.015);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
   margin: 0;
   white-space: pre-wrap;
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 .gallery-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 0.25rem;
+  margin-top: 0.15rem;
   border-top: 1px solid rgba(0, 0, 0, 0.03);
-  padding-top: 0.6rem;
+  padding-top: 0.45rem;
+}
+
+/* Compact status dot & collapsible details styles */
+.gallery-current-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  background: rgba(0, 0, 0, 0.02);
+  padding: 3px 6px;
+  border-radius: 4px;
+  width: fit-content;
+  margin-bottom: 2px;
+}
+
+.gallery-current-status .status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #a88a3a;
+  display: inline-block;
+}
+
+/* Column specific status dot coloring */
+.pipeline-column:nth-child(1) .gallery-current-status .status-dot { background-color: #757575; } /* Pending */
+.pipeline-column:nth-child(2) .gallery-current-status .status-dot { background-color: #a88a3a; } /* Arrived / Approval */
+.pipeline-column:nth-child(3) .gallery-current-status .status-dot { background-color: #1976D2; } /* Selected / Printing */
+.pipeline-column:nth-child(4) .gallery-current-status .status-dot { background-color: #E64A19; } /* Edited / Arrived */
+.pipeline-column:nth-child(5) .gallery-current-status .status-dot { background-color: #388E3C; } /* Delivered */
+
+.gallery-history-details {
+  margin-top: 2px;
+}
+
+.gallery-history-summary {
+  font-size: 0.68rem;
+  color: var(--text-light);
+  cursor: pointer;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  user-select: none;
+  list-style: none;
+}
+
+.gallery-history-summary::-webkit-details-marker {
+  display: none;
+}
+
+.gallery-history-summary::before {
+  content: '▶';
+  font-size: 0.55rem;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.gallery-history-details[open] .gallery-history-summary::before {
+  transform: rotate(90deg);
+}
+
+.gallery-history-details .gallery-timestamps-timeline {
+  margin: 4px 0 0 0;
+  padding: 4px 6px;
+  border-left: 2px solid rgba(0, 0, 0, 0.04);
+  background: rgba(0, 0, 0, 0.015);
+  gap: 2px;
+  border-radius: 4px;
 }
 
 .btn-move {
