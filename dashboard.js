@@ -1622,403 +1622,448 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   window.renderAccounts = () => {
-    populateMonthFilter();
+    try {
+      populateMonthFilter();
 
-    const fmt = (val) => new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(val);
+      const fmt = (val) => new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+      }).format(val);
 
-    const filterSelect = document.getElementById('account-filter');
-    const selectedAccount = filterSelect ? filterSelect.value : 'all';
+      const safeFormatDate = (dateVal) => {
+        if (!dateVal) return 'N/A';
+        const dObj = new Date(dateVal);
+        if (isNaN(dObj.getTime())) return String(dateVal);
+        return dObj.toLocaleDateString('en-IN', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
+      };
 
-    const monthFilter = document.getElementById('account-month-filter');
-    const selectedMonth = monthFilter ? monthFilter.value : 'all';
+      const filterSelect = document.getElementById('account-filter');
+      const selectedAccount = filterSelect ? filterSelect.value : 'all';
 
-    const summaryGrid = document.getElementById('accounts-summary-grid');
-    const cardsList = document.getElementById('accounts-cards-list');
-    const transactionsBody = document.getElementById('accounts-transactions-body');
+      const monthFilter = document.getElementById('account-month-filter');
+      const selectedMonth = monthFilter ? monthFilter.value : 'all';
 
-    if (!summaryGrid || !cardsList || !transactionsBody) return;
+      const summaryGrid = document.getElementById('accounts-summary-grid');
+      const cardsList = document.getElementById('accounts-cards-list');
+      const transactionsBody = document.getElementById('accounts-transactions-body');
 
-    const accountList = ['Rhythm', 'Cash', 'Purva', 'Bijal', 'Shilpa', 'Mahesh'];
-    const accountStats = {};
-    accountList.forEach(acc => {
-      accountStats[acc] = { advances: 0, balance: 0, expected: 0 };
-    });
+      if (!summaryGrid || !cardsList || !transactionsBody) return;
 
-    let overallExpected = 0;
-    let overallAdvances = 0;
-    let overallBalance = 0;
-
-    // Filter bookings by selected month
-    const filteredBookings = bookings.filter(b => {
-      if (selectedMonth === 'all') return true;
-      return b.date && String(b.date).substring(0, 7) === selectedMonth;
-    });
-
-    // 1. Trace bookings and correlate with completed shoots
-    filteredBookings.forEach(b => {
-      const packagePrice = parsePackagePrice(b.package);
-      const advanceVal = parseFloat(b.advance) || 0;
-
-      // Find if there is a completed shoot matching this booking
-      const linkedShoot = shoots.find(s => {
-        try {
-          if (s && s.bookingId && s.bookingId === b.id) return true;
-          const sName = s && s.clientName ? String(s.clientName).toLowerCase() : '';
-          const bName = b && b.clientName ? String(b.clientName).toLowerCase() : '';
-          if (sName && sName === bName && s.date === b.date) return true;
-        } catch (e) {
-          console.error(e);
-        }
-        return false;
+      const accountList = ['Rhythm', 'Cash', 'Purva', 'Bijal', 'Shilpa', 'Mahesh'];
+      const accountStats = {};
+      accountList.forEach(acc => {
+        accountStats[acc] = { advances: 0, balance: 0, expected: 0 };
       });
 
-      if (linkedShoot) {
-        // If logged/completed, both advance and balance are collected! No pending balance remains.
-        const sAdvance = parseFloat(linkedShoot.advanceAmount) || 0;
-        const sBalance = parseFloat(linkedShoot.balanceAmount) || 0;
-        const advAcc = linkedShoot.advanceAccount || 'Cash';
-        const balAcc = linkedShoot.balanceAccount || 'Cash';
+      let overallExpected = 0;
+      let overallAdvances = 0;
+      let overallBalance = 0;
 
-        if (accountStats[advAcc]) {
-          accountStats[advAcc].advances += sAdvance;
-          accountStats[advAcc].expected += sAdvance;
-        }
-        if (accountStats[balAcc]) {
-          accountStats[balAcc].advances += sBalance;
-          accountStats[balAcc].expected += sBalance;
-        }
+      // Filter bookings by selected month
+      const filteredBookings = (Array.isArray(bookings) ? bookings : []).filter(b => {
+        if (!b) return false;
+        if (selectedMonth === 'all') return true;
+        return b.date && String(b.date).substring(0, 7) === selectedMonth;
+      });
 
-        overallExpected += (sAdvance + sBalance);
-        overallAdvances += (sAdvance + sBalance);
-      } else {
-        // If not logged/completed, the advance is collected, but the balance is pending.
-        const balanceVal = Math.max(0, packagePrice - advanceVal);
-        const acc = b.paymentAccount || 'Cash';
-
-        if (accountStats[acc]) {
-          accountStats[acc].advances += advanceVal;
-          accountStats[acc].balance += balanceVal;
-          accountStats[acc].expected += packagePrice;
-        }
-
-        overallExpected += packagePrice;
-        overallAdvances += advanceVal;
-        overallBalance += balanceVal;
-      }
-    });
-
-    // 2. Account for any manually logged shoots that don't match any bookings
-    const linkedBookingIds = bookings.map(b => b.id);
-    const unlinkedShoots = shoots.filter(s => {
-      if (s && s.bookingId && linkedBookingIds.includes(s.bookingId)) return false;
-      const matchesBooking = bookings.some(b => {
+      // 1. Trace bookings and correlate with completed shoots
+      filteredBookings.forEach(b => {
         try {
-          const sName = s && s.clientName ? String(s.clientName).toLowerCase() : '';
-          const bName = b && b.clientName ? String(b.clientName).toLowerCase() : '';
-          return sName && sName === bName && b.date === s.date;
+          if (!b) return;
+          const packagePrice = parsePackagePrice(b.package);
+          const advanceVal = parseFloat(b.advance) || 0;
+
+          // Find if there is a completed shoot matching this booking
+          const linkedShoot = (Array.isArray(shoots) && shoots.length > 0) ? shoots.find(s => {
+            try {
+              if (s && s.bookingId && s.bookingId === b.id) return true;
+              const sName = s && s.clientName ? String(s.clientName).toLowerCase() : '';
+              const bName = b && b.clientName ? String(b.clientName).toLowerCase() : '';
+              if (sName && sName === bName && s.date === b.date) return true;
+            } catch (e) {
+              console.error(e);
+            }
+            return false;
+          }) : null;
+
+          if (linkedShoot) {
+            // If logged/completed, both advance and balance are collected! No pending balance remains.
+            const sAdvance = parseFloat(linkedShoot.advanceAmount) || 0;
+            const sBalance = parseFloat(linkedShoot.balanceAmount) || 0;
+            const advAcc = linkedShoot.advanceAccount || 'Cash';
+            const balAcc = linkedShoot.balanceAccount || 'Cash';
+
+            if (accountStats[advAcc]) {
+              accountStats[advAcc].advances += sAdvance;
+              accountStats[advAcc].expected += sAdvance;
+            }
+            if (accountStats[balAcc]) {
+              accountStats[balAcc].advances += sBalance;
+              accountStats[balAcc].expected += sBalance;
+            }
+
+            overallExpected += (sAdvance + sBalance);
+            overallAdvances += (sAdvance + sBalance);
+          } else {
+            // If not logged/completed, the advance is collected, but the balance is pending.
+            const balanceVal = Math.max(0, packagePrice - advanceVal);
+            const acc = b.paymentAccount || 'Cash';
+
+            if (accountStats[acc]) {
+              accountStats[acc].advances += advanceVal;
+              accountStats[acc].balance += balanceVal;
+              accountStats[acc].expected += packagePrice;
+            }
+
+            overallExpected += packagePrice;
+            overallAdvances += advanceVal;
+            overallBalance += balanceVal;
+          }
         } catch (e) {
-          return false;
+          console.error("Error processing booking stats:", e, b);
         }
       });
-      return !matchesBooking;
-    });
 
-    const filteredUnlinkedShoots = unlinkedShoots.filter(s => {
-      if (selectedMonth === 'all') return true;
-      return s.date && String(s.date).substring(0, 7) === selectedMonth;
-    });
+      // 2. Account for any manually logged shoots that don't match any bookings
+      const linkedBookingIds = (Array.isArray(bookings) ? bookings : []).map(b => b ? b.id : null).filter(Boolean);
+      const unlinkedShoots = (Array.isArray(shoots) ? shoots : []).filter(s => {
+        if (!s) return false;
+        if (s.bookingId && linkedBookingIds.includes(s.bookingId)) return false;
+        const matchesBooking = (Array.isArray(bookings) ? bookings : []).some(b => {
+          try {
+            if (!b) return false;
+            const sName = s && s.clientName ? String(s.clientName).toLowerCase() : '';
+            const bName = b && b.clientName ? String(b.clientName).toLowerCase() : '';
+            return sName && sName === bName && b.date === s.date;
+          } catch (e) {
+            return false;
+          }
+        });
+        return !matchesBooking;
+      });
 
-    filteredUnlinkedShoots.forEach(s => {
-      const sAdvance = parseFloat(s.advanceAmount) || 0;
-      const sBalance = parseFloat(s.balanceAmount) || 0;
-      const advAcc = s.advanceAccount || 'Cash';
-      const balAcc = s.balanceAccount || 'Cash';
+      const filteredUnlinkedShoots = unlinkedShoots.filter(s => {
+        if (!s) return false;
+        if (selectedMonth === 'all') return true;
+        return s.date && String(s.date).substring(0, 7) === selectedMonth;
+      });
 
-      if (accountStats[advAcc]) {
-        accountStats[advAcc].advances += sAdvance;
-        accountStats[advAcc].expected += sAdvance;
-      }
-      if (accountStats[balAcc]) {
-        accountStats[balAcc].advances += sBalance;
-        accountStats[balAcc].expected += sBalance;
-      }
+      filteredUnlinkedShoots.forEach(s => {
+        try {
+          if (!s) return;
+          const sAdvance = parseFloat(s.advanceAmount) || 0;
+          const sBalance = parseFloat(s.balanceAmount) || 0;
+          const advAcc = s.advanceAccount || 'Cash';
+          const balAcc = s.balanceAccount || 'Cash';
 
-      overallExpected += (sAdvance + sBalance);
-      overallAdvances += (sAdvance + sBalance);
-    });
+          if (accountStats[advAcc]) {
+            accountStats[advAcc].advances += sAdvance;
+            accountStats[advAcc].expected += sAdvance;
+          }
+          if (accountStats[balAcc]) {
+            accountStats[balAcc].advances += sBalance;
+            accountStats[balAcc].expected += sBalance;
+          }
 
-    // 2.5 Calculate extra edited photos charges & prepare table rows
-    let totalExtraPhotosCharges = 0;
-    const extraPhotosRows = [];
-
-    if (Array.isArray(galleries)) {
-      galleries.forEach(g => {
-        if (!g) return;
-        const gDate = new Date(g.timestamp);
-        const y = gDate.getFullYear();
-        const m = gDate.getMonth() + 1;
-        const gMonthStr = `${y}-${m.toString().padStart(2, '0')}`;
-        if (selectedMonth !== 'all' && gMonthStr !== selectedMonth) return;
-
-        const normName = g.clientName ? String(g.clientName).toLowerCase().replace(/[^a-z0-9]/g, '').trim() : '';
-        const matchingShoot = (normName && typeof shoots !== 'undefined' && Array.isArray(shoots)) 
-          ? shoots.find(s => s && s.clientName && String(s.clientName).toLowerCase().replace(/[^a-z0-9]/g, '').trim() === normName) 
-          : null;
-        
-        let shootAllowed = 0;
-        if (matchingShoot && matchingShoot.photosCount) {
-          shootAllowed = parseInt(matchingShoot.photosCount) || 0;
+          overallExpected += (sAdvance + sBalance);
+          overallAdvances += (sAdvance + sBalance);
+        } catch (e) {
+          console.error("Error processing unlinked shoot stats:", e, s);
         }
-        
-        const selectedCount = g.photosSelected ? parseInt(g.photosSelected) || 0 : 0;
-        if (shootAllowed > 0 && selectedCount > shootAllowed) {
-          const extraPhotos = selectedCount - shootAllowed;
-          const amountDue = extraPhotos * 200;
-          totalExtraPhotosCharges += amountDue;
+      });
 
-          const formattedGDate = gDate.toLocaleDateString('en-IN', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-          });
+      // 2.5 Calculate extra edited photos charges & prepare table rows
+      let totalExtraPhotosCharges = 0;
+      const extraPhotosRows = [];
 
-          extraPhotosRows.push(`
-            <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-              <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(g.clientName)}</td>
-              <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedGDate}</td>
-              <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: var(--text-secondary);">${shootAllowed} allowed / ${selectedCount} selected</td>
-              <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: #E65100;">${extraPhotos} extra</td>
-              <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: #E65100;">${fmt(amountDue)}</td>
-              <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(239, 108, 0, 0.12); color: #E65100; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PENDING</span></td>
+      if (Array.isArray(galleries)) {
+        galleries.forEach(g => {
+          try {
+            if (!g) return;
+            if (!g.timestamp) return;
+            const gDate = new Date(g.timestamp);
+            if (isNaN(gDate.getTime())) return;
+
+            const y = gDate.getFullYear();
+            const m = gDate.getMonth() + 1;
+            const gMonthStr = `${y}-${m.toString().padStart(2, '0')}`;
+            if (selectedMonth !== 'all' && gMonthStr !== selectedMonth) return;
+
+            const normName = g.clientName ? String(g.clientName).toLowerCase().replace(/[^a-z0-9]/g, '').trim() : '';
+            const matchingShoot = (normName && typeof shoots !== 'undefined' && Array.isArray(shoots)) 
+              ? shoots.find(s => s && s.clientName && String(s.clientName).toLowerCase().replace(/[^a-z0-9]/g, '').trim() === normName) 
+              : null;
+            
+            let shootAllowed = 0;
+            if (matchingShoot && matchingShoot.photosCount) {
+              shootAllowed = parseInt(matchingShoot.photosCount) || 0;
+            }
+            
+            const selectedCount = g.photosSelected ? parseInt(g.photosSelected) || 0 : 0;
+            if (shootAllowed > 0 && selectedCount > shootAllowed) {
+              const extraPhotos = selectedCount - shootAllowed;
+              const amountDue = extraPhotos * 200;
+              totalExtraPhotosCharges += amountDue;
+
+              const formattedGDate = gDate.toLocaleDateString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              });
+
+              extraPhotosRows.push(`
+                <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                  <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(g.clientName)}</td>
+                  <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedGDate}</td>
+                  <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: var(--text-secondary);">${shootAllowed} allowed / ${selectedCount} selected</td>
+                  <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: #E65100;">${extraPhotos} extra</td>
+                  <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: #E65100;">${fmt(amountDue)}</td>
+                  <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(239, 108, 0, 0.12); color: #E65100; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PENDING</span></td>
+                </tr>
+              `);
+            }
+          } catch (e) {
+            console.error("Error rendering extra photos row:", e, g);
+          }
+        });
+      }
+
+      const extraPhotosBody = document.getElementById('extra-photos-balance-body');
+      if (extraPhotosBody) {
+        if (extraPhotosRows.length === 0) {
+          extraPhotosBody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                No extra photos balance outstanding for this month.
+              </td>
             </tr>
-          `);
+          `;
+        } else {
+          extraPhotosBody.innerHTML = extraPhotosRows.join('');
         }
-      });
-    }
-
-    const extraPhotosBody = document.getElementById('extra-photos-balance-body');
-    if (extraPhotosBody) {
-      if (extraPhotosRows.length === 0) {
-        extraPhotosBody.innerHTML = `
-          <tr>
-            <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-light);">
-              No extra photos balance outstanding for this month.
-            </td>
-          </tr>
-        `;
-      } else {
-        extraPhotosBody.innerHTML = extraPhotosRows.join('');
       }
-    }
 
-    // Determine stats for current view (filtered)
-    let displayExpected = 0;
-    let displayAdvances = 0;
-    let displayBalance = 0;
+      // Determine stats for current view (filtered)
+      let displayExpected = 0;
+      let displayAdvances = 0;
+      let displayBalance = 0;
 
-    if (selectedAccount === 'all') {
-      displayExpected = overallExpected;
-      displayAdvances = overallAdvances;
-      displayBalance = overallBalance;
-    } else if (accountStats[selectedAccount]) {
-      displayExpected = accountStats[selectedAccount].expected;
-      displayAdvances = accountStats[selectedAccount].advances;
-      displayBalance = accountStats[selectedAccount].balance;
-    }
+      if (selectedAccount === 'all') {
+        displayExpected = overallExpected;
+        displayAdvances = overallAdvances;
+        displayBalance = overallBalance;
+      } else if (accountStats[selectedAccount]) {
+        displayExpected = accountStats[selectedAccount].expected;
+        displayAdvances = accountStats[selectedAccount].advances;
+        displayBalance = accountStats[selectedAccount].balance;
+      }
 
-    // 1. Render Summary Cards (Expected, Advances, Pending, Extra Photos Balance)
-    summaryGrid.innerHTML = `
-      <div class="grid-card" style="padding: 1.5rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); text-align: center;">
-        <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Expected Revenue</span>
-        <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: var(--text-primary);">${fmt(displayExpected)}</h3>
-      </div>
-      <div class="grid-card" style="padding: 1.5rem; background: rgba(46, 125, 50, 0.08); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(46, 125, 50, 0.15); text-align: center;">
-        <span style="font-size: 0.75rem; color: #2E7D32; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Advances/Paid Balance</span>
-        <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: #2E7D32;">${fmt(displayAdvances)}</h3>
-      </div>
-      <div class="grid-card" style="padding: 1.5rem; background: rgba(198, 40, 40, 0.08); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(198, 40, 40, 0.15); text-align: center;">
-        <span style="font-size: 0.75rem; color: #C62828; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Pending Receivables</span>
-        <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: #C62828;">${fmt(displayBalance)}</h3>
-      </div>
-      <div class="grid-card" style="padding: 1.5rem; background: rgba(239, 108, 0, 0.08); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(239, 108, 0, 0.15); text-align: center;">
-        <span style="font-size: 0.75rem; color: #E65100; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Extra Photos Balance</span>
-        <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: #E65100;">${fmt(totalExtraPhotosCharges)}</h3>
-      </div>
-    `;
-
-    // 2. Render Account Cards Breakdowns (Stop displaying pending balance on each account card)
-    cardsList.innerHTML = accountList.map(acc => {
-      const stats = accountStats[acc];
-      const percent = stats.expected > 0 ? Math.round((stats.advances / stats.expected) * 100) : 0;
-      return `
-        <div class="grid-card" style="padding: 1.5rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); display: flex; flex-direction: column; gap: 0.75rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h4 style="margin: 0; font-family: var(--font-serif); font-size: 1.15rem; color: var(--text-primary);">${acc} Account</h4>
-            <span style="font-size: 0.8rem; font-weight: 700; color: #2E7D32;">${percent}% Collected</span>
-          </div>
-          <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.06); border-radius: 3px; overflow: hidden;">
-            <div style="width: ${percent}%; height: 100%; background: #2E7D32; border-radius: 3px; transition: width 0.3s ease;"></div>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
-            <span>Received: <strong>${fmt(stats.advances)}</strong></span>
-          </div>
+      // 1. Render Summary Cards (Expected, Advances, Pending, Extra Photos Balance)
+      summaryGrid.innerHTML = `
+        <div class="grid-card" style="padding: 1.5rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); text-align: center;">
+          <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Expected Revenue</span>
+          <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: var(--text-primary);">${fmt(displayExpected)}</h3>
+        </div>
+        <div class="grid-card" style="padding: 1.5rem; background: rgba(46, 125, 50, 0.08); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(46, 125, 50, 0.15); text-align: center;">
+          <span style="font-size: 0.75rem; color: #2E7D32; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Advances/Paid Balance</span>
+          <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: #2E7D32;">${fmt(displayAdvances)}</h3>
+        </div>
+        <div class="grid-card" style="padding: 1.5rem; background: rgba(198, 40, 40, 0.08); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(198, 40, 40, 0.15); text-align: center;">
+          <span style="font-size: 0.75rem; color: #C62828; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Pending Receivables</span>
+          <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: #C62828;">${fmt(displayBalance)}</h3>
+        </div>
+        <div class="grid-card" style="padding: 1.5rem; background: rgba(239, 108, 0, 0.08); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(239, 108, 0, 0.15); text-align: center;">
+          <span style="font-size: 0.75rem; color: #E65100; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Extra Photos Balance</span>
+          <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: #E65100;">${fmt(totalExtraPhotosCharges)}</h3>
         </div>
       `;
-    }).join('');
 
-    // 3. Render Related Transactions List
-    const transactionRows = [];
+      // 2. Render Account Cards Breakdowns (Stop displaying pending balance on each account card)
+      cardsList.innerHTML = accountList.map(acc => {
+        const stats = accountStats[acc];
+        const percent = stats.expected > 0 ? Math.round((stats.advances / stats.expected) * 100) : 0;
+        return `
+          <div class="grid-card" style="padding: 1.5rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); display: flex; flex-direction: column; gap: 0.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <h4 style="margin: 0; font-family: var(--font-serif); font-size: 1.15rem; color: var(--text-primary);">${acc} Account</h4>
+              <span style="font-size: 0.8rem; font-weight: 700; color: #2E7D32;">${percent}% Collected</span>
+            </div>
+            <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.06); border-radius: 3px; overflow: hidden;">
+              <div style="width: ${percent}%; height: 100%; background: #2E7D32; border-radius: 3px; transition: width 0.3s ease;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+              <span>Received: <strong>${fmt(stats.advances)}</strong></span>
+            </div>
+          </div>
+        `;
+      }).join('');
 
-    filteredBookings.forEach(b => {
-      const packagePrice = parsePackagePrice(b.package);
-      const advanceVal = parseFloat(b.advance) || 0;
+      // 3. Render Related Transactions List
+      const transactionRows = [];
 
-      // Find if there is a completed shoot matching this booking
-      const linkedShoot = shoots.find(s => {
+      filteredBookings.forEach(b => {
         try {
-          if (s && s.bookingId && s.bookingId === b.id) return true;
-          const sName = s && s.clientName ? String(s.clientName).toLowerCase() : '';
-          const bName = b && b.clientName ? String(b.clientName).toLowerCase() : '';
-          if (sName && sName === bName && s.date === b.date) return true;
+          if (!b) return;
+          const packagePrice = parsePackagePrice(b.package);
+          const advanceVal = parseFloat(b.advance) || 0;
+
+          // Find if there is a completed shoot matching this booking
+          const linkedShoot = (Array.isArray(shoots) && shoots.length > 0) ? shoots.find(s => {
+            try {
+              if (s && s.bookingId && s.bookingId === b.id) return true;
+              const sName = s && s.clientName ? String(s.clientName).toLowerCase() : '';
+              const bName = b && b.clientName ? String(b.clientName).toLowerCase() : '';
+              if (sName && sName === bName && s.date === b.date) return true;
+            } catch (e) {
+              console.error(e);
+            }
+            return false;
+          }) : null;
+
+          const formattedDate = safeFormatDate(b.date);
+
+          if (linkedShoot) {
+            const sAdvance = parseFloat(linkedShoot.advanceAmount) || 0;
+            const sBalance = parseFloat(linkedShoot.balanceAmount) || 0;
+            const advAcc = linkedShoot.advanceAccount || 'Cash';
+            const balAcc = linkedShoot.balanceAccount || 'Cash';
+
+            // Add Advance transaction
+            if (sAdvance > 0 && (selectedAccount === 'all' || advAcc === selectedAccount)) {
+              transactionRows.push(`
+                <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                  <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(b.clientName)}</td>
+                  <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedDate}</td>
+                  <td style="padding: 0.75rem 0.5rem;"><span style="color: #2E7D32; font-weight: 600;">Advance Payment</span></td>
+                  <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(sAdvance)}</td>
+                  <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(advAcc)}</td>
+                  <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(46, 125, 50, 0.12); color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PAID</span></td>
+                </tr>
+              `);
+            }
+
+            // Add Balance transaction
+            if (sBalance > 0 && (selectedAccount === 'all' || balAcc === selectedAccount)) {
+              transactionRows.push(`
+                <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                  <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(b.clientName)}</td>
+                  <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedDate}</td>
+                  <td style="padding: 0.75rem 0.5rem;"><span style="color: #2E7D32; font-weight: 600;">Remaining Balance</span></td>
+                  <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(sBalance)}</td>
+                  <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(balAcc)}</td>
+                  <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(46, 125, 50, 0.12); color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PAID</span></td>
+                </tr>
+              `);
+            }
+          } else {
+            const balanceVal = Math.max(0, packagePrice - advanceVal);
+            const acc = b.paymentAccount || 'Cash';
+
+            if (selectedAccount === 'all' || acc === selectedAccount) {
+              if (advanceVal > 0) {
+                transactionRows.push(`
+                  <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(b.clientName)}</td>
+                    <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedDate}</td>
+                    <td style="padding: 0.75rem 0.5rem;"><span style="color: #2E7D32; font-weight: 600;">Advance Payment</span></td>
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(advanceVal)}</td>
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(acc)}</td>
+                    <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(46, 125, 50, 0.12); color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PAID</span></td>
+                  </tr>
+                `);
+              }
+
+              if (packagePrice > 0) {
+                transactionRows.push(`
+                  <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(b.clientName)}</td>
+                    <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedDate}</td>
+                    <td style="padding: 0.75rem 0.5rem;"><span style="color: ${balanceVal === 0 ? '#2E7D32' : '#C62828'}; font-weight: 600;">Remaining Balance</span></td>
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(balanceVal)}</td>
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(acc)}</td>
+                    <td style="padding: 0.75rem 0.5rem;">
+                      <span style="background: ${balanceVal === 0 ? 'rgba(46, 125, 50, 0.12)' : 'rgba(239, 108, 0, 0.12)'}; color: ${balanceVal === 0 ? '#2E7D32' : '#E65100'}; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
+                        ${balanceVal === 0 ? 'PAID' : 'PENDING'}
+                      </span>
+                    </td>
+                  </tr>
+                `);
+              }
+            }
+          }
         } catch (e) {
-          console.error(e);
+          console.error("Error rendering booking transaction row:", e, b);
         }
-        return false;
       });
 
-      const dateObj = new Date(b.date);
-      const formattedDate = dateObj.toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      });
+      // Add unlinked shoots transaction entries
+      filteredUnlinkedShoots.forEach(s => {
+        try {
+          if (!s) return;
+          const sAdvance = parseFloat(s.advanceAmount) || 0;
+          const sBalance = parseFloat(s.balanceAmount) || 0;
+          const advAcc = s.advanceAccount || 'Cash';
+          const balAcc = s.balanceAccount || 'Cash';
+          
+          const formattedDate = safeFormatDate(s.date);
 
-      if (linkedShoot) {
-        const sAdvance = parseFloat(linkedShoot.advanceAmount) || 0;
-        const sBalance = parseFloat(linkedShoot.balanceAmount) || 0;
-        const advAcc = linkedShoot.advanceAccount || 'Cash';
-        const balAcc = linkedShoot.balanceAccount || 'Cash';
-
-        // Add Advance transaction
-        if (sAdvance > 0 && (selectedAccount === 'all' || advAcc === selectedAccount)) {
-          transactionRows.push(`
-            <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-              <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(b.clientName)}</td>
-              <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedDate}</td>
-              <td style="padding: 0.75rem 0.5rem;"><span style="color: #2E7D32; font-weight: 600;">Advance Payment</span></td>
-              <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(sAdvance)}</td>
-              <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(advAcc)}</td>
-              <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(46, 125, 50, 0.12); color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PAID</span></td>
-            </tr>
-          `);
-        }
-
-        // Add Balance transaction
-        if (sBalance > 0 && (selectedAccount === 'all' || balAcc === selectedAccount)) {
-          transactionRows.push(`
-            <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-              <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(b.clientName)}</td>
-              <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedDate}</td>
-              <td style="padding: 0.75rem 0.5rem;"><span style="color: #2E7D32; font-weight: 600;">Remaining Balance</span></td>
-              <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(sBalance)}</td>
-              <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(balAcc)}</td>
-              <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(46, 125, 50, 0.12); color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PAID</span></td>
-            </tr>
-          `);
-        }
-      } else {
-        const balanceVal = Math.max(0, packagePrice - advanceVal);
-        const acc = b.paymentAccount || 'Cash';
-
-        if (selectedAccount === 'all' || acc === selectedAccount) {
-          if (advanceVal > 0) {
+          if (sAdvance > 0 && (selectedAccount === 'all' || advAcc === selectedAccount)) {
             transactionRows.push(`
               <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-                <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(b.clientName)}</td>
+                <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(s.clientName)} (Shoot Log)</td>
                 <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedDate}</td>
                 <td style="padding: 0.75rem 0.5rem;"><span style="color: #2E7D32; font-weight: 600;">Advance Payment</span></td>
-                <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(advanceVal)}</td>
-                <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(acc)}</td>
+                <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(sAdvance)}</td>
+                <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(advAcc)}</td>
                 <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(46, 125, 50, 0.12); color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PAID</span></td>
               </tr>
             `);
           }
 
-          if (packagePrice > 0) {
+          if (sBalance > 0 && (selectedAccount === 'all' || balAcc === selectedAccount)) {
             transactionRows.push(`
               <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-                <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(b.clientName)}</td>
+                <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(s.clientName)} (Shoot Log)</td>
                 <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedDate}</td>
-                <td style="padding: 0.75rem 0.5rem;"><span style="color: ${balanceVal === 0 ? '#2E7D32' : '#C62828'}; font-weight: 600;">Remaining Balance</span></td>
-                <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(balanceVal)}</td>
-                <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(acc)}</td>
-                <td style="padding: 0.75rem 0.5rem;">
-                  <span style="background: ${balanceVal === 0 ? 'rgba(46, 125, 50, 0.12)' : 'rgba(239, 108, 0, 0.12)'}; color: ${balanceVal === 0 ? '#2E7D32' : '#E65100'}; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
-                    ${balanceVal === 0 ? 'PAID' : 'PENDING'}
-                  </span>
-                </td>
+                <td style="padding: 0.75rem 0.5rem;"><span style="color: #2E7D32; font-weight: 600;">Remaining Balance</span></td>
+                <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(sBalance)}</td>
+                <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(balAcc)}</td>
+                <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(46, 125, 50, 0.12); color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PAID</span></td>
               </tr>
             `);
           }
+        } catch (e) {
+          console.error("Error rendering unlinked shoot transaction row:", e, s);
         }
-      }
-    });
-
-    // Add unlinked shoots transaction entries
-    filteredUnlinkedShoots.forEach(s => {
-      const sAdvance = parseFloat(s.advanceAmount) || 0;
-      const sBalance = parseFloat(s.balanceAmount) || 0;
-      const advAcc = s.advanceAccount || 'Cash';
-      const balAcc = s.balanceAccount || 'Cash';
-      
-      const dateObj = new Date(s.date);
-      const formattedDate = dateObj.toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
       });
 
-      if (sAdvance > 0 && (selectedAccount === 'all' || advAcc === selectedAccount)) {
-        transactionRows.push(`
-          <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-            <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(s.clientName)} (Shoot Log)</td>
-            <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedDate}</td>
-            <td style="padding: 0.75rem 0.5rem;"><span style="color: #2E7D32; font-weight: 600;">Advance Payment</span></td>
-            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(sAdvance)}</td>
-            <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(advAcc)}</td>
-            <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(46, 125, 50, 0.12); color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PAID</span></td>
+      if (transactionRows.length === 0) {
+        transactionsBody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-light);">
+              No transactions found for this account/month filter.
+            </td>
           </tr>
-        `);
+        `;
+      } else {
+        transactionsBody.innerHTML = transactionRows.join('');
       }
-
-      if (sBalance > 0 && (selectedAccount === 'all' || balAcc === selectedAccount)) {
-        transactionRows.push(`
-          <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-            <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(s.clientName)} (Shoot Log)</td>
-            <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedDate}</td>
-            <td style="padding: 0.75rem 0.5rem;"><span style="color: #2E7D32; font-weight: 600;">Remaining Balance</span></td>
-            <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(sBalance)}</td>
-            <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(balAcc)}</td>
-            <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(46, 125, 50, 0.12); color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PAID</span></td>
-          </tr>
-        `);
+    } catch (error) {
+      console.error("CRITICAL ERROR IN RENDER ACCOUNTS:", error);
+      const summaryGrid = document.getElementById('accounts-summary-grid');
+      if (summaryGrid) {
+        summaryGrid.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 1.5rem; background: rgba(198, 40, 40, 0.1); color: #C62828; border: 1px solid rgba(198, 40, 40, 0.2); border-radius: var(--border-radius-lg); font-family: monospace; font-size: 0.85rem; text-align: left; margin-bottom: 1rem;">
+            <strong>Error rendering accounts tracker:</strong> ${error.message}<br>
+            <pre style="margin-top: 0.75rem; white-space: pre-wrap; font-size: 0.75rem; max-height: 200px; overflow-y: auto;">${error.stack}</pre>
+          </div>
+        `;
       }
-    });
-
-    if (transactionRows.length === 0) {
-      transactionsBody.innerHTML = `
-        <tr>
-          <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-light);">
-            No transactions found for this account/month filter.
-          </td>
-        </tr>
-      `;
-    } else {
-      transactionsBody.innerHTML = transactionRows.join('');
     }
   };
 

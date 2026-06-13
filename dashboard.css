@@ -230,7 +230,7 @@ body {
     height: 100%;
   }
   
-  .grid-card {
+  .dashboard-grid .grid-card {
     height: 100%;
     overflow: hidden;
     display: flex;
