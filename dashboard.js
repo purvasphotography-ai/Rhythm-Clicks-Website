@@ -7541,8 +7541,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                   ${escapeHtml(booking.clientName)} 
                   ${statusBadge}
                 </td>
-                <td></td>
-                <td></td>
+                <td style="text-align: center; color: var(--text-secondary);">${dateDisplay}</td>
+                <td style="text-align: center; color: var(--text-secondary);">${weekdayDisplay}</td>
                 <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
                 <td style="color: var(--text-secondary);">${escapeHtml(booking.package)}</td>
                 <td style="text-align: center; display: flex; gap: 4px; justify-content: center; align-items: center; padding: 0.65rem 0.5rem; border: none !important;">
@@ -7562,8 +7562,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                   ${escapeHtml(event.summary || 'Google Event')} 
                   <span class="booking-shoot-badge" style="background: rgba(66, 133, 244, 0.1); color: #4285F4; margin-left: 8px;">Google Cal</span>
                 </td>
-                <td></td>
-                <td></td>
+                <td style="text-align: center; color: var(--text-secondary);">${dateDisplay}</td>
+                <td style="text-align: center; color: var(--text-secondary);">${weekdayDisplay}</td>
                 <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
                 <td style="color: var(--text-light); font-style: italic;">Google Sync</td>
                 <td style="text-align: center;">
@@ -7582,8 +7582,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             <td style="font-weight: 600; color: #2E7D32; font-style: italic;">
               ✨ Empty Slot (${info.label})
             </td>
-            <td></td>
-            <td></td>
+            <td style="text-align: center; color: var(--text-secondary);">${dateDisplay}</td>
+            <td style="text-align: center; color: var(--text-secondary);">${weekdayDisplay}</td>
             <td style="text-align: center; color: var(--text-light); font-size: 0.75rem;">AM & PM Available</td>
             <td style="color: var(--text-light); font-size: 0.75rem;">All Packages</td>
             <td style="text-align: center;">
