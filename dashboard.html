@@ -1461,6 +1461,26 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Extra Edited Photos Balance Section -->
+        <h3 style="font-family: var(--font-serif); font-size: 1.2rem; margin: 2rem 0 1rem 0; color: var(--text-primary);">Extra Edited Photos Balance</h3>
+        <div class="grid-card" style="padding: 1.5rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); overflow-x: auto; margin-bottom: 2rem;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; min-width: 600px;">
+            <thead>
+              <tr style="border-bottom: 1.5px solid rgba(0,0,0,0.08); color: var(--text-secondary); font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">
+                <th style="padding: 0.75rem 0.5rem;">Client Name</th>
+                <th style="padding: 0.75rem 0.5rem;">Gallery Date</th>
+                <th style="padding: 0.75rem 0.5rem;">Allowed / Selected</th>
+                <th style="padding: 0.75rem 0.5rem;">Extra Photos</th>
+                <th style="padding: 0.75rem 0.5rem;">Amount Due</th>
+                <th style="padding: 0.75rem 0.5rem;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="extra-photos-balance-body">
+              <!-- Will render dynamically -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Section 9: Settings (Google Integration & Backups) -->
@@ -1559,6 +1579,6 @@
   <!-- Google Identity Services client library -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Script Files (Loaded as ES6 Module for Firebase support) -->
-  <script type="module" src="dashboard.js?v=3.3"></script>
+  <script type="module" src="dashboard.js?v=3.4"></script>
 </body>
 </html>

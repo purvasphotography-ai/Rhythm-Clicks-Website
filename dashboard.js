@@ -1649,7 +1649,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Filter bookings by selected month
     const filteredBookings = bookings.filter(b => {
       if (selectedMonth === 'all') return true;
-      return b.date && b.date.substring(0, 7) === selectedMonth;
+      return b.date && String(b.date).substring(0, 7) === selectedMonth;
     });
 
     // 1. Trace bookings and correlate with completed shoots
@@ -1658,10 +1658,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       const advanceVal = parseFloat(b.advance) || 0;
 
       // Find if there is a completed shoot matching this booking
-      const linkedShoot = shoots.find(s => 
-        (s.bookingId && s.bookingId === b.id) || 
-        (s.clientName && s.clientName.toLowerCase() === b.clientName.toLowerCase() && s.date === b.date)
-      );
+      const linkedShoot = shoots.find(s => {
+        try {
+          if (s && s.bookingId && s.bookingId === b.id) return true;
+          const sName = s && s.clientName ? String(s.clientName).toLowerCase() : '';
+          const bName = b && b.clientName ? String(b.clientName).toLowerCase() : '';
+          if (sName && sName === bName && s.date === b.date) return true;
+        } catch (e) {
+          console.error(e);
+        }
+        return false;
+      });
 
       if (linkedShoot) {
         // If logged/completed, both advance and balance are collected! No pending balance remains.
@@ -1701,16 +1708,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 2. Account for any manually logged shoots that don't match any bookings
     const linkedBookingIds = bookings.map(b => b.id);
     const unlinkedShoots = shoots.filter(s => {
-      if (s.bookingId && linkedBookingIds.includes(s.bookingId)) return false;
-      const matchesBooking = bookings.some(b => 
-        b.clientName.toLowerCase() === s.clientName.toLowerCase() && b.date === s.date
-      );
+      if (s && s.bookingId && linkedBookingIds.includes(s.bookingId)) return false;
+      const matchesBooking = bookings.some(b => {
+        try {
+          const sName = s && s.clientName ? String(s.clientName).toLowerCase() : '';
+          const bName = b && b.clientName ? String(b.clientName).toLowerCase() : '';
+          return sName && sName === bName && b.date === s.date;
+        } catch (e) {
+          return false;
+        }
+      });
       return !matchesBooking;
     });
 
     const filteredUnlinkedShoots = unlinkedShoots.filter(s => {
       if (selectedMonth === 'all') return true;
-      return s.date && s.date.substring(0, 7) === selectedMonth;
+      return s.date && String(s.date).substring(0, 7) === selectedMonth;
     });
 
     filteredUnlinkedShoots.forEach(s => {
@@ -1731,6 +1744,70 @@ document.addEventListener('DOMContentLoaded', async () => {
       overallExpected += (sAdvance + sBalance);
       overallAdvances += (sAdvance + sBalance);
     });
+
+    // 2.5 Calculate extra edited photos charges & prepare table rows
+    let totalExtraPhotosCharges = 0;
+    const extraPhotosRows = [];
+
+    if (Array.isArray(galleries)) {
+      galleries.forEach(g => {
+        if (!g) return;
+        const gDate = new Date(g.timestamp);
+        const y = gDate.getFullYear();
+        const m = gDate.getMonth() + 1;
+        const gMonthStr = `${y}-${m.toString().padStart(2, '0')}`;
+        if (selectedMonth !== 'all' && gMonthStr !== selectedMonth) return;
+
+        const normName = g.clientName ? String(g.clientName).toLowerCase().replace(/[^a-z0-9]/g, '').trim() : '';
+        const matchingShoot = (normName && typeof shoots !== 'undefined' && Array.isArray(shoots)) 
+          ? shoots.find(s => s && s.clientName && String(s.clientName).toLowerCase().replace(/[^a-z0-9]/g, '').trim() === normName) 
+          : null;
+        
+        let shootAllowed = 0;
+        if (matchingShoot && matchingShoot.photosCount) {
+          shootAllowed = parseInt(matchingShoot.photosCount) || 0;
+        }
+        
+        const selectedCount = g.photosSelected ? parseInt(g.photosSelected) || 0 : 0;
+        if (shootAllowed > 0 && selectedCount > shootAllowed) {
+          const extraPhotos = selectedCount - shootAllowed;
+          const amountDue = extraPhotos * 200;
+          totalExtraPhotosCharges += amountDue;
+
+          const formattedGDate = gDate.toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          });
+
+          extraPhotosRows.push(`
+            <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+              <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(g.clientName)}</td>
+              <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedGDate}</td>
+              <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: var(--text-secondary);">${shootAllowed} allowed / ${selectedCount} selected</td>
+              <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: #E65100;">${extraPhotos} extra</td>
+              <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: #E65100;">${fmt(amountDue)}</td>
+              <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(239, 108, 0, 0.12); color: #E65100; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PENDING</span></td>
+            </tr>
+          `);
+        }
+      });
+    }
+
+    const extraPhotosBody = document.getElementById('extra-photos-balance-body');
+    if (extraPhotosBody) {
+      if (extraPhotosRows.length === 0) {
+        extraPhotosBody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-light);">
+              No extra photos balance outstanding for this month.
+            </td>
+          </tr>
+        `;
+      } else {
+        extraPhotosBody.innerHTML = extraPhotosRows.join('');
+      }
+    }
 
     // Determine stats for current view (filtered)
     let displayExpected = 0;
@@ -1753,7 +1830,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       maximumFractionDigits: 0
     }).format(val);
 
-    // 1. Render Summary Cards
+    // 1. Render Summary Cards (Expected, Advances, Pending, Extra Photos Balance)
     summaryGrid.innerHTML = `
       <div class="grid-card" style="padding: 1.5rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); text-align: center;">
         <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Expected Revenue</span>
@@ -1767,9 +1844,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         <span style="font-size: 0.75rem; color: #C62828; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Pending Receivables</span>
         <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: #C62828;">${fmt(displayBalance)}</h3>
       </div>
+      <div class="grid-card" style="padding: 1.5rem; background: rgba(239, 108, 0, 0.08); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(239, 108, 0, 0.15); text-align: center;">
+        <span style="font-size: 0.75rem; color: #E65100; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Extra Photos Balance</span>
+        <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: #E65100;">${fmt(totalExtraPhotosCharges)}</h3>
+      </div>
     `;
 
-    // 2. Render Account Cards Breakdowns
+    // 2. Render Account Cards Breakdowns (Stop displaying pending balance on each account card)
     cardsList.innerHTML = accountList.map(acc => {
       const stats = accountStats[acc];
       const percent = stats.expected > 0 ? Math.round((stats.advances / stats.expected) * 100) : 0;
@@ -1784,7 +1865,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
           <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
             <span>Received: <strong>${fmt(stats.advances)}</strong></span>
-            <span>Pending: <strong>${fmt(stats.balance)}</strong></span>
           </div>
         </div>
       `;
@@ -1798,10 +1878,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       const advanceVal = parseFloat(b.advance) || 0;
 
       // Find if there is a completed shoot matching this booking
-      const linkedShoot = shoots.find(s => 
-        (s.bookingId && s.bookingId === b.id) || 
-        (s.clientName && s.clientName.toLowerCase() === b.clientName.toLowerCase() && s.date === b.date)
-      );
+      const linkedShoot = shoots.find(s => {
+        try {
+          if (s && s.bookingId && s.bookingId === b.id) return true;
+          const sName = s && s.clientName ? String(s.clientName).toLowerCase() : '';
+          const bName = b && b.clientName ? String(b.clientName).toLowerCase() : '';
+          if (sName && sName === bName && s.date === b.date) return true;
+        } catch (e) {
+          console.error(e);
+        }
+        return false;
+      });
 
       const dateObj = new Date(b.date);
       const formattedDate = dateObj.toLocaleDateString('en-IN', {
@@ -6034,7 +6121,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Helper to parse total price from package
   const parsePackagePrice = (packageText) => {
     if (!packageText) return 0;
-    const match = packageText.replace(/,/g, '').match(/\d+/);
+    const cleanText = String(packageText);
+    const match = cleanText.replace(/,/g, '').match(/\d+/);
     return match ? parseInt(match[0], 10) : 0;
   };
 
