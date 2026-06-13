@@ -576,22 +576,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Attach edit listeners
+    window.editGallery = (id) => {
+      const gallery = galleries.find(g => g.id === id);
+      if (gallery) {
+        document.getElementById('edit-gallery-id').value = gallery.id;
+        document.getElementById('edit-gallery-client-name').value = gallery.clientName;
+        document.getElementById('edit-gallery-notes-input').value = gallery.notes || '';
+        document.getElementById('edit-gallery-status-select').value = gallery.status;
+        
+        const editGalleryModal = document.getElementById('edit-gallery-modal');
+        editGalleryModal.style.display = 'flex';
+        editGalleryModal.offsetHeight; // force reflow
+        editGalleryModal.classList.remove('hidden');
+      }
+    };
+
     document.querySelectorAll('.btn-edit-gallery').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const button = e.target.closest('.btn-edit-gallery');
         const id = button.getAttribute('data-id');
-        const gallery = galleries.find(g => g.id === id);
-        if (gallery) {
-          document.getElementById('edit-gallery-id').value = gallery.id;
-          document.getElementById('edit-gallery-client-name').value = gallery.clientName;
-          document.getElementById('edit-gallery-notes-input').value = gallery.notes || '';
-          document.getElementById('edit-gallery-status-select').value = gallery.status;
-          
-          const editGalleryModal = document.getElementById('edit-gallery-modal');
-          editGalleryModal.style.display = 'flex';
-          editGalleryModal.offsetHeight; // force reflow
-          editGalleryModal.classList.remove('hidden');
-        }
+        window.editGallery(id);
       });
     });
     renderSearchPipeline();
@@ -776,33 +780,86 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     });
 
+    window.editAlbum = (id) => {
+      const album = albums.find(a => a.id === id);
+      if (album) {
+        document.getElementById('edit-album-id').value = album.id;
+        document.getElementById('edit-album-client-name').value = album.clientName;
+        document.getElementById('edit-album-notes-input').value = album.notes || '';
+        document.getElementById('edit-album-status-select').value = album.status;
+        document.getElementById('edit-album-delivery-method').value = album.deliveredMethod || 'In-Hand';
+
+        if (album.status === 'delivered') {
+          document.getElementById('edit-album-delivery-container').style.display = 'block';
+        } else {
+          document.getElementById('edit-album-delivery-container').style.display = 'none';
+        }
+        
+        const editAlbumModal = document.getElementById('edit-album-modal');
+        editAlbumModal.style.display = 'flex';
+        editAlbumModal.offsetHeight; // force reflow
+        editAlbumModal.classList.remove('hidden');
+      }
+    };
+
     // Attach edit listeners
     document.querySelectorAll('.btn-edit-album').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const button = e.target.closest('.btn-edit-album');
         const id = button.getAttribute('data-id');
-        const album = albums.find(a => a.id === id);
-        if (album) {
-          document.getElementById('edit-album-id').value = album.id;
-          document.getElementById('edit-album-client-name').value = album.clientName;
-          document.getElementById('edit-album-notes-input').value = album.notes || '';
-          document.getElementById('edit-album-status-select').value = album.status;
-          document.getElementById('edit-album-delivery-method').value = album.deliveredMethod || 'In-Hand';
-
-          if (album.status === 'delivered') {
-            document.getElementById('edit-album-delivery-container').style.display = 'block';
-          } else {
-            document.getElementById('edit-album-delivery-container').style.display = 'none';
-          }
-          
-          const editAlbumModal = document.getElementById('edit-album-modal');
-          editAlbumModal.style.display = 'flex';
-          editAlbumModal.offsetHeight; // force reflow
-          editAlbumModal.classList.remove('hidden');
-        }
+        window.editAlbum(id);
       });
     });
     renderSearchPipeline();
+  };
+
+  window.showAddBooking = (clientName) => {
+    const addBookingForm = document.getElementById('add-booking-form');
+    const addBookingModal = document.getElementById('booking-modal');
+    if (addBookingForm && addBookingModal) {
+      addBookingForm.reset();
+      document.getElementById('booking-client-name').value = clientName;
+      addBookingModal.style.display = 'flex';
+      addBookingModal.offsetHeight;
+      addBookingModal.classList.remove('hidden');
+    }
+  };
+
+  window.showAddShoot = (clientName) => {
+    const addShootForm = document.getElementById('add-shoot-form');
+    const shootModal = document.getElementById('shoot-modal');
+    if (addShootForm && shootModal) {
+      addShootForm.reset();
+      document.getElementById('shoot-client-name').value = clientName;
+      shootModal.style.display = 'flex';
+      shootModal.offsetHeight;
+      shootModal.classList.remove('hidden');
+    }
+  };
+
+  window.showAddGallery = (clientName) => {
+    const addGalleryForm = document.getElementById('add-gallery-form');
+    const galleryModal = document.getElementById('gallery-modal');
+    if (addGalleryForm && galleryModal) {
+      addGalleryForm.reset();
+      document.getElementById('gallery-client-name').value = clientName;
+      document.getElementById('gallery-status-msg').textContent = 'This gallery will enter the "Arrived" column.';
+      galleryModal.style.display = 'flex';
+      galleryModal.offsetHeight;
+      galleryModal.classList.remove('hidden');
+    }
+  };
+
+  window.showAddAlbum = (clientName) => {
+    const addAlbumForm = document.getElementById('add-album-form');
+    const albumModal = document.getElementById('album-modal');
+    if (addAlbumForm && albumModal) {
+      addAlbumForm.reset();
+      document.getElementById('album-client-name').value = clientName;
+      albumModal.style.display = 'flex';
+      albumModal.offsetHeight;
+      albumModal.classList.remove('hidden');
+    }
   };
 
   function renderSearchPipeline() {
@@ -974,8 +1031,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           
           <div class="pipeline-progress-stepper">
             <!-- Booking -->
-            <div class="stepper-node ${hasBooking ? 'completed' : 'disabled'}">
-              <div class="node-circle">📅</div>
+            <div class="stepper-node ${hasBooking ? 'completed' : 'disabled'}" style="cursor: pointer;" data-action="${hasBooking ? 'edit-booking' : 'add-booking'}" data-id="${hasBooking ? clientBookings[0].id : ''}" data-client="${escapeHtml(clientName)}">
+              <div class="node-circle" style="position: relative;">
+                📅
+                <span class="edit-pill-icon" style="position: absolute; right: -4px; bottom: -4px; font-size: 0.55rem; background: var(--bg-card); border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,0.08);">${hasBooking ? '✏️' : '➕'}</span>
+              </div>
               <div class="node-label">Booking</div>
               <div class="node-status">${escapeHtml(bookingText)}</div>
             </div>
@@ -983,8 +1043,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="stepper-connector ${hasShoot ? 'completed' : ''}"></div>
             
             <!-- Shoot -->
-            <div class="stepper-node ${hasShoot ? 'completed' : 'disabled'}">
-              <div class="node-circle">📷</div>
+            <div class="stepper-node ${hasShoot ? 'completed' : 'disabled'}" style="cursor: pointer;" data-action="${hasShoot ? 'edit-shoot' : 'add-shoot'}" data-id="${hasShoot ? clientShoots[0].id : ''}" data-client="${escapeHtml(clientName)}">
+              <div class="node-circle" style="position: relative;">
+                📷
+                <span class="edit-pill-icon" style="position: absolute; right: -4px; bottom: -4px; font-size: 0.55rem; background: var(--bg-card); border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,0.08);">${hasShoot ? '✏️' : '➕'}</span>
+              </div>
               <div class="node-label">Shoot Log</div>
               <div class="node-status">${escapeHtml(shootText)}</div>
             </div>
@@ -992,8 +1055,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="stepper-connector ${hasGallery ? 'completed' : ''}"></div>
             
             <!-- Gallery -->
-            <div class="stepper-node ${hasGallery ? 'active' : 'disabled'}">
-              <div class="node-circle">📸</div>
+            <div class="stepper-node ${hasGallery ? 'active' : 'disabled'}" style="cursor: pointer;" data-action="${hasGallery ? 'edit-gallery' : 'add-gallery'}" data-id="${hasGallery ? gal.id : ''}" data-client="${escapeHtml(clientName)}">
+              <div class="node-circle" style="position: relative;">
+                📸
+                <span class="edit-pill-icon" style="position: absolute; right: -4px; bottom: -4px; font-size: 0.55rem; background: var(--bg-card); border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,0.08);">${hasGallery ? '✏️' : '➕'}</span>
+              </div>
               <div class="node-label">Gallery Tracker</div>
               <div class="node-status">${escapeHtml(galleryStatusText)}</div>
               ${galleryDateStr ? `<div class="node-date">${escapeHtml(galleryDateStr)}</div>` : ''}
@@ -1015,8 +1081,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="stepper-connector ${hasAlbum ? 'completed' : ''}"></div>
             
             <!-- Album -->
-            <div class="stepper-node ${hasAlbum ? 'active' : (albumIncluded ? 'pending' : 'disabled')}">
-              <div class="node-circle">📖</div>
+            <div class="stepper-node ${hasAlbum ? 'active' : (albumIncluded ? 'pending' : 'disabled')}" style="cursor: pointer;" data-action="${hasAlbum ? 'edit-album' : (albumIncluded ? 'add-album' : '')}" data-id="${hasAlbum ? alb.id : ''}" data-client="${escapeHtml(clientName)}">
+              <div class="node-circle" style="position: relative;">
+                📖
+                <span class="edit-pill-icon" style="position: absolute; right: -4px; bottom: -4px; font-size: 0.55rem; background: var(--bg-card); border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,0.08);">${hasAlbum ? '✏️' : (albumIncluded ? '➕' : '🚫')}</span>
+              </div>
               <div class="node-label">Album Tracker</div>
               <div class="node-status">
                 ${hasAlbum ? escapeHtml(albumStatusText) : (albumIncluded ? 'Album Pending' : 'Not Included')}
@@ -1047,6 +1116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Attach click listeners to pipeline sub-steps
     container.querySelectorAll('.mini-sub-pipeline .sub-step').forEach(span => {
       span.addEventListener('click', async (e) => {
+        e.stopPropagation(); // prevent opening the main node edit modal
         const type = span.getAttribute('data-type');
         const id = span.getAttribute('data-id');
         const status = span.getAttribute('data-status');
@@ -1080,6 +1150,35 @@ document.addEventListener('DOMContentLoaded', async () => {
               showToast('Error updating album: ' + err.message, '⚠️');
             }
           }
+        }
+      });
+    });
+
+    // Attach click listeners to pipeline nodes themselves for add/edit operations
+    container.querySelectorAll('.pipeline-progress-stepper .stepper-node').forEach(node => {
+      node.addEventListener('click', (e) => {
+        const action = node.getAttribute('data-action');
+        const id = node.getAttribute('data-id');
+        const client = node.getAttribute('data-client');
+        
+        if (!action) return;
+
+        if (action === 'edit-booking') {
+          window.editBooking(id);
+        } else if (action === 'add-booking') {
+          window.showAddBooking(client);
+        } else if (action === 'edit-shoot') {
+          window.editShoot(id);
+        } else if (action === 'add-shoot') {
+          window.showAddShoot(client);
+        } else if (action === 'edit-gallery') {
+          window.editGallery(id);
+        } else if (action === 'add-gallery') {
+          window.showAddGallery(client);
+        } else if (action === 'edit-album') {
+          window.editAlbum(id);
+        } else if (action === 'add-album') {
+          window.showAddAlbum(client);
         }
       });
     });
@@ -6003,7 +6102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           month: 'short',
           year: 'numeric'
         }) : 'Invalid Date';
-        const [hours, minutes] = (b.time || '10:00').split(':');
+        const [hours, minutes] = String(b.time || '10:00').split(':');
         const timeHrs = parseInt(hours);
         const ampm = timeHrs >= 12 ? 'PM' : 'AM';
         const formattedTime = `${timeHrs % 12 || 12}:${minutes} ${ampm}`;
@@ -6111,7 +6210,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           month: 'short',
           year: 'numeric'
         }) : 'Invalid Date';
-        const [hours, minutes] = (s.time || '10:00').split(':');
+        const [hours, minutes] = String(s.time || '10:00').split(':');
         const timeHrs = parseInt(hours);
         const ampm = timeHrs >= 12 ? 'PM' : 'AM';
         const formattedTime = `${timeHrs % 12 || 12}:${minutes} ${ampm}`;
