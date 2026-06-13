@@ -1929,8 +1929,8 @@ option, datalist option {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--text-primary);
   border: 1.5px solid transparent;
   background: rgba(255, 255, 255, 0.2);

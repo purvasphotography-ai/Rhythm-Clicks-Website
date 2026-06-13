@@ -6508,13 +6508,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Local bookings
       dayBookings.forEach(booking => {
         slotsList.innerHTML += `
-          <div class="calendar-slot-item" style="border-left-color: #a88a3a;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px;">
-              <strong style="color: var(--text-primary); text-transform: capitalize;">${escapeHtml(booking.clientName)}</strong>
-              <span style="font-size: 0.65rem; background: rgba(168, 138, 58, 0.08); color: #a88a3a; padding: 1px 4px; border-radius: 3px; font-weight: 600;">Booking</span>
+          <div class="calendar-slot-item" style="border-left-color: #a88a3a; padding: 1rem; margin-bottom: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <strong style="color: var(--text-primary); font-size: 0.95rem; text-transform: capitalize;">${escapeHtml(booking.clientName)}</strong>
+              <span style="font-size: 0.7rem; background: rgba(168, 138, 58, 0.1); color: #a88a3a; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Booking</span>
             </div>
-            <div style="font-size: 0.72rem; color: var(--text-secondary);">
-              <span>⏰ ${booking.time}</span> • <span>📷 ${escapeHtml(booking.shootType)}</span>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span>⏰ Time: <strong>${booking.time}</strong></span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span>📦 Package: <strong>${escapeHtml(booking.package || 'N/A')}</strong></span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span>📷 Shoot Type: <strong>${escapeHtml(booking.shootType)}</strong></span>
+              </div>
             </div>
           </div>
         `;
@@ -6523,13 +6531,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Completed shoots
       dayShoots.forEach(shoot => {
         slotsList.innerHTML += `
-          <div class="calendar-slot-item" style="border-left-color: #2E7D32;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px;">
-              <strong style="color: var(--text-primary); text-transform: capitalize;">${escapeHtml(shoot.clientName)}</strong>
-              <span style="font-size: 0.65rem; background: rgba(46, 125, 50, 0.08); color: #2E7D32; padding: 1px 4px; border-radius: 3px; font-weight: 600;">Shoot</span>
+          <div class="calendar-slot-item" style="border-left-color: #2E7D32; padding: 1rem; margin-bottom: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <strong style="color: var(--text-primary); font-size: 0.95rem; text-transform: capitalize;">${escapeHtml(shoot.clientName)}</strong>
+              <span style="font-size: 0.7rem; background: rgba(46, 125, 50, 0.1); color: #2E7D32; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Shoot</span>
             </div>
-            <div style="font-size: 0.72rem; color: var(--text-secondary);">
-              <span>⏰ ${shoot.time || 'Completed'}</span> • <span>📷 ${escapeHtml(shoot.shootType || 'Photos')}</span>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span>⏰ Time: <strong>${shoot.time || 'All Day'}</strong></span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span>📦 Package: <strong>${escapeHtml(shoot.package || 'N/A')}</strong></span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span>📷 Shoot Type: <strong>${escapeHtml(shoot.shootType || 'Photos')}</strong></span>
+              </div>
             </div>
           </div>
         `;
@@ -6538,13 +6554,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Google events
       dayGcalEvents.forEach(event => {
         slotsList.innerHTML += `
-          <div class="calendar-slot-item" style="border-left-color: #4285F4;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px;">
-              <strong style="color: var(--text-primary);">${escapeHtml(event.summary || 'Google Event')}</strong>
-              <span style="font-size: 0.65rem; background: rgba(66, 133, 244, 0.08); color: #4285F4; padding: 1px 4px; border-radius: 3px; font-weight: 600;">Google Cal</span>
+          <div class="calendar-slot-item" style="border-left-color: #4285F4; padding: 1rem; margin-bottom: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <strong style="color: var(--text-primary); font-size: 0.95rem;">${escapeHtml(event.summary || 'Google Event')}</strong>
+              <span style="font-size: 0.7rem; background: rgba(66, 133, 244, 0.1); color: #4285F4; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Google Cal</span>
             </div>
-            <div style="font-size: 0.72rem; color: var(--text-secondary);">
-              <span>⏰ ${getGcalTimeDisplay(event)}</span>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span>⏰ Time: <strong>${getGcalTimeDisplay(event)}</strong></span>
+              </div>
+              ${event.description ? `
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span>📝 Details: <strong>${escapeHtml(event.description)}</strong></span>
+              </div>` : ''}
             </div>
           </div>
         `;
