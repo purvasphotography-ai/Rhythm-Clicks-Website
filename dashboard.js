@@ -582,7 +582,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       let photoSelectionHtml = '';
-      const selectedCount = gallery && gallery.photosSelected ? parseInt(gallery.photosSelected) || 0 : 0;
+      const photosSelectedCount = gallery && gallery.photosSelected ? parseInt(gallery.photosSelected) || 0 : 0;
       let shootAllowed = 0;
       if (matchingShoot && matchingShoot.photosCount) {
         shootAllowed = parseInt(matchingShoot.photosCount) || 0;
@@ -590,8 +590,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       let extraPhotos = 0;
       let extraCost = 0;
-      if (shootAllowed > 0 && selectedCount > shootAllowed) {
-        extraPhotos = selectedCount - shootAllowed;
+      if (shootAllowed > 0 && photosSelectedCount > shootAllowed) {
+        extraPhotos = photosSelectedCount - shootAllowed;
         extraCost = extraPhotos * 200;
       }
 
@@ -599,7 +599,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="gallery-photo-selection-info" style="margin-top: 8px; font-size: 0.8rem; background: rgba(0, 0, 0, 0.02); padding: 8px; border-radius: var(--border-radius-sm); border: 1px dashed rgba(0, 0, 0, 0.05);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
             <span style="color: var(--text-secondary);">Selected Photos:</span>
-            <strong style="color: var(--text-primary); font-family: var(--font-sans);">${selectedCount}${shootAllowed ? ` / ${shootAllowed}` : ''}</strong>
+            <strong style="color: var(--text-primary); font-family: var(--font-sans);">${photosSelectedCount}${shootAllowed ? ` / ${shootAllowed}` : ''}</strong>
           </div>
       `;
       if (extraCost > 0) {
