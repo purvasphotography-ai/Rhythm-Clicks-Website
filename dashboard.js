@@ -37,6 +37,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   let albums = [];
   let searchFilter = '';
 
+  // Slots Visual Calendar State
+  let calendarYear = new Date().getFullYear();
+  let calendarMonth = new Date().getMonth();
+  let calendarSelectedDate = new Date().toISOString().split('T')[0];
+  let gcalEvents = [];
+
   // --- UI Elements ---
   const loginOverlay = document.getElementById('login-overlay');
   const loginCredentialsCard = document.getElementById('login-credentials-card');
@@ -813,12 +819,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderSearchPipeline();
   };
 
-  window.showAddBooking = (clientName) => {
+  window.showAddBooking = (clientName, prefilledDate) => {
     const addBookingForm = document.getElementById('add-booking-form');
     const addBookingModal = document.getElementById('booking-modal');
     if (addBookingForm && addBookingModal) {
       addBookingForm.reset();
-      document.getElementById('booking-client-name').value = clientName;
+      document.getElementById('booking-client-name').value = clientName || '';
+      if (prefilledDate) {
+        document.getElementById('booking-date').value = prefilledDate;
+      }
       addBookingModal.style.display = 'flex';
       addBookingModal.offsetHeight;
       addBookingModal.classList.remove('hidden');
@@ -1872,6 +1881,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const data = await response.json();
       const items = data.items || [];
+      gcalEvents = items;
+      if (typeof renderVisualCalendar === 'function') {
+        renderVisualCalendar();
+      }
 
       if (items.length === 0) {
         eventsList.innerHTML = `
@@ -2777,6 +2790,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (typeof window.renderShoots === 'function') {
       window.renderShoots();
+    }
+    if (typeof renderVisualCalendar === 'function') {
+      renderVisualCalendar();
     }
   };
 
@@ -6273,6 +6289,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       });
     }
+    if (typeof renderVisualCalendar === 'function') {
+      renderVisualCalendar();
+    }
   };
 
   window.editShoot = (id) => {
@@ -6442,5 +6461,242 @@ document.addEventListener('DOMContentLoaded', async () => {
   const editAlbumClientNameAutocomplete = document.getElementById('edit-album-client-name-autocomplete');
   setupAutocomplete(albumClientName, albumClientNameAutocomplete);
   setupAutocomplete(editAlbumClientName, editAlbumClientNameAutocomplete);
+
+  // --- Visual Calendar Core Functions ---
+  const getGcalTimeDisplay = (event) => {
+    if (!event.start.dateTime) return 'All Day';
+    const start = new Date(event.start.dateTime);
+    const hrs = start.getHours();
+    const mins = String(start.getMinutes()).padStart(2, '0');
+    const ampm = hrs >= 12 ? 'PM' : 'AM';
+    return `${hrs % 12 || 12}:${mins} ${ampm}`;
+  };
+
+  const renderSelectedDayDetails = (dateStr, dayBookings, dayShoots, dayGcalEvents) => {
+    const selectedDayTitle = document.getElementById('selected-day-title');
+    const slotsList = document.getElementById('selected-day-slots-list');
+    const selectedDayActions = document.getElementById('selected-day-actions');
+    if (!selectedDayTitle || !slotsList || !selectedDayActions) return;
+
+    const dateObj = new Date(dateStr);
+    selectedDayTitle.textContent = dateObj.toLocaleDateString('en-IN', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+
+    slotsList.innerHTML = '';
+    selectedDayActions.innerHTML = '';
+
+    const totalEvents = dayBookings.length + dayShoots.length + dayGcalEvents.length;
+
+    if (totalEvents === 0) {
+      slotsList.innerHTML = `
+        <div style="text-align: center; padding: 2rem 1rem; color: var(--text-secondary);">
+          <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">✨</span>
+          <strong>Date is Available</strong>
+          <p style="font-size: 0.75rem; margin: 0.25rem 0 0 0; opacity: 0.8;">No shoots or bookings are scheduled on this day.</p>
+        </div>
+      `;
+      selectedDayActions.innerHTML = `
+        <button class="btn btn-primary" onclick="window.showAddBooking('', '${dateStr}')" style="width: 100%; padding: 0.65rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>➕</span> Book Shoot Slot
+        </button>
+      `;
+    } else {
+      // Local bookings
+      dayBookings.forEach(booking => {
+        slotsList.innerHTML += `
+          <div class="calendar-slot-item" style="border-left-color: #a88a3a;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px;">
+              <strong style="color: var(--text-primary); text-transform: capitalize;">${escapeHtml(booking.clientName)}</strong>
+              <span style="font-size: 0.65rem; background: rgba(168, 138, 58, 0.08); color: #a88a3a; padding: 1px 4px; border-radius: 3px; font-weight: 600;">Booking</span>
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-secondary);">
+              <span>⏰ ${booking.time}</span> • <span>📷 ${escapeHtml(booking.shootType)}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // Completed shoots
+      dayShoots.forEach(shoot => {
+        slotsList.innerHTML += `
+          <div class="calendar-slot-item" style="border-left-color: #2E7D32;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px;">
+              <strong style="color: var(--text-primary); text-transform: capitalize;">${escapeHtml(shoot.clientName)}</strong>
+              <span style="font-size: 0.65rem; background: rgba(46, 125, 50, 0.08); color: #2E7D32; padding: 1px 4px; border-radius: 3px; font-weight: 600;">Shoot</span>
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-secondary);">
+              <span>⏰ ${shoot.time || 'Completed'}</span> • <span>📷 ${escapeHtml(shoot.shootType || 'Photos')}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // Google events
+      dayGcalEvents.forEach(event => {
+        slotsList.innerHTML += `
+          <div class="calendar-slot-item" style="border-left-color: #4285F4;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px;">
+              <strong style="color: var(--text-primary);">${escapeHtml(event.summary || 'Google Event')}</strong>
+              <span style="font-size: 0.65rem; background: rgba(66, 133, 244, 0.08); color: #4285F4; padding: 1px 4px; border-radius: 3px; font-weight: 600;">Google Cal</span>
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-secondary);">
+              <span>⏰ ${getGcalTimeDisplay(event)}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      selectedDayActions.innerHTML = `
+        <button class="btn btn-secondary" onclick="window.showAddBooking('', '${dateStr}')" style="width: 100%; padding: 0.65rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); color: var(--text-primary);">
+          <span>➕</span> Add Another Booking
+        </button>
+      `;
+    }
+  };
+
+  const renderVisualCalendar = () => {
+    const daysGrid = document.getElementById('visual-calendar-days-grid');
+    const monthYearHeading = document.getElementById('calendar-month-year');
+    if (!daysGrid || !monthYearHeading) return;
+
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    monthYearHeading.textContent = `${monthNames[calendarMonth]} ${calendarYear}`;
+
+    daysGrid.innerHTML = '';
+
+    const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+    const firstDayIndex = new Date(calendarYear, calendarMonth, 1).getDay();
+    const prevDaysInMonth = new Date(calendarYear, calendarMonth, 0).getDate();
+
+    const todayObj = new Date();
+    const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+
+    let selectedDayBookings = [];
+    let selectedDayShoots = [];
+    let selectedDayGcalEvents = [];
+
+    for (let i = 0; i < 42; i++) {
+      let cellDay, cellMonth, cellYear, isAdjacent = false;
+
+      if (i < firstDayIndex) {
+        cellDay = prevDaysInMonth - firstDayIndex + i + 1;
+        cellMonth = calendarMonth - 1;
+        cellYear = calendarYear;
+        if (cellMonth < 0) {
+          cellMonth = 11;
+          cellYear--;
+        }
+        isAdjacent = true;
+      } else if (i >= firstDayIndex && i < firstDayIndex + daysInMonth) {
+        cellDay = i - firstDayIndex + 1;
+        cellMonth = calendarMonth;
+        cellYear = calendarYear;
+      } else {
+        cellDay = i - firstDayIndex - daysInMonth + 1;
+        cellMonth = calendarMonth + 1;
+        cellYear = calendarYear;
+        if (cellMonth > 11) {
+          cellMonth = 0;
+          cellYear++;
+        }
+        isAdjacent = true;
+      }
+
+      const cellDateStr = `${cellYear}-${String(cellMonth + 1).padStart(2, '0')}-${String(cellDay).padStart(2, '0')}`;
+
+      // Find events matching this cell
+      const cellBookings = bookings.filter(b => b.date === cellDateStr);
+      const cellShoots = shoots.filter(s => s.date === cellDateStr);
+      const cellGcalEvents = gcalEvents.filter(event => {
+        const eventDateStr = (event.start.dateTime || event.start.date || '').split('T')[0];
+        return eventDateStr === cellDateStr;
+      });
+
+      const isToday = cellDateStr === todayStr;
+      const isActive = cellDateStr === calendarSelectedDate;
+
+      if (isActive) {
+        selectedDayBookings = cellBookings;
+        selectedDayShoots = cellShoots;
+        selectedDayGcalEvents = cellGcalEvents;
+      }
+
+      const dayCell = document.createElement('div');
+      dayCell.className = `calendar-day-cell ${isToday ? 'today-day' : ''} ${isActive ? 'active-day' : ''} ${isAdjacent ? 'empty-day' : ''}`;
+      dayCell.setAttribute('data-date', cellDateStr);
+      dayCell.innerHTML = `<span>${cellDay}</span>`;
+
+      // Draw dots if events found and not adjacent month day
+      if (!isAdjacent && (cellBookings.length > 0 || cellShoots.length > 0 || cellGcalEvents.length > 0)) {
+        const dotsContainer = document.createElement('div');
+        dotsContainer.className = 'calendar-dots-container';
+
+        if (cellBookings.length > 0) {
+          const dot = document.createElement('span');
+          dot.className = 'calendar-dot local-booking';
+          dotsContainer.appendChild(dot);
+        }
+        if (cellShoots.length > 0) {
+          const dot = document.createElement('span');
+          dot.className = 'calendar-dot completed-shoot';
+          dotsContainer.appendChild(dot);
+        }
+        if (cellGcalEvents.length > 0) {
+          const dot = document.createElement('span');
+          dot.className = 'calendar-dot google-event';
+          dotsContainer.appendChild(dot);
+        }
+        dayCell.appendChild(dotsContainer);
+      }
+
+      if (!isAdjacent) {
+        dayCell.addEventListener('click', () => {
+          document.querySelectorAll('.calendar-day-cell').forEach(c => c.classList.remove('active-day'));
+          dayCell.classList.add('active-day');
+          calendarSelectedDate = cellDateStr;
+          renderSelectedDayDetails(cellDateStr, cellBookings, cellShoots, cellGcalEvents);
+        });
+      }
+
+      daysGrid.appendChild(dayCell);
+    }
+
+    // Initialize the details side-panel for active date
+    renderSelectedDayDetails(calendarSelectedDate, selectedDayBookings, selectedDayShoots, selectedDayGcalEvents);
+  };
+
+  const initCalendarListeners = () => {
+    const prevBtn = document.getElementById('calendar-prev-month');
+    const nextBtn = document.getElementById('calendar-next-month');
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        calendarMonth--;
+        if (calendarMonth < 0) {
+          calendarMonth = 11;
+          calendarYear--;
+        }
+        renderVisualCalendar();
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        calendarMonth++;
+        if (calendarMonth > 11) {
+          calendarMonth = 0;
+          calendarYear++;
+        }
+        renderVisualCalendar();
+      });
+    }
+  };
+
+  // Run calendar initializations
+  initCalendarListeners();
+  renderVisualCalendar();
+  window.renderVisualCalendar = renderVisualCalendar;
 
 });
