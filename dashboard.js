@@ -7364,91 +7364,96 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
       sheetBody.appendChild(headerRow);
 
-      if (hasEvents) {
-        // Render completed shoots
-        cellShoots.forEach(shoot => {
-          const shootRow = document.createElement('tr');
-          shootRow.className = 'completed-shoot-row';
-          
-          const formattedTime = formatTime12H(shoot.time || '10:00');
-          const matchedBooking = bookings.find(b => b.id === shoot.bookingId);
-          const pkg = matchedBooking ? matchedBooking.package : 'Completed Shoot';
+      // Gather completed shoots
+      const completedBookingIds = cellShoots.map(s => s.bookingId).filter(id => id);
+      const activeBookings = cellBookings.filter(b => !completedBookingIds.includes(b.id));
 
-          shootRow.innerHTML = `
-            <td style="font-weight: 600; text-transform: capitalize; color: var(--text-primary);">
-              ${escapeHtml(shoot.clientName)} 
-              <span class="booking-shoot-badge" style="background: rgba(46,125,50,0.1); color: #2e7d32; margin-left: 8px;">Completed</span>
-            </td>
-            <td></td>
-            <td></td>
-            <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
-            <td style="color: var(--text-secondary);">${escapeHtml(pkg)}</td>
-            <td style="text-align: center;">
-              <button class="btn btn-secondary btn-edit-sheet-shoot" data-id="${shoot.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
-            </td>
-          `;
-          sheetBody.appendChild(shootRow);
-        });
+      const syncedEventIds = new Set();
+      cellBookings.forEach(b => { if (b.gCalEventId) syncedEventIds.add(b.gCalEventId); });
+      cellShoots.forEach(s => { if (s.gCalEventId) syncedEventIds.add(s.gCalEventId); });
+      const filteredGcal = cellGcalEvents.filter(e => !syncedEventIds.has(e.id));
 
-        // Render bookings (that don't have shoots completed yet)
-        const completedBookingIds = cellShoots.map(s => s.bookingId).filter(id => id);
-        const activeBookings = cellBookings.filter(b => !completedBookingIds.includes(b.id));
-        activeBookings.forEach(booking => {
-          const bookingRow = document.createElement('tr');
-          bookingRow.className = 'booking-row';
+      const totalEventCount = cellShoots.length + activeBookings.length + filteredGcal.length;
 
-          const formattedTime = formatTime12H(booking.time || '10:00');
+      // 1. Render completed shoots
+      cellShoots.forEach(shoot => {
+        const shootRow = document.createElement('tr');
+        shootRow.className = 'completed-shoot-row';
+        
+        const formattedTime = formatTime12H(shoot.time || '10:00');
+        const matchedBooking = bookings.find(b => b.id === shoot.bookingId);
+        const pkg = matchedBooking ? matchedBooking.package : 'Completed Shoot';
 
-          bookingRow.innerHTML = `
-            <td style="font-weight: 600; text-transform: capitalize; color: var(--text-primary);">
-              ${escapeHtml(booking.clientName)} 
-              <span class="booking-shoot-badge" style="background: rgba(168,138,58,0.1); color: #a88a3a; margin-left: 8px;">Booked</span>
-            </td>
-            <td></td>
-            <td></td>
-            <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
-            <td style="color: var(--text-secondary);">${escapeHtml(booking.package)}</td>
-            <td style="text-align: center; display: flex; gap: 4px; justify-content: center; align-items: center; padding: 0.65rem 0.5rem; border: none !important;">
-              <button class="btn btn-primary btn-log-pending-shoot-sheet" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; white-space: nowrap; font-weight: bold;">Log Shoot</button>
-              <button class="btn btn-secondary btn-edit-sheet-booking" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
-            </td>
-          `;
-          sheetBody.appendChild(bookingRow);
-        });
+        shootRow.innerHTML = `
+          <td style="font-weight: 600; text-transform: capitalize; color: var(--text-primary);">
+            ${escapeHtml(shoot.clientName)} 
+            <span class="booking-shoot-badge" style="background: rgba(46,125,50,0.1); color: #2e7d32; margin-left: 8px;">Completed</span>
+          </td>
+          <td></td>
+          <td></td>
+          <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
+          <td style="color: var(--text-secondary);">${escapeHtml(pkg)}</td>
+          <td style="text-align: center;">
+            <button class="btn btn-secondary btn-edit-sheet-shoot" data-id="${shoot.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
+          </td>
+        `;
+        sheetBody.appendChild(shootRow);
+      });
 
-        // Render Google Calendar events
-        const syncedEventIds = new Set();
-        cellBookings.forEach(b => { if (b.gCalEventId) syncedEventIds.add(b.gCalEventId); });
-        cellShoots.forEach(s => { if (s.gCalEventId) syncedEventIds.add(s.gCalEventId); });
+      // 2. Render bookings (that don't have shoots completed yet)
+      activeBookings.forEach(booking => {
+        const bookingRow = document.createElement('tr');
+        bookingRow.className = 'booking-row';
 
-        const filteredGcal = cellGcalEvents.filter(e => !syncedEventIds.has(e.id));
-        filteredGcal.forEach(event => {
-          const gcalRow = document.createElement('tr');
-          gcalRow.className = 'gcal-row';
-          const formattedTime = getGcalTimeDisplay(event);
+        const formattedTime = formatTime12H(booking.time || '10:00');
 
-          gcalRow.innerHTML = `
-            <td style="font-weight: 600; color: var(--text-primary);">
-              ${escapeHtml(event.summary || 'Google Event')} 
-              <span class="booking-shoot-badge" style="background: rgba(66, 133, 244, 0.1); color: #4285F4; margin-left: 8px;">Google Cal</span>
-            </td>
-            <td></td>
-            <td></td>
-            <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
-            <td style="color: var(--text-light); font-style: italic;">Google Sync</td>
-            <td style="text-align: center;">
-              <span style="font-size: 0.75rem; color: var(--text-light); font-weight: bold;">Google Sync</span>
-            </td>
-          `;
-          sheetBody.appendChild(gcalRow);
-        });
-      } else {
-        // Available day
+        bookingRow.innerHTML = `
+          <td style="font-weight: 600; text-transform: capitalize; color: var(--text-primary);">
+            ${escapeHtml(booking.clientName)} 
+            <span class="booking-shoot-badge" style="background: rgba(168,138,58,0.1); color: #a88a3a; margin-left: 8px;">Booked</span>
+          </td>
+          <td></td>
+          <td></td>
+          <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
+          <td style="color: var(--text-secondary);">${escapeHtml(booking.package)}</td>
+          <td style="text-align: center; display: flex; gap: 4px; justify-content: center; align-items: center; padding: 0.65rem 0.5rem; border: none !important;">
+            <button class="btn btn-primary btn-log-pending-shoot-sheet" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; white-space: nowrap; font-weight: bold;">Log Shoot</button>
+            <button class="btn btn-secondary btn-edit-sheet-booking" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
+          </td>
+        `;
+        sheetBody.appendChild(bookingRow);
+      });
+
+      // 3. Render Google Calendar events
+      filteredGcal.forEach(event => {
+        const gcalRow = document.createElement('tr');
+        gcalRow.className = 'gcal-row';
+        const formattedTime = getGcalTimeDisplay(event);
+
+        gcalRow.innerHTML = `
+          <td style="font-weight: 600; color: var(--text-primary);">
+            ${escapeHtml(event.summary || 'Google Event')} 
+            <span class="booking-shoot-badge" style="background: rgba(66, 133, 244, 0.1); color: #4285F4; margin-left: 8px;">Google Cal</span>
+          </td>
+          <td></td>
+          <td></td>
+          <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
+          <td style="color: var(--text-light); font-style: italic;">Google Sync</td>
+          <td style="text-align: center;">
+            <span style="font-size: 0.75rem; color: var(--text-light); font-weight: bold;">Google Sync</span>
+          </td>
+        `;
+        sheetBody.appendChild(gcalRow);
+      });
+
+      // 4. Render empty slots to bring the day's total to at least 4 slots
+      const emptySlotsToRender = Math.max(0, 4 - totalEventCount);
+      for (let sIdx = 0; sIdx < emptySlotsToRender; sIdx++) {
         const availableRow = document.createElement('tr');
         availableRow.className = 'available-row';
         availableRow.innerHTML = `
           <td style="font-weight: 600; color: #2E7D32; font-style: italic;">
-            ✨ Available (No shoots scheduled)
+            ✨ Empty Slot (Available)
           </td>
           <td></td>
           <td></td>
