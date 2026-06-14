@@ -3383,16 +3383,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       logoutBtn.style.display = 'block';
       userDisplayLabel.textContent = `Viewing secure board:`;
 
-      // Configure workspace selector (disable switching to other users' views)
+      // Configure workspace selector (allow switching users' views)
       identityPills.forEach(pill => {
         const pillUser = pill.getAttribute('data-user');
-        if (pillUser === currentUser) {
-          pill.classList.add('active');
-          pill.style.display = 'inline-flex';
-        } else {
-          pill.classList.remove('active');
-          pill.style.display = 'none'; // Lock views
-        }
+        pill.style.display = 'inline-flex';
+        pill.classList.toggle('active', pillUser === currentUser);
       });
 
       // Initialize compose assignees options
@@ -4479,6 +4474,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       });
     });
+
+    // Setup click listeners for header identity pills in online mode
+    identityPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        const selectedProfile = pill.getAttribute('data-user');
+        const user = auth.currentUser;
+        if (user) {
+          localStorage.setItem('rhythm_clicks_profile', selectedProfile);
+          initOnlineDashboard(user, selectedProfile);
+        }
+      });
+    });
   }
   // ==========================================================================
   // 2. LOCAL FALLBACK MODE IMPLEMENTATION (LocalStorage + BroadcastChannel)
@@ -4809,16 +4816,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       isInitialLoad = true;
       checkForTaskStateUpdates();
 
-      // Configure manual identity switcher pills (Locked to logged in user)
+      // Configure manual identity switcher pills (Allow switching views)
       identityPills.forEach(pill => {
         const pillUser = pill.getAttribute('data-user');
-        if (pillUser === currentUser) {
-          pill.style.display = 'inline-flex';
-          pill.classList.add('active');
-        } else {
-          pill.style.display = 'none';
-          pill.classList.remove('active');
-        }
+        pill.style.display = 'inline-flex';
+        pill.classList.toggle('active', pillUser === currentUser);
       });
 
       // Update compose assignees options
