@@ -97,8 +97,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       const rawTemplate = getWhatsAppAlbumTemplate();
-      let message = rawTemplate.replace(/{name}/g, albumName);
-      message += ` Your pending balance is ${formatCurrency(pending)}.`;
+      const balanceStatement = `Your pending balance is *${formatCurrency(pending)}*.\n\n`;
+      const message = balanceStatement + rawTemplate.replace(/{name}/g, albumName);
 
       const isMac = navigator.platform && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
