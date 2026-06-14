@@ -3625,6 +3625,54 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
+    // Google SSO click handler
+    const ssoBtn = document.getElementById('google-sso-btn');
+    if (ssoBtn) {
+      ssoBtn.addEventListener('click', async () => {
+        loginStatusMsg.textContent = 'Opening Google Sign-In...';
+        try {
+          const provider = new firebaseAuth.GoogleAuthProvider();
+          provider.addScope('https://www.googleapis.com/auth/calendar.events');
+          provider.addScope('https://www.googleapis.com/auth/calendar.readonly');
+          provider.addScope('https://www.googleapis.com/auth/drive.file');
+
+          const result = await firebaseAuth.signInWithPopup(auth, provider);
+          const credential = firebaseAuth.GoogleAuthProvider.credentialFromResult(result);
+          const token = credential ? credential.accessToken : null;
+          const user = result.user;
+
+          if (token) {
+            console.log('Successfully retrieved Google Access Token from SSO.');
+            gcalAccessToken = token;
+            localStorage.setItem('gcal_access_token', gcalAccessToken);
+            localStorage.setItem('google_connected', 'true');
+          }
+
+          // Determine profile based on email address
+          const email = user.email || '';
+          const profile = getIdentityFromEmail(email);
+          localStorage.setItem('rhythm_clicks_profile', profile);
+
+          // Sync Google Access Token to Firestore so other instances can sync
+          if (token) {
+            await firebaseFirestore.setDoc(firebaseFirestore.doc(db, "google_auth", "state"), {
+              accessToken: gcalAccessToken,
+              updatedAt: Date.now(),
+              updatedBy: profile
+            });
+          }
+
+          // Initialize dashboard UI
+          initOnlineDashboard(user, profile);
+          showToast(`Signed in as ${profile} with Google!`, '👋');
+        } catch (error) {
+          console.error('Google SSO login failed:', error);
+          loginStatusMsg.innerHTML = `<span style="color: #d32f2f;">Google Sign-In failed: ${error.message}</span>`;
+          showToast('Google login failed.', '❌');
+        }
+      });
+    }
+
     // Logout trigger
     logoutBtn.addEventListener('click', () => {
       firebaseAuth.signOut(auth)
@@ -4486,6 +4534,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   else {
     console.log('Booting in Local Offline Fallback Mode');
     loginStatusMsg.innerHTML = 'Workspace ready. <span style="font-weight:700; color: #2E7D32;">Local Mode Active.</span>';
+    
+    // Hide Google SSO elements in local offline mode
+    const ssoBtn = document.getElementById('google-sso-btn');
+    if (ssoBtn) ssoBtn.style.display = 'none';
+    const loginDivider = document.querySelector('.login-divider');
+    if (loginDivider) loginDivider.style.display = 'none';
     
     // Customize login card for local simulation
     const submitBtn = loginForm.querySelector('.login-submit-btn');
