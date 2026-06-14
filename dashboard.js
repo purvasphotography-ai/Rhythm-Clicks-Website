@@ -2054,7 +2054,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         displayBalance = accountStats[selectedAccount].balance;
       }
 
-      // 1. Render Summary Cards (Expected, Advances, Pending, Extra Photos Balance)
+      const selectedMonthShootsCount = filteredBookings.length + filteredUnlinkedShoots.length;
+
+      // 1. Render Summary Cards (Expected, Advances, Pending, Extra Photos Balance, Shoots Count)
       summaryGrid.innerHTML = `
         <div class="grid-card" style="padding: 1.5rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(255,255,255,0.3); text-align: center;">
           <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Expected Revenue</span>
@@ -2071,6 +2073,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="grid-card" style="padding: 1.5rem; background: rgba(239, 108, 0, 0.08); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(239, 108, 0, 0.15); text-align: center;">
           <span style="font-size: 0.75rem; color: #E65100; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Extra Photos Balance</span>
           <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: #E65100;">${fmt(totalExtraPhotosCharges)}</h3>
+        </div>
+        <div class="grid-card" style="padding: 1.5rem; background: rgba(33, 150, 243, 0.08); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(33, 150, 243, 0.15); text-align: center;">
+          <span style="font-size: 0.75rem; color: #1976D2; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Shoots Booked</span>
+          <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: #1976D2;">${selectedMonthShootsCount}</h3>
         </div>
       `;
 
@@ -3082,7 +3088,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     return false; // Removed 2 hour warning/conflict check for now
   };
 
+  const updateMonthlyShootsStat = () => {
+    try {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonthNum = now.getMonth() + 1;
+      const currentMonthStr = `${currentYear}-${currentMonthNum.toString().padStart(2, '0')}`;
+
+      // Count bookings for this month
+      const monthlyBookings = (Array.isArray(bookings) ? bookings : []).filter(b => b && b.date && b.date.startsWith(currentMonthStr));
+
+      // Count manually logged completed shoots for this month (without linked booking or matching bookings)
+      const linkedBookingIds = (Array.isArray(bookings) ? bookings : []).map(b => b ? b.id : null).filter(Boolean);
+      const monthlyUnlinkedShoots = (Array.isArray(shoots) ? shoots : []).filter(s => {
+        if (!s) return false;
+        if (s.bookingId && linkedBookingIds.includes(s.bookingId)) return false;
+        const matchesBooking = (Array.isArray(bookings) ? bookings : []).some(b => 
+          b && s.clientName && b.clientName && s.clientName.toLowerCase().trim() === b.clientName.toLowerCase().trim() && s.date === b.date
+        );
+        return !matchesBooking && s.date && s.date.startsWith(currentMonthStr);
+      });
+
+      const totalMonthlyShoots = monthlyBookings.length + monthlyUnlinkedShoots.length;
+
+      const monthlyBookingsBadge = document.getElementById('monthly-bookings-stat-badge');
+      const monthlyShootsBadge = document.getElementById('monthly-shoots-stat-badge');
+
+      if (monthlyBookingsBadge) {
+        monthlyBookingsBadge.textContent = `Shoots this Month: ${totalMonthlyShoots}`;
+      }
+      if (monthlyShootsBadge) {
+        monthlyShootsBadge.textContent = `Shoots this Month: ${totalMonthlyShoots}`;
+      }
+    } catch (e) {
+      console.error("Error updating monthly shoots stat:", e);
+    }
+  };
+
   const renderBookings = () => {
+    updateMonthlyShootsStat();
     const grid = document.getElementById('bookings-grid');
     if (!grid) return;
 
@@ -6708,6 +6752,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Shoots Rendering and Event Handlers ---
   window.renderShoots = () => {
+    updateMonthlyShootsStat();
     if (!shootsGrid || !pendingShootsGrid) return;
 
     // 1. Calculate Pending Shoots (bookings that have NOT been completed)
