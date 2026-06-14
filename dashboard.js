@@ -1965,6 +1965,20 @@ document.addEventListener('DOMContentLoaded', async () => {
           const packagePrice = parsePackagePrice(b.package);
           const advanceVal = parseFloat(b.advance) || 0;
 
+          if (b.status === 'cancelled') {
+            const isRefunded = b.refunded === true || b.refunded === 'yes';
+            if (!isRefunded) {
+              const acc = b.paymentAccount || 'Cash';
+              if (accountStats[acc]) {
+                accountStats[acc].advances += advanceVal;
+                accountStats[acc].expected += advanceVal;
+              }
+              overallExpected += advanceVal;
+              overallAdvances += advanceVal;
+            }
+            return;
+          }
+
           // Find if there is a completed shoot matching this booking
           const linkedShoot = (Array.isArray(shoots) && shoots.length > 0) ? shoots.find(s => {
             try {
@@ -2248,6 +2262,20 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (!b) return;
           const packagePrice = parsePackagePrice(b.package);
           const advanceVal = parseFloat(b.advance) || 0;
+
+          if (b.status === 'cancelled') {
+            const isRefunded = b.refunded === true || b.refunded === 'yes';
+            if (!isRefunded) {
+              const acc = b.paymentAccount || 'Cash';
+              if (accountStats[acc]) {
+                accountStats[acc].advances += advanceVal;
+                accountStats[acc].expected += advanceVal;
+              }
+              overallExpected += advanceVal;
+              overallAdvances += advanceVal;
+            }
+            return;
+          }
 
           // Find if there is a completed shoot matching this booking
           const linkedShoot = (Array.isArray(shoots) && shoots.length > 0) ? shoots.find(s => {
@@ -3328,10 +3356,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         (s.clientName && s.clientName.toLowerCase() === booking.clientName.toLowerCase() && s.date === booking.date)
       );
 
+      const isCancelled = booking.status === 'cancelled';
+      const isRescheduled = booking.status === 'rescheduled';
+      const isRefunded = booking.refunded === true || booking.refunded === 'yes';
+
       // Parse price and calculate balance
       const parsedPrice = parsePackagePrice(booking.package);
       const isCompleted = !!linkedShoot;
-      const balance = isCompleted ? 0 : Math.max(0, parsedPrice - booking.advance);
+      let balance = isCompleted ? 0 : Math.max(0, parsedPrice - booking.advance);
+      if (isCancelled) balance = 0;
       const formattedBalance = formatCurrency(balance);
 
       let accountDisplay = booking.paymentAccount || 'Cash';
@@ -3378,8 +3411,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
 
+      let borderLeft = '#a88a3a';
+      let badgeStyle = 'background-color: rgba(168, 138, 58, 0.08); color: #a88a3a;';
+      let badgeText = booking.shootType;
+      
+      if (isCancelled) {
+        borderLeft = '#d32f2f';
+        badgeStyle = 'background-color: rgba(211, 47, 47, 0.08); color: #d32f2f;';
+        badgeText = `Cancelled (${isRefunded ? 'Refunded' : 'No Refund'})`;
+      } else if (isRescheduled) {
+        borderLeft = '#1976D2';
+        badgeStyle = 'background-color: rgba(25, 118, 210, 0.08); color: #1976D2;';
+        badgeText = `${booking.shootType} (Rescheduled)`;
+      }
+
+      let advanceDisplay = formattedAdvance;
+      let balanceDisplay = isCompleted ? 'Paid ✓' : formattedBalance;
+      if (isCancelled) {
+        advanceDisplay = isRefunded ? 'Refunded' : `${formattedAdvance} (Retained)`;
+        balanceDisplay = 'Cancelled';
+      }
+
       return `
-        <li class="booking-card" style="border-left: 4px solid #a88a3a; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 1.5rem; padding: 0.6rem 1.25rem; flex-wrap: wrap;" data-id="${booking.id}">
+        <li class="booking-card" style="border-left: 4px solid ${borderLeft}; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 1.5rem; padding: 0.6rem 1.25rem; flex-wrap: wrap; ${isCancelled ? 'opacity: 0.75; background-color: rgba(0,0,0,0.01);' : ''}" data-id="${booking.id}">
           <!-- Column 1: Client Name -->
           <div class="booking-client-info" style="display: flex !important; flex-direction: column !important; align-items: flex-start !important; flex: 1.5; min-width: 180px; gap: 4px;">
             <h3 class="booking-client-name" style="margin: 0; font-family: var(--font-sans) !important; font-size: 0.9rem; font-weight: 600; text-transform: capitalize; white-space: nowrap;">${escapeHtml(booking.clientName)}</h3>
@@ -3387,7 +3441,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           
           <!-- Column 2: Status Indicator Badge -->
           <div class="booking-status-indicator" style="display: flex !important; align-items: center !important; justify-content: flex-start !important; flex: 1; min-width: 120px;">
-            <span class="booking-shoot-badge" style="margin: 0; background-color: rgba(168, 138, 58, 0.08); color: #a88a3a;">${escapeHtml(booking.shootType)}</span>
+            <span class="booking-shoot-badge" style="margin: 0; ${badgeStyle}">${escapeHtml(badgeText)}</span>
           </div>
           
           <!-- Column 3: Booking Info (stacked vertically) -->
@@ -3399,8 +3453,8 @@ document.addEventListener('DOMContentLoaded', async () => {
               <span>📦 Package: <strong>${escapeHtml(booking.package)}</strong></span>
             </div>
             <div class="booking-detail-item" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-              <span>💵 Advance: <strong>${formattedAdvance}</strong></span>
-              <span>💵 Balance: <strong>${isCompleted ? 'Paid ✓' : formattedBalance}</strong></span>
+              <span>💵 Advance: <strong>${advanceDisplay}</strong></span>
+              <span>💵 Balance: <strong>${balanceDisplay}</strong></span>
             </div>
             <div class="booking-detail-item" style="display: flex; align-items: center; gap: 4px; white-space: nowrap;">
               <span>🏦 Account: <strong>${escapeHtml(accountDisplay)}</strong></span>
@@ -4277,7 +4331,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           package: pack.trim(),
           advance: parseFloat(advance) || 0,
           paymentAccount: paymentAccount || 'Cash',
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          status: 'confirmed',
+          refunded: false
         });
         showToast(`Booking for <strong>${clientName}</strong> saved`, '📅');
 
@@ -4326,7 +4382,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.updateBooking = async (id, clientName, shootType, date, time, pack, advance, paymentAccount, clientPhone, status) => {
+    window.updateBooking = async (id, clientName, shootType, date, time, pack, advance, paymentAccount, clientPhone, status, refunded) => {
       try {
         await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "bookings", id), {
           clientName: clientName.trim(),
@@ -4336,7 +4392,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           package: pack.trim(),
           advance: parseFloat(advance) || 0,
           paymentAccount: paymentAccount || 'Cash',
-          status: status || 'confirmed'
+          status: status || 'confirmed',
+          refunded: refunded === true || refunded === 'yes'
         });
         showToast(`Booking for <strong>${clientName}</strong> updated`, '📅');
 
@@ -5329,7 +5386,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         package: pack.trim(),
         advance: parseFloat(advance) || 0,
         paymentAccount: paymentAccount || 'Cash',
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        status: 'confirmed',
+        refunded: false
       };
 
       // Auto Sync with Google Calendar if connected
@@ -5385,7 +5444,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast(`Booking for <strong>${clientName}</strong> saved`, '📅');
     };
 
-    window.updateBooking = async (id, clientName, shootType, date, time, pack, advance, paymentAccount, clientPhone, status) => {
+    window.updateBooking = async (id, clientName, shootType, date, time, pack, advance, paymentAccount, clientPhone, status, refunded) => {
       const existing = bookings.find(b => b.id === id);
       if (!existing) return;
 
@@ -5414,6 +5473,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       existing.advance = parseFloat(advance) || 0;
       existing.paymentAccount = paymentAccount || 'Cash';
       existing.status = status || 'confirmed';
+      existing.refunded = refunded === true || refunded === 'yes';
 
       // Auto Sync with Google Calendar if connected
       if (gcalAccessToken) {
@@ -6881,6 +6941,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const paymentAccount = editBookingPaymentAccount ? editBookingPaymentAccount.value : 'Cash';
       const statusEl = document.getElementById('edit-booking-status');
       const status = statusEl ? statusEl.value : 'confirmed';
+      const refundEl = document.getElementById('edit-booking-refund');
+      const refunded = (status === 'cancelled' && refundEl && refundEl.value === 'yes');
 
       if (!name.trim() || !shootType || !date || !time || !pack) return;
 
@@ -6889,7 +6951,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      await window.updateBooking(id, name, shootType, date, time, pack, advance, paymentAccount, phone, status);
+      await window.updateBooking(id, name, shootType, date, time, pack, advance, paymentAccount, phone, status, refunded);
       closeEditBooking();
     });
   }
@@ -6963,6 +7025,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const editBookingStatus = document.getElementById('edit-booking-status');
     if (editBookingStatus) {
       editBookingStatus.value = b.status || 'confirmed';
+    }
+    const editBookingRefundContainer = document.getElementById('edit-booking-refund-container');
+    const editBookingRefund = document.getElementById('edit-booking-refund');
+    if (editBookingRefundContainer && editBookingRefund) {
+      if (b.status === 'cancelled') {
+        editBookingRefundContainer.style.display = 'block';
+        editBookingRefund.value = (b.refunded === true || b.refunded === 'yes') ? 'yes' : 'no';
+      } else {
+        editBookingRefundContainer.style.display = 'none';
+        editBookingRefund.value = 'no';
+      }
     }
 
     if (editBookingStatusMsg) {
@@ -7560,7 +7633,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         let badgeBg = 'rgba(168, 138, 58, 0.1)';
         let badgeColor = '#a88a3a';
 
-        if (g.album && g.album.status === 'delivered') {
+        const isCancelled = primaryBooking && primaryBooking.status === 'cancelled';
+        const isRescheduled = primaryBooking && primaryBooking.status === 'rescheduled';
+        const isRefunded = primaryBooking && (primaryBooking.refunded === true || primaryBooking.refunded === 'yes');
+
+        if (isCancelled) {
+          phaseBadge = `Cancelled (${isRefunded ? 'Refunded' : 'No Refund'})`;
+          badgeBg = 'rgba(211, 47, 47, 0.1)';
+          badgeColor = '#d32f2f';
+        } else if (isRescheduled) {
+          phaseBadge = 'Rescheduled';
+          badgeBg = 'rgba(25, 118, 210, 0.1)';
+          badgeColor = '#1976D2';
+        } else if (g.album && g.album.status === 'delivered') {
           phaseBadge = 'Album Delivered';
           badgeBg = 'rgba(46, 125, 50, 0.1)';
           badgeColor = '#2E7D32';
@@ -7582,7 +7667,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           badgeColor = '#2E7D32';
         }
 
-        const borderLeftColor = primaryShoot ? '#2E7D32' : '#a88a3a';
+        let borderLeftColor = primaryShoot ? '#2E7D32' : '#a88a3a';
+        if (isCancelled) borderLeftColor = '#d32f2f';
+        else if (isRescheduled) borderLeftColor = '#1976D2';
 
         // Compute Gallery Status display
         let galleryStatusText = 'Not started';
@@ -7668,9 +7755,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem;">
                   <!-- Step 1: Booking -->
                   <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #2E7D32; font-weight: bold; font-size: 0.85rem;">✓</span>
+                    <span style="color: ${isCancelled ? '#d32f2f' : '#2E7D32'}; font-weight: bold; font-size: 0.85rem;">✓</span>
                     <span style="color: var(--text-secondary); font-size: 0.78rem;">Booking:</span>
-                    <strong style="color: var(--text-primary); font-size: 0.78rem;">Confirmed</strong>
+                    <strong style="color: ${isCancelled ? '#d32f2f' : (isRescheduled ? '#1976D2' : 'var(--text-primary)')}; font-size: 0.78rem;">
+                      ${isCancelled ? 'Cancelled' : (isRescheduled ? 'Rescheduled' : 'Confirmed')}
+                    </strong>
                   </div>
 
                   <!-- Step 2: Shoot -->
@@ -7810,11 +7899,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       dayCell.innerHTML = `<span>${cellDay}</span>`;
 
       // Draw dots if events found and not adjacent month day
-      if (!isAdjacent && (cellBookings.length > 0 || cellShoots.length > 0 || cellGcalEvents.length > 0)) {
+      const cellBookingsActive = cellBookings.filter(b => b.status !== 'cancelled');
+      if (!isAdjacent && (cellBookingsActive.length > 0 || cellShoots.length > 0 || cellGcalEvents.length > 0)) {
         const dotsContainer = document.createElement('div');
         dotsContainer.className = 'calendar-dots-container';
 
-        if (cellBookings.length > 0) {
+        if (cellBookingsActive.length > 0) {
           const dot = document.createElement('span');
           dot.className = 'calendar-dot local-booking';
           dotsContainer.appendChild(dot);
@@ -8213,9 +8303,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
+  // Toggle visibility of refund status dropdown in edit modal
+  const initEditBookingRefundToggle = () => {
+    const editBookingStatus = document.getElementById('edit-booking-status');
+    const editBookingRefundContainer = document.getElementById('edit-booking-refund-container');
+    
+    if (editBookingStatus && editBookingRefundContainer) {
+      editBookingStatus.addEventListener('change', (e) => {
+        if (e.target.value === 'cancelled') {
+          editBookingRefundContainer.style.display = 'block';
+        } else {
+          editBookingRefundContainer.style.display = 'none';
+        }
+      });
+    }
+  };
+
   // Run settings and preferences initializations
   syncSettingsFields();
   initPreferencesListeners();
+  initEditBookingRefundToggle();
 
   // Run calendar initializations
   initCalendarListeners();

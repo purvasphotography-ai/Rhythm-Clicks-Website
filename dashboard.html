@@ -624,7 +624,17 @@
               <label for="edit-booking-status" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Booking Status *</label>
               <select id="edit-booking-status" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
                 <option value="confirmed">Confirmed / Active</option>
+                <option value="rescheduled">Rescheduled</option>
                 <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <!-- Refund Status (only shown when cancelled is selected) -->
+            <div class="form-group" id="edit-booking-refund-container" style="display: none;">
+              <label for="edit-booking-refund" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Advance Refunded *</label>
+              <select id="edit-booking-refund" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+                <option value="no">No (Advance Retained)</option>
+                <option value="yes">Yes (Advance Refunded)</option>
               </select>
             </div>
           </div>
