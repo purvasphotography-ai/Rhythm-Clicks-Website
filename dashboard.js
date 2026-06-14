@@ -52,7 +52,54 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (cleanPhone.length === 10) {
         cleanPhone = '91' + cleanPhone;
       }
-      const message = `Hi ${albumName}, your album has arrived at Rhythm Clicks Studio! 📸✨ It is ready for collection/delivery.`;
+
+      // Calculate pending balance
+      let pending = 0;
+      const normName = albumName.trim().toLowerCase();
+      
+      const clientBookings = bookings.filter(b => b && b.clientName && b.clientName.trim().toLowerCase() === normName);
+      clientBookings.forEach(b => {
+        const packagePrice = parsePackagePrice(b.package);
+        const advanceVal = parseFloat(b.advance) || 0;
+        
+        const linkedShoot = (Array.isArray(shoots) && shoots.length > 0) ? shoots.find(s => {
+          if (s && s.bookingId && s.bookingId === b.id) return true;
+          const sName = s && s.clientName ? String(s.clientName).toLowerCase() : '';
+          const bName = b && b.clientName ? String(b.clientName).toLowerCase() : '';
+          if (sName && sName === bName && s.date === b.date) return true;
+          return false;
+        }) : null;
+
+        if (!linkedShoot) {
+          pending += Math.max(0, packagePrice - advanceVal);
+        }
+      });
+
+      // Include extra photos pending balance
+      if (Array.isArray(galleries)) {
+        const clientGalleries = galleries.filter(g => g && g.clientName && g.clientName.trim().toLowerCase() === normName);
+        clientGalleries.forEach(g => {
+          const selectedCount = g.photosSelected ? parseInt(g.photosSelected) || 0 : 0;
+          const matchingShoot = (normName && typeof shoots !== 'undefined' && Array.isArray(shoots)) 
+            ? shoots.find(s => s && s.clientName && String(s.clientName).toLowerCase().replace(/[^a-z0-9]/g, '').trim() === normName.replace(/[^a-z0-9]/g, '').trim()) 
+            : null;
+          let shootAllowed = 0;
+          if (matchingShoot && matchingShoot.photosCount) {
+            shootAllowed = parseInt(matchingShoot.photosCount) || 0;
+          }
+          if (shootAllowed > 0 && selectedCount > shootAllowed) {
+            const extraPhotos = selectedCount - shootAllowed;
+            const amountDue = extraPhotos * getExtraPhotoRate();
+            const extraPaid = parseFloat(g.extraPhotosPaid) || 0;
+            pending += Math.max(0, amountDue - extraPaid);
+          }
+        });
+      }
+
+      const rawTemplate = getWhatsAppAlbumTemplate();
+      let message = rawTemplate.replace(/{name}/g, albumName);
+      message += ` Your pending balance is ${formatCurrency(pending)}.`;
+
       const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     } else {
@@ -334,6 +381,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     return val !== null ? parseInt(val, 10) : 200;
   };
 
+  const getWhatsAppAlbumTemplate = () => {
+    return localStorage.getItem('rhythm_clicks_whatsapp_album_template') || 'Hi {name}, your album has arrived at Rhythm Clicks Studio! 📸✨ It is ready for collection/delivery.';
+  };
+
   const formatCurrency = (val) => {
     const code = getCurrencyCode();
     return new Intl.NumberFormat(getLocaleForCurrency(code), {
@@ -418,6 +469,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const inputExtraRate = document.getElementById('settings-extra-photo-rate');
     if (inputExtraRate) inputExtraRate.value = getExtraPhotoRate();
 
+    const inputTemplate = document.getElementById('settings-whatsapp-album-template');
+    if (inputTemplate) inputTemplate.value = getWhatsAppAlbumTemplate();
+
     applyStudioName(getStudioName());
     updateFormLabelsCurrencySymbol();
     updateDatalistsCurrency();
@@ -473,6 +527,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           localStorage.setItem('rhythm_clicks_extra_photo_rate', 0);
           if (typeof renderGalleries === 'function') renderGalleries();
         }
+      });
+    }
+
+    const inputTemplate = document.getElementById('settings-whatsapp-album-template');
+    if (inputTemplate) {
+      inputTemplate.addEventListener('input', (e) => {
+        localStorage.setItem('rhythm_clicks_whatsapp_album_template', e.target.value);
       });
     }
   };
@@ -888,6 +949,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('edit-gallery-status-select').value = gallery.status;
         if (document.getElementById('edit-gallery-photos-selected')) {
           document.getElementById('edit-gallery-photos-selected').value = gallery.photosSelected || 0;
+        }
+        if (document.getElementById('edit-gallery-extra-paid')) {
+          document.getElementById('edit-gallery-extra-paid').value = gallery.extraPhotosPaid || 0;
+        }
+        if (document.getElementById('edit-gallery-extra-account')) {
+          document.getElementById('edit-gallery-extra-account').value = gallery.extraPhotosAccount || 'Cash';
         }
         
         const editGalleryDate = document.getElementById('edit-gallery-date-input');
@@ -1865,12 +1932,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       const accountList = ['Rhythm', 'Cash', 'Purva', 'Bijal', 'Shilpa', 'Mahesh'];
       const accountStats = {};
       accountList.forEach(acc => {
-        accountStats[acc] = { advances: 0, balance: 0, expected: 0 };
+        accountStats[acc] = { advances: 0, balance: 0, expected: 0, extraPending: 0 };
       });
 
       let overallExpected = 0;
       let overallAdvances = 0;
       let overallBalance = 0;
+      let overallExtraPending = 0;
+
+      const transactionRows = [];
 
       // Filter bookings by selected month
       const filteredBookings = (Array.isArray(bookings) ? bookings : []).filter(b => {
@@ -2015,7 +2085,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             const selectedCount = g.photosSelected ? parseInt(g.photosSelected) || 0 : 0;
             if (shootAllowed > 0 && selectedCount > shootAllowed) {
               const extraPhotos = selectedCount - shootAllowed;
-              const amountDue = extraPhotos * 200;
+              const amountDue = extraPhotos * getExtraPhotoRate();
+              const extraPaid = parseFloat(g.extraPhotosPaid) || 0;
+              const extraAcc = g.extraPhotosAccount || 'Cash';
+              const pendingExtra = Math.max(0, amountDue - extraPaid);
+
+              if (accountStats[extraAcc]) {
+                accountStats[extraAcc].extraPending += pendingExtra;
+                accountStats[extraAcc].advances += extraPaid;
+                accountStats[extraAcc].expected += extraPaid;
+              }
+              overallExtraPending += pendingExtra;
+              overallExpected += extraPaid;
+              overallAdvances += extraPaid;
+
               totalExtraPhotosCharges += amountDue;
 
               const formattedGDate = gDate.toLocaleDateString('en-IN', {
@@ -2024,16 +2107,43 @@ document.addEventListener('DOMContentLoaded', async () => {
                 year: 'numeric'
               });
 
-              extraPhotosRows.push(`
-                <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-                  <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(g.clientName)}</td>
-                  <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedGDate}</td>
-                  <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: var(--text-secondary);">${shootAllowed} allowed / ${selectedCount} selected</td>
-                  <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: #E65100;">${extraPhotos} extra</td>
-                  <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: #E65100;">${fmt(amountDue)}</td>
-                  <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(239, 108, 0, 0.12); color: #E65100; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PENDING</span></td>
-                </tr>
-              `);
+              if (extraPaid > 0 && (selectedAccount === 'all' || extraAcc === selectedAccount)) {
+                transactionRows.push(`
+                  <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(g.clientName)} (Extra Photos)</td>
+                    <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedGDate}</td>
+                    <td style="padding: 0.75rem 0.5rem;"><span style="color: #2E7D32; font-weight: 600;">Extra Photos Payment</span></td>
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(extraPaid)}</td>
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(extraAcc)}</td>
+                    <td style="padding: 0.75rem 0.5rem;"><span style="background: rgba(46, 125, 50, 0.12); color: #2E7D32; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">PAID</span></td>
+                  </tr>
+                `);
+              }
+
+              if (selectedAccount === 'all' || extraAcc === selectedAccount) {
+                let statusText = 'PENDING';
+                let statusStyle = 'background: rgba(239, 108, 0, 0.12); color: #E65100;';
+                if (extraPaid >= amountDue) {
+                  statusText = 'PAID';
+                  statusStyle = 'background: rgba(46, 125, 50, 0.12); color: #2E7D32;';
+                } else if (extraPaid > 0) {
+                  statusText = 'PARTIAL';
+                  statusStyle = 'background: rgba(239, 108, 0, 0.12); color: #E65100;';
+                }
+
+                extraPhotosRows.push(`
+                  <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(g.clientName)}</td>
+                    <td style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${formattedGDate}</td>
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: var(--text-secondary);">${shootAllowed} allowed / ${selectedCount} selected</td>
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: #E65100;">${extraPhotos} extra</td>
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: #E65100;">${fmt(amountDue)}</td>
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--text-primary);">${fmt(extraPaid)}</td>
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 500; color: var(--text-secondary);">${escapeHtml(extraAcc)}</td>
+                    <td style="padding: 0.75rem 0.5rem;"><span style="${statusStyle} padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">${statusText}</span></td>
+                  </tr>
+                `);
+              }
             }
           } catch (e) {
             console.error("Error rendering extra photos row:", e, g);
@@ -2057,18 +2167,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       // Determine stats for current view (filtered)
+      // Determine stats for current view (filtered)
       let displayExpected = 0;
       let displayAdvances = 0;
       let displayBalance = 0;
+      let displayExtraPending = 0;
 
       if (selectedAccount === 'all') {
         displayExpected = overallExpected;
         displayAdvances = overallAdvances;
         displayBalance = overallBalance;
+        displayExtraPending = overallExtraPending;
       } else if (accountStats[selectedAccount]) {
         displayExpected = accountStats[selectedAccount].expected;
         displayAdvances = accountStats[selectedAccount].advances;
         displayBalance = accountStats[selectedAccount].balance;
+        displayExtraPending = accountStats[selectedAccount].extraPending;
       }
 
       const selectedMonthShootsCount = filteredBookings.length + filteredUnlinkedShoots.length;
@@ -2080,7 +2194,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: var(--text-primary);">${fmt(displayExpected)}</h3>
         </div>
         <div class="grid-card" style="padding: 1.5rem; background: rgba(46, 125, 50, 0.08); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(46, 125, 50, 0.15); text-align: center;">
-          <span style="font-size: 0.75rem; color: #2E7D32; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Advances/Paid Balance</span>
+          <span style="font-size: 0.75rem; color: #2E7D32; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Received Revenue</span>
           <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: #2E7D32;">${fmt(displayAdvances)}</h3>
         </div>
         <div class="grid-card" style="padding: 1.5rem; background: rgba(198, 40, 40, 0.08); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(198, 40, 40, 0.15); text-align: center;">
@@ -2089,7 +2203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
         <div class="grid-card" style="padding: 1.5rem; background: rgba(239, 108, 0, 0.08); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(239, 108, 0, 0.15); text-align: center;">
           <span style="font-size: 0.75rem; color: #E65100; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Extra Photos Balance</span>
-          <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: #E65100;">${fmt(totalExtraPhotosCharges)}</h3>
+          <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0.5rem 0 0 0; color: #E65100;">${fmt(displayExtraPending)}</h3>
         </div>
         <div class="grid-card" style="padding: 1.5rem; background: rgba(33, 150, 243, 0.08); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); border: 1px solid rgba(33, 150, 243, 0.15); text-align: center;">
           <span style="font-size: 0.75rem; color: #1976D2; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Shoots Booked</span>
@@ -2118,7 +2232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }).join('');
 
       // 3. Render Related Transactions List
-      const transactionRows = [];
+
 
       filteredBookings.forEach(b => {
         try {
@@ -3891,15 +4005,29 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.updateGallery = async (id, clientName, notes, status, chosenTimestamp = Date.now(), customCreationTimestamp = null, photosSelected = 0) => {
+    window.updateGallery = async (id, clientName, notes, status, chosenTimestamp = Date.now(), customCreationTimestamp = null, photosSelected = undefined, extraPhotosPaid = undefined, extraPhotosAccount = undefined) => {
       try {
         const existing = galleries.find(g => g.id === id);
         const updateFields = {
           clientName: clientName.trim(),
           notes: notes.trim(),
-          status: status,
-          photosSelected: parseInt(photosSelected) || 0
+          status: status
         };
+        if (photosSelected !== undefined) {
+          updateFields.photosSelected = parseInt(photosSelected) || 0;
+        } else if (existing && existing.photosSelected !== undefined) {
+          updateFields.photosSelected = existing.photosSelected;
+        }
+        if (extraPhotosPaid !== undefined) {
+          updateFields.extraPhotosPaid = parseFloat(extraPhotosPaid) || 0;
+        } else if (existing && existing.extraPhotosPaid !== undefined) {
+          updateFields.extraPhotosPaid = existing.extraPhotosPaid;
+        }
+        if (extraPhotosAccount !== undefined) {
+          updateFields.extraPhotosAccount = extraPhotosAccount;
+        } else if (existing && existing.extraPhotosAccount !== undefined) {
+          updateFields.extraPhotosAccount = existing.extraPhotosAccount;
+        }
         if (customCreationTimestamp !== null) {
           updateFields.timestamp = customCreationTimestamp;
         }
@@ -5049,7 +5177,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    window.updateGallery = (id, clientName, notes, status, chosenTimestamp = Date.now(), customCreationTimestamp = null, photosSelected = 0) => {
+    window.updateGallery = (id, clientName, notes, status, chosenTimestamp = Date.now(), customCreationTimestamp = null, photosSelected = undefined, extraPhotosPaid = undefined, extraPhotosAccount = undefined) => {
       const gIndex = galleries.findIndex(g => g.id === id);
       if (gIndex === -1) return;
 
@@ -5057,7 +5185,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       existing.clientName = clientName.trim();
       existing.notes = notes.trim();
       existing.status = status;
-      existing.photosSelected = parseInt(photosSelected) || 0;
+      if (photosSelected !== undefined) {
+        existing.photosSelected = parseInt(photosSelected) || 0;
+      }
+      if (extraPhotosPaid !== undefined) {
+        existing.extraPhotosPaid = parseFloat(extraPhotosPaid) || 0;
+      }
+      if (extraPhotosAccount !== undefined) {
+        existing.extraPhotosAccount = extraPhotosAccount;
+      }
       if (customCreationTimestamp !== null) {
         existing.timestamp = customCreationTimestamp;
       }
@@ -6050,12 +6186,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       const customCreationTimestamp = editGalleryDate && editGalleryDate.value ? new Date(editGalleryDate.value).getTime() : (gallery ? gallery.timestamp : Date.now());
       const photosSelected = editGalleryPhotosSelected ? parseInt(editGalleryPhotosSelected.value) || 0 : 0;
 
+      const editGalleryExtraPaid = document.getElementById('edit-gallery-extra-paid');
+      const editGalleryExtraAccount = document.getElementById('edit-gallery-extra-account');
+      const extraPhotosPaid = editGalleryExtraPaid ? parseFloat(editGalleryExtraPaid.value) || 0 : 0;
+      const extraPhotosAccount = editGalleryExtraAccount ? editGalleryExtraAccount.value : 'Cash';
+
       if (status === 'selected' && (!photosSelected || photosSelected < 1)) {
         alert("Mandatory: Please enter a valid number of photos selected (1 or more) for 'Selected' status.");
         return; // Don't submit
       }
 
-      await window.updateGallery(id, name, notes, status, chosenTimestamp, customCreationTimestamp, photosSelected);
+      await window.updateGallery(id, name, notes, status, chosenTimestamp, customCreationTimestamp, photosSelected, extraPhotosPaid, extraPhotosAccount);
       closeEditGallery();
     });
   }

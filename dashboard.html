@@ -267,6 +267,23 @@
           <label for="edit-gallery-photos-selected" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Photos Selected</label>
           <input type="number" id="edit-gallery-photos-selected" value="0" min="0" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans);">
         </div>
+        <div class="form-group" style="display: flex; gap: 1rem;">
+          <div style="flex: 1;">
+            <label for="edit-gallery-extra-paid" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Extra Paid Amt</label>
+            <input type="number" id="edit-gallery-extra-paid" value="0" min="0" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans);">
+          </div>
+          <div style="flex: 1;">
+            <label for="edit-gallery-extra-account" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Extra Acc</label>
+            <select id="edit-gallery-extra-account" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
+              <option value="Cash">Cash</option>
+              <option value="Rhythm">Rhythm</option>
+              <option value="Purva">Purva</option>
+              <option value="Bijal">Bijal</option>
+              <option value="Shilpa">Shilpa</option>
+              <option value="Mahesh">Mahesh</option>
+            </select>
+          </div>
+        </div>
         <div class="form-group">
           <label for="edit-gallery-status-select" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">Pipeline Status</label>
           <select id="edit-gallery-status-select" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer;">
@@ -1526,6 +1543,8 @@
                 <th style="padding: 0.75rem 0.5rem;">Allowed / Selected</th>
                 <th style="padding: 0.75rem 0.5rem;">Extra Photos</th>
                 <th style="padding: 0.75rem 0.5rem;">Amount Due</th>
+                <th style="padding: 0.75rem 0.5rem;">Paid</th>
+                <th style="padding: 0.75rem 0.5rem;">Account</th>
                 <th style="padding: 0.75rem 0.5rem;">Status</th>
               </tr>
             </thead>
@@ -1588,6 +1607,15 @@
               <input type="number" id="settings-extra-photo-rate" placeholder="e.g., 200" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.7); font-family: var(--font-sans); font-size: 0.85rem; color: var(--text-primary);">
               <p style="margin: 0.4rem 0 0 0; font-size: 0.75rem; color: var(--text-light); line-height: 1.4;">
                 Rate charged for each photo selected beyond the package limit.
+              </p>
+            </div>
+
+            <!-- WhatsApp Album Arrived Message Template -->
+            <div style="grid-column: 1 / -1;">
+              <label for="settings-whatsapp-album-template" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">WhatsApp Album Arrived Message Template</label>
+              <textarea id="settings-whatsapp-album-template" rows="3" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.7); font-family: var(--font-sans); font-size: 0.85rem; color: var(--text-primary); resize: vertical;" placeholder="Enter template message. Use {name} for client name."></textarea>
+              <p style="margin: 0.4rem 0 0 0; font-size: 0.75rem; color: var(--text-light); line-height: 1.4;">
+                Template message to send via WhatsApp when an album is marked as "arrived". Use <strong>{name}</strong> for the client name. The outstanding pending balance will be appended at the end of the message automatically.
               </p>
             </div>
 
