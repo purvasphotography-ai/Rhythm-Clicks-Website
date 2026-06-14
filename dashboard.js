@@ -100,8 +100,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       let message = rawTemplate.replace(/{name}/g, albumName);
       message += ` Your pending balance is ${formatCurrency(pending)}.`;
 
-      const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
+      const isMac = navigator.platform && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isNativeApp = (window.Capacitor && window.Capacitor.isNative) || isMac || isMobile;
+
+      if (isNativeApp) {
+        const nativeUrl = `whatsapp://send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
+        window.location.href = nativeUrl;
+      } else {
+        const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, 'whatsapp_window');
+      }
     } else {
       showToast(`No contact phone number found for ${albumName} to send WhatsApp.`, '⚠️');
     }
