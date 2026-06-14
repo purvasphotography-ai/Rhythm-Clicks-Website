@@ -3833,11 +3833,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.moveGallery = async (id, nextStatus) => {
       try {
+        const existing = galleries.find(g => g.id === id);
+        
+        let photosSelectedVal = 0;
+        if (nextStatus === 'selected') {
+          const numPhotosStr = window.prompt("Mandatory: How many photos has the client selected?", "");
+          if (numPhotosStr === null) {
+            showToast("Move cancelled. Number of selected photos is required.", "⚠️");
+            return; // Don't move to selected
+          }
+          const numPhotos = parseInt(numPhotosStr.trim(), 10);
+          if (isNaN(numPhotos) || numPhotos < 1) {
+            alert("Invalid photo count. Please enter a valid number of photos (1 or more).");
+            showToast("Move cancelled. Invalid photo count.", "⚠️");
+            return; // Don't move to selected
+          }
+          photosSelectedVal = numPhotos;
+        }
+
         const chosenTimestamp = await window.promptTransitionDate();
         if (chosenTimestamp === null) return; // User cancelled
         
-        const existing = galleries.find(g => g.id === id);
         const updateFields = { status: nextStatus };
+        if (nextStatus === 'selected') {
+          updateFields.photosSelected = photosSelectedVal;
+        }
         if (existing) {
           if (nextStatus === 'arrived') {
             updateFields.selectionDate = null;
@@ -4968,11 +4988,30 @@ document.addEventListener('DOMContentLoaded', async () => {
       const galleryIndex = galleries.findIndex(g => g.id === id);
       if (galleryIndex === -1) return;
 
+      let photosSelectedVal = 0;
+      if (nextStatus === 'selected') {
+        const numPhotosStr = window.prompt("Mandatory: How many photos has the client selected?", "");
+        if (numPhotosStr === null) {
+          showToast("Move cancelled. Number of selected photos is required.", "⚠️");
+          return; // Don't move to selected
+        }
+        const numPhotos = parseInt(numPhotosStr.trim(), 10);
+        if (isNaN(numPhotos) || numPhotos < 1) {
+          alert("Invalid photo count. Please enter a valid number of photos (1 or more).");
+          showToast("Move cancelled. Invalid photo count.", "⚠️");
+          return; // Don't move to selected
+        }
+        photosSelectedVal = numPhotos;
+      }
+
       const chosenTimestamp = await window.promptTransitionDate();
       if (chosenTimestamp === null) return; // User cancelled
 
       const existing = galleries[galleryIndex];
       existing.status = nextStatus;
+      if (nextStatus === 'selected') {
+        existing.photosSelected = photosSelectedVal;
+      }
       if (nextStatus === 'arrived') {
         existing.selectionDate = null;
         existing.editedDate = null;
@@ -6010,6 +6049,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       const editGalleryDate = document.getElementById('edit-gallery-date-input');
       const customCreationTimestamp = editGalleryDate && editGalleryDate.value ? new Date(editGalleryDate.value).getTime() : (gallery ? gallery.timestamp : Date.now());
       const photosSelected = editGalleryPhotosSelected ? parseInt(editGalleryPhotosSelected.value) || 0 : 0;
+
+      if (status === 'selected' && (!photosSelected || photosSelected < 1)) {
+        alert("Mandatory: Please enter a valid number of photos selected (1 or more) for 'Selected' status.");
+        return; // Don't submit
+      }
 
       await window.updateGallery(id, name, notes, status, chosenTimestamp, customCreationTimestamp, photosSelected);
       closeEditGallery();
