@@ -43,6 +43,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   let calendarSelectedDate = new Date().toISOString().split('T')[0];
   let gcalEvents = [];
 
+  // Helper to send WhatsApp message when an album is marked "arrived"
+  const triggerWhatsAppAlbumArrived = (albumName) => {
+    const contact = contacts.find(c => c.name.trim().toLowerCase() === albumName.trim().toLowerCase());
+    if (contact && contact.phone) {
+      let phone = contact.phone.trim();
+      let cleanPhone = phone.replace(/\D/g, '');
+      if (cleanPhone.length === 10) {
+        cleanPhone = '91' + cleanPhone;
+      }
+      const message = `Hi ${albumName}, your album has arrived at Rhythm Clicks Studio! 📸✨ It is ready for collection/delivery.`;
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    } else {
+      showToast(`No contact phone number found for ${albumName} to send WhatsApp.`, '⚠️');
+    }
+  };
+
   // --- UI Elements ---
   const loginOverlay = document.getElementById('login-overlay');
   const loginCredentialsCard = document.getElementById('login-credentials-card');
@@ -3967,6 +3984,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!existing.approvalDate) updateFields.approvalDate = chosenTimestamp;
             if (!existing.printingDate) updateFields.printingDate = chosenTimestamp;
             updateFields.arrivedDate = chosenTimestamp;
+            
+            // Trigger WhatsApp notification
+            triggerWhatsAppAlbumArrived(existing.clientName);
           } else if (nextStatus === 'delivered') {
             if (!existing.approvalDate) updateFields.approvalDate = chosenTimestamp;
             if (!existing.printingDate) updateFields.printingDate = chosenTimestamp;
@@ -3985,6 +4005,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.updateAlbum = async (id, clientName, notes, status, deliveryMethod = '', chosenTimestamp = Date.now(), customCreationTimestamp = null) => {
       try {
         const existing = albums.find(a => a.id === id);
+        const oldStatus = existing ? existing.status : '';
         const updateFields = {
           clientName: clientName.trim(),
           notes: notes.trim(),
@@ -4018,6 +4039,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!existing.approvalDate) updateFields.approvalDate = chosenTimestamp;
             if (!existing.printingDate) updateFields.printingDate = chosenTimestamp;
             if (!existing.arrivedDate) updateFields.arrivedDate = chosenTimestamp;
+            
+            // Trigger WhatsApp notification
+            if (oldStatus !== 'arrived') {
+              triggerWhatsAppAlbumArrived(clientName);
+            }
           } else if (status === 'delivered') {
             if (!existing.approvalDate) updateFields.approvalDate = chosenTimestamp;
             if (!existing.printingDate) updateFields.printingDate = chosenTimestamp;
@@ -5552,6 +5578,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!existing.approvalDate) existing.approvalDate = chosenTimestamp;
         if (!existing.printingDate) existing.printingDate = chosenTimestamp;
         existing.arrivedDate = chosenTimestamp;
+        
+        // Trigger WhatsApp notification
+        triggerWhatsAppAlbumArrived(existing.clientName);
       } else if (nextStatus === 'delivered') {
         if (!existing.approvalDate) existing.approvalDate = chosenTimestamp;
         if (!existing.printingDate) existing.printingDate = chosenTimestamp;
@@ -5578,6 +5607,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (aIndex === -1) return;
 
       const existing = albums[aIndex];
+      const oldStatus = existing.status;
       existing.clientName = clientName.trim();
       existing.notes = notes.trim();
       existing.status = status;
@@ -5609,6 +5639,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!existing.approvalDate) existing.approvalDate = chosenTimestamp;
         if (!existing.printingDate) existing.printingDate = chosenTimestamp;
         if (!existing.arrivedDate) existing.arrivedDate = chosenTimestamp;
+        
+        // Trigger WhatsApp notification
+        if (oldStatus !== 'arrived') {
+          triggerWhatsAppAlbumArrived(clientName);
+        }
       } else if (status === 'delivered') {
         if (!existing.approvalDate) existing.approvalDate = chosenTimestamp;
         if (!existing.printingDate) existing.printingDate = chosenTimestamp;
