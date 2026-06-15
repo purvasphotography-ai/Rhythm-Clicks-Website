@@ -996,6 +996,65 @@
     </div>
   </div>
 
+  <!-- Reschedule Shoot Modal -->
+  <div class="login-overlay hidden" id="reschedule-modal" style="display: none;">
+    <div class="login-card" style="max-width: 420px; padding: 2rem;">
+      <div class="card-header" style="justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 1rem; padding-bottom: 0.5rem; display: flex; align-items: center;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1976D2" stroke-width="2"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+          Reschedule Shoot
+        </h2>
+        <button class="modal-close-btn" id="close-reschedule-btn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); line-height: 1;">&times;</button>
+      </div>
+      
+      <form id="reschedule-form" class="login-form" style="gap: 1.25rem;">
+        <input type="hidden" id="reschedule-booking-id">
+        
+        <!-- Client Name (read-only display) -->
+        <div style="background: rgba(25, 118, 210, 0.06); border: 1px solid rgba(25, 118, 210, 0.12); border-radius: var(--border-radius-md); padding: 0.85rem 1rem;">
+          <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #1976D2; margin-bottom: 0.35rem;">Client</div>
+          <div id="reschedule-client-display" style="font-size: 1rem; font-weight: 600; color: var(--text-primary); text-transform: capitalize;"></div>
+          <div id="reschedule-current-date-display" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.3rem;"></div>
+        </div>
+
+        <!-- New Date -->
+        <div class="form-group">
+          <label for="reschedule-new-date" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">New Shoot Date *</label>
+          <input type="date" id="reschedule-new-date" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(25, 118, 210, 0.25); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); font-size: 0.95rem;">
+        </div>
+
+        <!-- New Time -->
+        <div class="form-group">
+          <label style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary);">New Shoot Time *</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="reschedule-time-hour" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(25, 118, 210, 0.25); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.9rem;">
+              <option value="01">01</option><option value="02">02</option><option value="03">03</option>
+              <option value="04">04</option><option value="05">05</option><option value="06">06</option>
+              <option value="07">07</option><option value="08">08</option><option value="09">09</option>
+              <option value="10" selected>10</option><option value="11">11</option><option value="12">12</option>
+            </select>
+            <span style="font-weight: 700; color: var(--text-secondary);">:</span>
+            <select id="reschedule-time-minute" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(25, 118, 210, 0.25); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.9rem;">
+              <option value="00" selected>00</option><option value="15">15</option><option value="30">30</option><option value="45">45</option>
+            </select>
+            <select id="reschedule-time-ampm" required style="flex: 1; padding: 0.75rem 0.25rem; border: 1px solid rgba(25, 118, 210, 0.25); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); cursor: pointer; font-size: 0.9rem;">
+              <option value="AM" selected>AM</option><option value="PM">PM</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 0.25rem; padding: 0.85rem; background: #1976D2; border-color: #1976D2; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+          Confirm Reschedule
+        </button>
+      </form>
+
+      <div class="login-footer" id="reschedule-status-msg" style="padding-top: 0.5rem; font-size: 0.75rem; color: var(--text-light);">
+        The original booking will be marked as rescheduled.
+      </div>
+    </div>
+  </div>
+
   <!-- Main Dashboard App Wrapper -->
   <div class="dashboard-wrapper" id="dashboard-app" style="display: none;">
     <!-- Header -->

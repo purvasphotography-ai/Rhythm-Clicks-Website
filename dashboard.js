@@ -7074,32 +7074,123 @@ document.addEventListener('DOMContentLoaded', async () => {
     editBookingModal.classList.remove('hidden');
   };
 
-  // --- Reschedule Booking ---
+  // --- Reschedule Booking Modal ---
+  const rescheduleModal = document.getElementById('reschedule-modal');
+  const rescheduleForm = document.getElementById('reschedule-form');
+  const rescheduleBookingIdInput = document.getElementById('reschedule-booking-id');
+  const rescheduleClientDisplay = document.getElementById('reschedule-client-display');
+  const rescheduleCurrentDateDisplay = document.getElementById('reschedule-current-date-display');
+  const rescheduleNewDate = document.getElementById('reschedule-new-date');
+  const rescheduleTimeHour = document.getElementById('reschedule-time-hour');
+  const rescheduleTimeMinute = document.getElementById('reschedule-time-minute');
+  const rescheduleTimeAmpm = document.getElementById('reschedule-time-ampm');
+  const closeRescheduleBtn = document.getElementById('close-reschedule-btn');
+  const rescheduleStatusMsg = document.getElementById('reschedule-status-msg');
+
+  const closeRescheduleModal = () => {
+    if (rescheduleModal) {
+      rescheduleModal.classList.add('hidden');
+      setTimeout(() => { rescheduleModal.style.display = 'none'; }, 400);
+    }
+  };
+
+  if (closeRescheduleBtn) {
+    closeRescheduleBtn.addEventListener('click', closeRescheduleModal);
+  }
+  if (rescheduleModal) {
+    rescheduleModal.addEventListener('click', (e) => {
+      if (e.target === rescheduleModal) closeRescheduleModal();
+    });
+  }
+
   window.rescheduleBooking = (id) => {
     const b = bookings.find(item => item.id === id);
     if (!b) return;
 
-    // Open the edit booking modal with status pre-set to 'rescheduled'
-    window.editBooking(id);
+    // Populate the reschedule modal
+    rescheduleBookingIdInput.value = b.id;
+    rescheduleClientDisplay.textContent = b.clientName;
 
-    // Pre-set the status to rescheduled
-    const editBookingStatus = document.getElementById('edit-booking-status');
-    if (editBookingStatus) {
-      editBookingStatus.value = 'rescheduled';
-      // Trigger change event to handle any conditional UI
-      editBookingStatus.dispatchEvent(new Event('change'));
+    // Format current date/time for display
+    const currentDate = new Date(b.date);
+    const formattedCurrentDate = currentDate.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const [h, m] = (b.time || '10:00').split(':');
+    const hrs = parseInt(h);
+    const ampm = hrs >= 12 ? 'PM' : 'AM';
+    const formattedTime = `${hrs % 12 || 12}:${m} ${ampm}`;
+    rescheduleCurrentDateDisplay.textContent = `Currently: ${formattedCurrentDate} at ${formattedTime}`;
+
+    // Pre-fill the new date/time with tomorrow's date and same time
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    rescheduleNewDate.value = tomorrowStr;
+    rescheduleNewDate.min = new Date().toISOString().split('T')[0]; // Can't reschedule to past
+
+    // Pre-fill same time
+    rescheduleTimeHour.value = String(hrs % 12 || 12).padStart(2, '0');
+    rescheduleTimeMinute.value = m;
+    rescheduleTimeAmpm.value = ampm;
+
+    // Reset status message
+    if (rescheduleStatusMsg) {
+      rescheduleStatusMsg.textContent = 'The original booking will be marked as rescheduled.';
     }
 
-    // Update the status message
-    if (editBookingStatusMsg) {
-      editBookingStatusMsg.innerHTML = '<span style="color: #1976D2; font-weight: 600;">🔄 Rescheduling — Update the date and time below, then save.</span>';
-    }
+    // Open modal
+    rescheduleModal.style.display = 'flex';
+    rescheduleModal.offsetHeight;
+    rescheduleModal.classList.remove('hidden');
 
-    // Focus on the date input for quick rescheduling
-    setTimeout(() => {
-      if (editBookingDate) editBookingDate.focus();
-    }, 300);
+    // Auto-focus date picker
+    setTimeout(() => { rescheduleNewDate.focus(); }, 300);
   };
+
+  // Reschedule form submission
+  if (rescheduleForm) {
+    rescheduleForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const bookingId = rescheduleBookingIdInput.value;
+      const b = bookings.find(item => item.id === bookingId);
+      if (!b) return;
+
+      const newDate = rescheduleNewDate.value;
+      const newTime = convertTimeTo24H(rescheduleTimeHour.value, rescheduleTimeMinute.value, rescheduleTimeAmpm.value);
+
+      if (!newDate) {
+        if (rescheduleStatusMsg) {
+          rescheduleStatusMsg.innerHTML = '<span style="color: #d32f2f; font-weight: 600;">Please select a new date.</span>';
+        }
+        return;
+      }
+
+      // Update the booking with new date/time and set status to rescheduled
+      await window.updateBooking(
+        b.id,
+        b.clientName,
+        b.shootType,
+        newDate,
+        newTime,
+        b.package,
+        b.advance,
+        b.paymentAccount || 'Cash',
+        '', // clientPhone - not changing
+        'rescheduled',
+        false
+      );
+
+      // Format the new date for toast message
+      const newDateObj = new Date(newDate);
+      const formattedNewDate = newDateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      const newHrs = parseInt(rescheduleTimeHour.value);
+      const newAmpm = rescheduleTimeAmpm.value;
+      const formattedNewTime = `${newHrs}:${rescheduleTimeMinute.value} ${newAmpm}`;
+
+      showToast(`Shoot for <strong>${escapeHtml(b.clientName)}</strong> rescheduled to ${formattedNewDate} at ${formattedNewTime}`, '🔄');
+      closeRescheduleModal();
+    });
+  }
 
   // --- Cancel Booking ---
   window.cancelBooking = (id) => {
