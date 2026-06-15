@@ -2188,3 +2188,35 @@ option, datalist option {
   box-shadow: var(--shadow-sm);
 }
 
+/* Reschedule & Cancel Booking Button Styles */
+.btn-reschedule-booking:hover,
+.btn-reschedule-pending-shoot:hover,
+.btn-reschedule-sheet-booking:hover {
+  background: rgba(25, 118, 210, 0.15) !important;
+  border-color: rgba(25, 118, 210, 0.35) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(25, 118, 210, 0.15);
+}
+
+.btn-reschedule-booking:active,
+.btn-reschedule-pending-shoot:active,
+.btn-reschedule-sheet-booking:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-cancel-booking:hover,
+.btn-cancel-pending-shoot:hover,
+.btn-cancel-sheet-booking:hover {
+  background: rgba(211, 47, 47, 0.15) !important;
+  border-color: rgba(211, 47, 47, 0.35) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(211, 47, 47, 0.15);
+}
+
+.btn-cancel-booking:active,
+.btn-cancel-pending-shoot:active,
+.btn-cancel-sheet-booking:active {
+  transform: translateY(0);
+  box-shadow: none;
+}

@@ -3464,6 +3464,16 @@ document.addEventListener('DOMContentLoaded', async () => {
           
           <!-- Column 4: Action Buttons -->
           <div class="booking-card-actions" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 8px; flex-shrink: 0; margin-left: auto;">
+            ${!isCancelled && !isCompleted ? `
+            <button class="btn-reschedule-booking" data-id="${booking.id}" title="Reschedule shoot" style="padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 4px; background: rgba(25, 118, 210, 0.08); border: 1px solid rgba(25, 118, 210, 0.2); color: #1976D2; cursor: pointer; transition: all var(--transition-fast); font-size: 0.72rem; font-weight: 600; white-space: nowrap;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+              Reschedule
+            </button>
+            <button class="btn-cancel-booking" data-id="${booking.id}" title="Cancel shoot" style="padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 4px; background: rgba(211, 47, 47, 0.08); border: 1px solid rgba(211, 47, 47, 0.2); color: #d32f2f; cursor: pointer; transition: all var(--transition-fast); font-size: 0.72rem; font-weight: 600; white-space: nowrap;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+              Cancel
+            </button>
+            ` : ''}
             <button class="btn-edit-contact btn-edit-booking" data-id="${booking.id}" title="Edit booking" style="padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--text-light); cursor: pointer; transition: all var(--transition-fast);">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -3496,6 +3506,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         const button = e.target.closest('.btn-delete-booking');
         const id = button.getAttribute('data-id');
         window.deleteBooking(id);
+      });
+    });
+
+    // Attach reschedule listeners
+    grid.querySelectorAll('.btn-reschedule-booking').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const button = e.target.closest('.btn-reschedule-booking');
+        const id = button.getAttribute('data-id');
+        window.rescheduleBooking(id);
+      });
+    });
+
+    // Attach cancel listeners
+    grid.querySelectorAll('.btn-cancel-booking').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const button = e.target.closest('.btn-cancel-booking');
+        const id = button.getAttribute('data-id');
+        window.cancelBooking(id);
       });
     });
 
@@ -7046,6 +7074,66 @@ document.addEventListener('DOMContentLoaded', async () => {
     editBookingModal.classList.remove('hidden');
   };
 
+  // --- Reschedule Booking ---
+  window.rescheduleBooking = (id) => {
+    const b = bookings.find(item => item.id === id);
+    if (!b) return;
+
+    // Open the edit booking modal with status pre-set to 'rescheduled'
+    window.editBooking(id);
+
+    // Pre-set the status to rescheduled
+    const editBookingStatus = document.getElementById('edit-booking-status');
+    if (editBookingStatus) {
+      editBookingStatus.value = 'rescheduled';
+      // Trigger change event to handle any conditional UI
+      editBookingStatus.dispatchEvent(new Event('change'));
+    }
+
+    // Update the status message
+    if (editBookingStatusMsg) {
+      editBookingStatusMsg.innerHTML = '<span style="color: #1976D2; font-weight: 600;">🔄 Rescheduling — Update the date and time below, then save.</span>';
+    }
+
+    // Focus on the date input for quick rescheduling
+    setTimeout(() => {
+      if (editBookingDate) editBookingDate.focus();
+    }, 300);
+  };
+
+  // --- Cancel Booking ---
+  window.cancelBooking = (id) => {
+    const b = bookings.find(item => item.id === id);
+    if (!b) return;
+
+    const clientName = b.clientName || 'this client';
+    const advanceAmount = formatCurrency(b.advance);
+
+    // Show confirmation dialog
+    const confirmMsg = `Are you sure you want to cancel the shoot for "${clientName}"?\n\nAdvance paid: ${advanceAmount}\n\nClick OK to proceed with cancellation.`;
+    if (!confirm(confirmMsg)) return;
+
+    // Ask about refund
+    const refundChoice = confirm(`Should the advance of ${advanceAmount} be refunded to ${clientName}?\n\nClick OK = Refunded\nClick Cancel = No Refund (retained)`);
+
+    // Use the existing updateBooking to save the cancellation
+    window.updateBooking(
+      b.id,
+      b.clientName,
+      b.shootType,
+      b.date,
+      b.time,
+      b.package,
+      b.advance,
+      b.paymentAccount || 'Cash',
+      '', // clientPhone - not changing
+      'cancelled',
+      refundChoice
+    );
+
+    showToast(`Shoot for <strong>${escapeHtml(clientName)}</strong> has been cancelled${refundChoice ? ' (refund issued)' : ''}`, '❌');
+  };
+
   // Time conversion utility
   const convertTimeTo24H = (hour, minute, ampm) => {
     let hrs = parseInt(hour);
@@ -7059,9 +7147,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateMonthlyShootsStat();
     if (!shootsGrid || !pendingShootsGrid) return;
 
-    // 1. Calculate Pending Shoots (bookings that have NOT been completed)
+    // 1. Calculate Pending Shoots (bookings that have NOT been completed and NOT cancelled)
     const completedBookingIds = shoots.map(s => s.bookingId).filter(id => id);
-    const pendingBookings = bookings.filter(b => !completedBookingIds.includes(b.id));
+    const pendingBookings = bookings.filter(b => !completedBookingIds.includes(b.id) && b.status !== 'cancelled');
 
     const filteredPending = pendingBookings.filter(b => {
       return !searchFilter ||
@@ -7168,9 +7256,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
             
             <!-- Column 4: Action Buttons -->
-            <div class="booking-card-actions" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 10px; flex-shrink: 0; margin-left: auto;">
+            <div class="booking-card-actions" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 10px; flex-shrink: 0; margin-left: auto; flex-wrap: wrap;">
               <button class="btn btn-primary btn-log-pending-shoot" data-id="${b.id}" style="padding: 0.45rem 1rem; font-size: 0.72rem; border-radius: 6px; white-space: nowrap;">
                 Log Shoot & Payments
+              </button>
+              <button class="btn-reschedule-pending-shoot" data-id="${b.id}" title="Reschedule shoot" style="padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 4px; background: rgba(25, 118, 210, 0.08); border: 1px solid rgba(25, 118, 210, 0.2); color: #1976D2; cursor: pointer; transition: all var(--transition-fast); font-size: 0.72rem; font-weight: 600; white-space: nowrap;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                Reschedule
+              </button>
+              <button class="btn-cancel-pending-shoot" data-id="${b.id}" title="Cancel shoot" style="padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 4px; background: rgba(211, 47, 47, 0.08); border: 1px solid rgba(211, 47, 47, 0.2); color: #d32f2f; cursor: pointer; transition: all var(--transition-fast); font-size: 0.72rem; font-weight: 600; white-space: nowrap;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                Cancel
               </button>
             </div>
           </li>
@@ -7202,6 +7298,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             shootModal.offsetHeight;
             shootModal.classList.remove('hidden');
           }
+        });
+      });
+
+      // Attach reschedule listeners for pending shoots
+      pendingShootsGrid.querySelectorAll('.btn-reschedule-pending-shoot').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const button = e.target.closest('.btn-reschedule-pending-shoot');
+          const id = button.getAttribute('data-id');
+          window.rescheduleBooking(id);
+        });
+      });
+
+      // Attach cancel listeners for pending shoots
+      pendingShootsGrid.querySelectorAll('.btn-cancel-pending-shoot').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const button = e.target.closest('.btn-cancel-pending-shoot');
+          const id = button.getAttribute('data-id');
+          window.cancelBooking(id);
         });
       });
     }
@@ -7784,6 +7898,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                   </div>
                 </div>
               </div>
+
+              ${primaryBooking && !isCancelled && !primaryShoot ? `
+              <div style="display: flex; gap: 8px; margin-top: 0.8rem; border-top: 1px dashed rgba(0,0,0,0.06); padding-top: 0.8rem;">
+                <button onclick="event.stopPropagation(); window.rescheduleBooking('${primaryBooking.id}')" style="flex: 1; padding: 6px 10px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 4px; background: rgba(25, 118, 210, 0.08); border: 1px solid rgba(25, 118, 210, 0.2); color: #1976D2; cursor: pointer; font-size: 0.75rem; font-weight: 600; white-space: nowrap; transition: all 0.2s;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                  Reschedule
+                </button>
+                <button onclick="event.stopPropagation(); window.cancelBooking('${primaryBooking.id}')" style="flex: 1; padding: 6px 10px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 4px; background: rgba(211, 47, 47, 0.08); border: 1px solid rgba(211, 47, 47, 0.2); color: #d32f2f; cursor: pointer; font-size: 0.75rem; font-weight: 600; white-space: nowrap; transition: all 0.2s;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                  Cancel Shoot
+                </button>
+              </div>
+              ` : ''}
             </div>
           </div>
         `;
@@ -8099,8 +8226,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td></td>
                 <td style="text-align: center; font-weight: bold; color: var(--text-primary);">${formattedTime}</td>
                 <td style="color: var(--text-secondary);">${escapeHtml(booking.package)}</td>
-                <td style="text-align: center; display: flex; gap: 4px; justify-content: center; align-items: center; padding: 0.65rem 0.5rem; border: none !important;">
+                <td style="text-align: center; display: flex; gap: 4px; justify-content: center; align-items: center; padding: 0.65rem 0.5rem; border: none !important; flex-wrap: wrap;">
                   ${isCancelled ? '' : `<button class="btn btn-primary btn-log-pending-shoot-sheet" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; white-space: nowrap; font-weight: bold;">Log Shoot</button>`}
+                  ${isCancelled ? '' : `<button class="btn-reschedule-sheet-booking" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; background: rgba(25,118,210,0.08); border: 1px solid rgba(25,118,210,0.2); color: #1976D2; cursor: pointer; white-space: nowrap; font-weight: 600;">Reschedule</button>`}
+                  ${isCancelled ? '' : `<button class="btn-cancel-sheet-booking" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; background: rgba(211,47,47,0.08); border: 1px solid rgba(211,47,47,0.2); color: #d32f2f; cursor: pointer; white-space: nowrap; font-weight: 600;">Cancel</button>`}
                   <button class="btn btn-secondary btn-edit-sheet-booking" data-id="${booking.id}" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 4px; border: 1px solid rgba(0,0,0,0.08); background: white; cursor: pointer; color: var(--text-primary);">Edit</button>
                 </td>
               `;
@@ -8216,6 +8345,22 @@ document.addEventListener('DOMContentLoaded', async () => {
           shootModal.offsetHeight;
           shootModal.classList.remove('hidden');
         }
+      });
+    });
+
+    // Attach reschedule listeners for sheet view
+    sheetBody.querySelectorAll('.btn-reschedule-sheet-booking').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.getAttribute('data-id');
+        window.rescheduleBooking(id);
+      });
+    });
+
+    // Attach cancel listeners for sheet view
+    sheetBody.querySelectorAll('.btn-cancel-sheet-booking').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.getAttribute('data-id');
+        window.cancelBooking(id);
       });
     });
 
