@@ -3320,11 +3320,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // Sort bookings chronologically by date and time
+    // Sort bookings by creation timestamp (newest first / latest booking added first)
     filteredBookings.sort((a, b) => {
-      const dateTimeA = new Date(`${a.date}T${a.time}`);
-      const dateTimeB = new Date(`${b.date}T${b.time}`);
-      return dateTimeA - dateTimeB;
+      const timeA = a.timestamp || 0;
+      const timeB = b.timestamp || 0;
+      return timeB - timeA;
     });
 
     grid.innerHTML = filteredBookings.map(booking => {
