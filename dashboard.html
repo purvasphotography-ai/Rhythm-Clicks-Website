@@ -1102,6 +1102,7 @@
         <button class="tab-btn" id="tab-albums"><span class="tab-icon">📖</span> <span class="tab-text">Albums</span></button>
         <button class="tab-btn" id="tab-contacts"><span class="tab-icon">📞</span> <span class="tab-text">Contacts</span></button>
         <button class="tab-btn" id="tab-accounts"><span class="tab-icon">💰</span> <span class="tab-text">Accounts</span></button>
+        <button class="tab-btn" id="tab-ai-assistant"><span class="tab-icon">✨</span> <span class="tab-text">AI Assistant</span></button>
         <button class="tab-btn" id="tab-settings"><span class="tab-icon">⚙️</span> <span class="tab-text">Settings</span></button>
       </div>
       <div class="search-bar-container" style="position: relative; min-width: 250px; flex-grow: 1; max-width: 350px;">
@@ -1624,7 +1625,150 @@
         </div>
       </div>
 
-      <!-- Section 9: Settings (Google Integration & Backups) -->
+      <!-- Section 9: AI Personal Assistant -->
+      <div id="ai-assistant-section" class="tab-content">
+        <div class="gallery-tracker-header" style="margin-bottom: 1.5rem;">
+          <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+            ✨ AI Personal Assistant
+          </h2>
+          <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--text-secondary);">
+            Use the power of AI to parse WhatsApp messages or query your dashboard.
+          </p>
+        </div>
+
+        <!-- Gemini API Key warning banner -->
+        <div id="ai-key-warning" class="grid-card" style="margin-bottom: 2rem; border-color: rgba(230, 161, 92, 0.4); background: rgba(230, 161, 92, 0.05); text-align: left; display: none;">
+          <h4 style="margin: 0 0 0.5rem 0; color: #a88a3a; display: flex; align-items: center; gap: 6px;">
+            ⚠️ Gemini API Key Required
+          </h4>
+          <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+            To use the AI Assistant, please set your Gemini API key. Go to the <strong>Settings</strong> tab and enter your key. You can get a free key from the <a href="https://aistudio.google.com/" target="_blank" style="color: #a88a3a; text-decoration: underline; font-weight: 600;">Google AI Studio</a>.
+          </p>
+          <button id="go-to-settings-btn" class="btn btn-secondary" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.85rem; background: rgba(168, 138, 58, 0.1); border-color: rgba(168, 138, 58, 0.3); color: #a88a3a;">Go to Settings</button>
+        </div>
+
+        <!-- Main AI Panel (Visible when key is configured) -->
+        <div id="ai-main-panel" style="display: flex; flex-direction: column; gap: 1.5rem; height: 100%; flex-grow: 1;">
+          <!-- Pane Toggle Selector -->
+          <div class="ai-mode-toggle-bar">
+            <button id="btn-mode-parser" class="ai-toggle-btn active">📥 WhatsApp Entry Parser</button>
+            <button id="btn-mode-chat" class="ai-toggle-btn">💬 Ask Dashboard Chat</button>
+          </div>
+
+          <!-- PANE 1: WhatsApp Parser -->
+          <div id="ai-pane-parser" class="ai-pane-content active">
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+              <!-- Left Side: Paste message -->
+              <div class="grid-card" style="padding: 1.5rem; text-align: left; display: flex; flex-direction: column; gap: 1rem;">
+                <label for="ai-whatsapp-input" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Paste WhatsApp Message *</label>
+                <textarea id="ai-whatsapp-input" placeholder="Paste booking info, selection updates, or album details here...&#10;e.g., 'Please book Maternity shoot for Priya on 15 July at 4 PM, pack standard, paid 5000 advance PURVA GPay'" style="width: 100%; min-height: 120px; padding: 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.5); font-family: var(--font-sans); font-size: 0.9rem; line-height: 1.5; resize: vertical;"></textarea>
+                
+                <button type="button" id="btn-ai-parse" class="btn btn-primary btn-ai-action" style="align-self: flex-start; min-width: 180px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                  <span>✨</span> Analyze with AI
+                </button>
+              </div>
+
+              <!-- Loader Spinner -->
+              <div id="ai-parser-loader" style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; text-align: center; gap: 1rem;">
+                <div class="ai-spinner"></div>
+                <div style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">AI is parsing the message...</div>
+                <div style="font-size: 0.8rem; color: var(--text-light);">Extracting dates, payments, and client details</div>
+              </div>
+
+              <!-- Right Side: Review Results Pane -->
+              <div id="ai-parser-results-pane" style="display: none; text-align: left;">
+                <div class="grid-card" style="padding: 1.5rem; border-color: rgba(76, 175, 80, 0.3); background: rgba(76, 175, 80, 0.01);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+                    <h3 style="font-family: var(--font-serif); font-size: 1.25rem; margin: 0; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                      🔍 Review Parsed Entries (<span id="ai-parsed-count">0</span>)
+                    </h3>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                      <button type="button" id="btn-ai-save-all" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                        📥 Save All to Pipeline
+                      </button>
+                      <button type="button" id="btn-ai-clear-all" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                        Discard All
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Container for dynamic review cards -->
+                  <div id="ai-entries-container" style="display: flex; flex-direction: column; gap: 1.5rem;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- WhatsApp Examples Grid -->
+            <div style="margin-top: 2rem;">
+              <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--text-primary); text-align: left; margin-bottom: 1rem;">
+                💡 Formatting Examples for Parser
+              </h3>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; text-align: left;">
+                <div class="grid-card" style="padding: 1.25rem;">
+                  <h4 style="margin: 0 0 0.5rem 0; color: #a88a3a;">📅 Booking Entry</h4>
+                  <div style="background: rgba(0,0,0,0.02); padding: 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; line-height: 1.4; color: var(--text-secondary);">
+                    "Please book Kids shoot for Aarav on 25th July at 10 AM, 1 year old age, package is Premium and paid 3000 advance PURVA GPAY, phone 9900887766"
+                  </div>
+                </div>
+                <div class="grid-card" style="padding: 1.25rem;">
+                  <h4 style="margin: 0 0 0.5rem 0; color: #2196f3;">📸 Selection (Gallery) Entry</h4>
+                  <div style="background: rgba(0,0,0,0.02); padding: 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; line-height: 1.4; color: var(--text-secondary);">
+                    "Priya, register newborn gallery for Kabir, package is newborn. Note that selection is pending, but client requested extra retouches for face."
+                  </div>
+                </div>
+                <div class="grid-card" style="padding: 1.25rem;">
+                  <h4 style="margin: 0 0 0.5rem 0; color: #9c27b0;">📖 Album Order Entry</h4>
+                  <div style="background: rgba(0,0,0,0.02); padding: 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; line-height: 1.4; color: var(--text-secondary);">
+                    "Ananya Prewedding album order. Matte finish pages, size 12x18 with thick acrylic cover. Please check and put it in approval pipeline."
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANE 2: Ask Dashboard Chat -->
+          <div id="ai-pane-chat" class="ai-pane-content" style="flex-grow: 1; display: none; flex-direction: column; height: 500px;">
+            <div class="grid-card" style="flex-grow: 1; display: flex; flex-direction: column; padding: 1.25rem; overflow: hidden; height: 100%;">
+              <!-- Chat Logs viewport -->
+              <div id="ai-chat-logs" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding: 1rem; margin-bottom: 1rem; background: rgba(0,0,0,0.01); border-radius: var(--border-radius-md); border: 1px solid rgba(0,0,0,0.03); max-height: 380px;">
+                <!-- Initial assistant welcome bubble -->
+                <div class="ai-chat-message assistant">
+                  <div class="ai-avatar">✨</div>
+                  <div class="ai-bubble">
+                    <p style="margin: 0 0 0.5rem 0; font-weight: 600;">Hello! I am your Rhythm Clicks Personal Assistant.</p>
+                    <p style="margin: 0 0 0.5rem 0;">I have full live access to your bookings, galleries, albums, contacts, shoots, and tasks. Ask me anything!</p>
+                    <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);">Examples: "What shoots do we have this week?" or "Which albums are pending approval?" or "List Bijal's tasks."</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick query suggestion chips -->
+              <div id="ai-chat-suggestions" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; justify-content: flex-start;">
+                <button type="button" class="ai-chip">📅 Shoots scheduled for this month?</button>
+                <button type="button" class="ai-chip">⏳ Any pending album approvals?</button>
+                <button type="button" class="ai-chip">📋 What tasks are pending for Bijal?</button>
+                <button type="button" class="ai-chip">💰 Summary of account transactions</button>
+              </div>
+
+              <!-- Loader Spinner for Chat -->
+              <div id="ai-chat-loader" style="display: none; align-items: center; gap: 10px; padding: 0.5rem 1rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; background: rgba(0,0,0,0.02); border-radius: 8px; width: fit-content;">
+                <div class="ai-dots-loader"><span>.</span><span>.</span><span>.</span></div>
+                <span>Assistant is thinking...</span>
+              </div>
+
+              <!-- Chat prompt input row -->
+              <form id="ai-chat-form" style="display: flex; gap: 0.75rem; align-items: center; margin: 0;">
+                <input type="text" id="ai-chat-input" placeholder="Ask your personal assistant a question..." required style="flex-grow: 1; padding: 0.85rem 1.25rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-lg); background: rgba(255,255,255,0.7); font-size: 0.9rem;" autocomplete="off">
+                <button type="submit" class="btn btn-primary" style="padding: 0.85rem 1.5rem; border-radius: var(--border-radius-lg); font-size: 0.9rem; display: flex; align-items: center; justify-content: center; height: 44px; min-width: 80px;">
+                  Send
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 10: Settings (Google Integration & Backups) -->
       <div id="settings-section" class="tab-content">
         <div class="gallery-tracker-header">
           <h2 style="font-family: var(--font-serif); font-size: 1.5rem; margin: 0; color: var(--text-primary);">Google Services Integration & Backup Settings</h2>
@@ -1676,6 +1820,18 @@
               <input type="number" id="settings-extra-photo-rate" placeholder="e.g., 200" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.7); font-family: var(--font-sans); font-size: 0.85rem; color: var(--text-primary);">
               <p style="margin: 0.4rem 0 0 0; font-size: 0.75rem; color: var(--text-light); line-height: 1.4;">
                 Rate charged for each photo selected beyond the package limit.
+              </p>
+            </div>
+
+            <!-- Google Gemini API Key for AI Assistant -->
+            <div>
+              <label for="settings-gemini-api-key" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">Google Gemini API Key</label>
+              <div style="position: relative; display: flex; align-items: center;">
+                <input type="password" id="settings-gemini-api-key" placeholder="Enter Gemini API Key" style="width: 100%; padding: 0.75rem 2.5rem 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.7); font-family: var(--font-sans); font-size: 0.85rem; color: var(--text-primary);">
+                <button type="button" id="toggle-gemini-key-btn" style="position: absolute; right: 0.75rem; background: transparent; border: none; cursor: pointer; font-size: 1rem; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; height: 100%;">👁️</button>
+              </div>
+              <p style="margin: 0.4rem 0 0 0; font-size: 0.75rem; color: var(--text-light); line-height: 1.4;">
+                Required for AI Assistant. Get a key at <a href="https://aistudio.google.com/" target="_blank" style="color: #a88a3a; text-decoration: underline; font-weight: 600;">Google AI Studio</a>.
               </p>
             </div>
 
@@ -1790,6 +1946,6 @@
   <!-- Google Identity Services client library -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Script Files (Loaded as ES6 Module for Firebase support) -->
-  <script type="module" src="dashboard.js?v=3.5"></script>
+  <script type="module" src="dashboard.js?v=3.9"></script>
 </body>
 </html>

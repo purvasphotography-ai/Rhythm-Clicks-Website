@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     firebaseConfig.projectId && 
     !firebaseConfig.projectId.startsWith('YOUR_');
 
+  let geminiApiKey = localStorage.getItem('gemini_api_key') || null;
+
   // Local Mode Sync Channel
   let localChannel = null;
 
@@ -8555,6 +8557,1021 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
+// --- AI Assistant Logic ---
+  const checkAiAssistantStatus = () => {
+    const keyWarning = document.getElementById('ai-key-warning');
+    const mainPanel = document.getElementById('ai-main-panel');
+    if (!keyWarning || !mainPanel) return;
+
+    if (geminiApiKey) {
+      keyWarning.style.display = 'none';
+      mainPanel.style.display = 'flex';
+    } else {
+      keyWarning.style.display = 'block';
+      mainPanel.style.display = 'none';
+    }
+  };
+
+  // Switch tabs programmatically
+  const forceSwitchTab = (targetBtn, targetSec) => {
+    switchTab(targetBtn, targetSec);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const initAiAssistantPanes = () => {
+    const btnModeParser = document.getElementById('btn-mode-parser');
+    const btnModeChat = document.getElementById('btn-mode-chat');
+    const paneParser = document.getElementById('ai-pane-parser');
+    const paneChat = document.getElementById('ai-pane-chat');
+
+    if (btnModeParser && btnModeChat && paneParser && paneChat) {
+      btnModeParser.addEventListener('click', () => {
+        btnModeParser.classList.add('active');
+        btnModeChat.classList.remove('active');
+        paneParser.style.display = 'block';
+        paneChat.style.display = 'none';
+      });
+
+      btnModeChat.addEventListener('click', () => {
+        btnModeChat.classList.add('active');
+        btnModeParser.classList.remove('active');
+        paneParser.style.display = 'none';
+        paneChat.style.display = 'flex';
+        setTimeout(scrollChatToBottom, 100);
+      });
+    }
+
+    const goToSettingsBtn = document.getElementById('go-to-settings-btn');
+    if (goToSettingsBtn) {
+      goToSettingsBtn.addEventListener('click', () => {
+        forceSwitchTab(tabSettings, settingsSection);
+        const inputKey = document.getElementById('settings-gemini-api-key');
+        if (inputKey) {
+          inputKey.focus();
+          inputKey.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    }
+  };
+
+  const parseWhatsAppWithGemini = async (text) => {
+    if (!geminiApiKey) {
+      showToast("Gemini API key is not configured.", "⚠️");
+      return null;
+    }
+
+    const promptText = `Analyze this raw copy-pasted WhatsApp message and extract all entries of bookings, selection galleries, or album orders mentioned. A single copy-pasted text block may describe multiple bookings, selections, or album events (for the same or different clients). Split them into separate entries under the "entries" array in the returned JSON.
+
+Note: The raw message may contain WhatsApp chat log headers (e.g., '[19/06/26, 10:34:24 AM] Rhythm Clicks Studio:'). Ignore these headers when extracting client names, but use the dates/times in those headers to infer the year, month, or context if needed.
+
+For each entry, classify it into one of these entry categories:
+- 'booking': message about booking confirmation or scheduling a new shoot.
+- 'selection': message about a client selecting photos for their gallery/shoot.
+- 'album': message about an album layout selection, order, approval, sizing, page specifications.
+
+Extract all details matching the schema for each entry. If dates are mentioned relative to a month (e.g. "15th July") or just as numbers, assume the year is 2026. For dates, write them in YYYY-MM-DD format. For times, extract in "HH:MM" 24-hour format.
+
+Raw WhatsApp Message:
+"""
+${text}
+"""`;
+
+    const schema = {
+      type: "OBJECT",
+      properties: {
+        entries: {
+          type: "ARRAY",
+          description: "List of extracted entries from the message.",
+          items: {
+            type: "OBJECT",
+            properties: {
+              entryType: {
+                type: "STRING",
+                description: "Detected category: 'booking', 'selection', or 'album'"
+              },
+              bookingDetails: {
+                type: "OBJECT",
+                properties: {
+                  clientName: { type: "STRING" },
+                  shootType: { type: "STRING", description: "Predefined category: Maternity, Newborn, Kids, or specify custom shoot type if other." },
+                  date: { type: "STRING", description: "Shoot date in YYYY-MM-DD format." },
+                  time: { type: "STRING", description: "Time of shoot in 24-hour HH:MM format." },
+                  package: { type: "STRING" },
+                  advance: { type: "NUMBER" },
+                  paymentAccount: { type: "STRING", description: "Account payment went to: Cash, Rhythm, Purva, Bijal, Shilpa, Mahesh" },
+                  clientPhone: { type: "STRING" }
+                }
+              },
+              selectionDetails: {
+                type: "OBJECT",
+                properties: {
+                  clientName: { type: "STRING" },
+                  notes: { type: "STRING" },
+                  photosSelected: { type: "INTEGER" }
+                }
+              },
+              albumDetails: {
+                type: "OBJECT",
+                properties: {
+                  clientName: { type: "STRING" },
+                  notes: { type: "STRING" }
+                }
+              },
+              confidenceReasoning: {
+                type: "STRING",
+                description: "Brief confidence summary explaining why this choice was selected."
+              }
+            },
+            required: ["entryType", "confidenceReasoning"]
+          }
+        }
+      },
+      required: ["entries"]
+    };
+
+    const payload = {
+      contents: [{
+        parts: [{ text: promptText }]
+      }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: schema
+      }
+    };
+
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${geminiApiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error?.message || `HTTP ${response.status}`);
+      }
+
+      const resJson = await response.json();
+      const rawText = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) throw new Error("No text candidates returned from API.");
+
+      return JSON.parse(rawText.trim());
+    } catch (err) {
+      console.error("Gemini Parsing Error:", err);
+      showToast("Gemini parsing failed: " + err.message, "⚠️");
+      return null;
+    }
+  };
+
+  let activeParsedEntries = [];
+
+  const populateParserForm = (data) => {
+    if (!data) {
+      activeParsedEntries = [];
+    } else if (data.entries && Array.isArray(data.entries)) {
+      activeParsedEntries = data.entries;
+    } else if (Array.isArray(data)) {
+      activeParsedEntries = data;
+    } else if (data.entryType) {
+      activeParsedEntries = [data];
+    } else if (data.bookingDetails || data.selectionDetails || data.albumDetails) {
+      const entryType = data.bookingDetails ? 'booking' : (data.selectionDetails ? 'selection' : 'album');
+      activeParsedEntries = [Object.assign({ entryType }, data)];
+    } else {
+      activeParsedEntries = [];
+    }
+
+    if (activeParsedEntries.length === 0) {
+      showToast("AI could not find any valid entries in this text. Please check the format.", "⚠️");
+    } else {
+      showToast(`Parsed ${activeParsedEntries.length} entries successfully!`, "✨");
+    }
+    renderParsedEntries();
+  };
+
+  const saveIndividualEntry = async (idx, card) => {
+    const entry = activeParsedEntries[idx];
+    if (!entry) return false;
+
+    if (entry.entryType === 'booking') {
+      const clientName = card.querySelector('.field-client-name').value.trim();
+      const phone = card.querySelector('.field-client-phone').value.trim();
+      
+      let shootType = card.querySelector('.field-shoot-type').value;
+      if (shootType === 'Other') {
+        shootType = card.querySelector('.field-custom-shoot-type').value.trim();
+      } else if (shootType === 'Kids') {
+        const ageVal = card.querySelector('.field-kid-age').value.trim();
+        shootType = ageVal ? `Kids (${ageVal})` : 'Kids';
+      }
+      
+      const date = card.querySelector('.field-date').value;
+      const time = card.querySelector('.field-time').value;
+      const pack = card.querySelector('.field-package').value.trim();
+      const advance = parseFloat(card.querySelector('.field-advance').value) || 0;
+      const account = card.querySelector('.field-account').value;
+
+      if (!clientName || !shootType || !date || !time || !pack) {
+        showToast("Required booking details are missing.", "⚠️");
+        return false;
+      }
+
+      await window.addBooking(clientName, shootType, date, time, pack, advance, account, phone);
+      showToast(`Successfully registered booking for ${clientName}`, "✅");
+      return true;
+
+    } else if (entry.entryType === 'selection') {
+      const clientName = card.querySelector('.field-client-name').value.trim();
+      const photosCount = parseInt(card.querySelector('.field-photos').value, 10) || 0;
+      const notes = card.querySelector('.field-notes').value.trim();
+
+      if (!clientName) {
+        showToast("Client name is required for selections.", "⚠️");
+        return false;
+      }
+
+      await window.addGallery(clientName, notes, null, photosCount);
+      showToast(`Successfully registered selection for ${clientName}`, "✅");
+      return true;
+
+    } else if (entry.entryType === 'album') {
+      const clientName = card.querySelector('.field-client-name').value.trim();
+      const notes = card.querySelector('.field-notes').value.trim();
+
+      if (!clientName) {
+        showToast("Client name is required for albums.", "⚠️");
+        return false;
+      }
+
+      await window.addAlbum(clientName, notes);
+      showToast(`Successfully registered album for ${clientName}`, "✅");
+      return true;
+    }
+    return false;
+  };
+
+  const saveAllEntries = async () => {
+    const container = document.getElementById('ai-entries-container');
+    if (!container) return;
+    const cards = container.querySelectorAll('.parsed-entry-card');
+    if (cards.length === 0) return;
+
+    let successCount = 0;
+    let savedTypes = new Set();
+    let validatedEntries = [];
+
+    for (let i = 0; i < cards.length; i++) {
+      const card = cards[i];
+      const idx = parseInt(card.getAttribute('data-index'), 10);
+      const entry = activeParsedEntries[idx];
+      if (!entry) continue;
+
+      if (entry.entryType === 'booking') {
+        const clientName = card.querySelector('.field-client-name').value.trim();
+        const phone = card.querySelector('.field-client-phone').value.trim();
+        let shootType = card.querySelector('.field-shoot-type').value;
+        if (shootType === 'Other') {
+          shootType = card.querySelector('.field-custom-shoot-type').value.trim();
+        } else if (shootType === 'Kids') {
+          const ageVal = card.querySelector('.field-kid-age').value.trim();
+          shootType = ageVal ? `Kids (${ageVal})` : 'Kids';
+        }
+        const date = card.querySelector('.field-date').value;
+        const time = card.querySelector('.field-time').value;
+        const pack = card.querySelector('.field-package').value.trim();
+        const advance = parseFloat(card.querySelector('.field-advance').value) || 0;
+        const account = card.querySelector('.field-account').value;
+
+        if (!clientName || !shootType || !date || !time || !pack) {
+          showToast(`Required details missing in card #${idx + 1}`, "⚠️");
+          return;
+        }
+
+        validatedEntries.push({
+          type: 'booking',
+          clientName,
+          shootType,
+          date,
+          time,
+          pack,
+          advance,
+          account,
+          phone,
+          cardIndex: idx
+        });
+
+      } else if (entry.entryType === 'selection') {
+        const clientName = card.querySelector('.field-client-name').value.trim();
+        const photosCount = parseInt(card.querySelector('.field-photos').value, 10) || 0;
+        const notes = card.querySelector('.field-notes').value.trim();
+
+        if (!clientName) {
+          showToast(`Client name is required in card #${idx + 1}`, "⚠️");
+          return;
+        }
+
+        validatedEntries.push({
+          type: 'selection',
+          clientName,
+          photosCount,
+          notes,
+          cardIndex: idx
+        });
+
+      } else if (entry.entryType === 'album') {
+        const clientName = card.querySelector('.field-client-name').value.trim();
+        const notes = card.querySelector('.field-notes').value.trim();
+
+        if (!clientName) {
+          showToast(`Client name is required in card #${idx + 1}`, "⚠️");
+          return;
+        }
+
+        validatedEntries.push({
+          type: 'album',
+          clientName,
+          notes,
+          cardIndex: idx
+        });
+      }
+    }
+
+    // Now save all validated entries!
+    for (const valEntry of validatedEntries) {
+      if (valEntry.type === 'booking') {
+        await window.addBooking(valEntry.clientName, valEntry.shootType, valEntry.date, valEntry.time, valEntry.pack, valEntry.advance, valEntry.account, valEntry.phone);
+        savedTypes.add('booking');
+      } else if (valEntry.type === 'selection') {
+        await window.addGallery(valEntry.clientName, valEntry.notes, null, valEntry.photosCount);
+        savedTypes.add('selection');
+      } else if (valEntry.type === 'album') {
+        await window.addAlbum(valEntry.clientName, valEntry.notes);
+        savedTypes.add('album');
+      }
+      successCount++;
+    }
+
+    showToast(`Successfully saved ${successCount} entries to pipeline!`, "✅");
+
+    // Clear everything
+    activeParsedEntries = [];
+    document.getElementById('ai-whatsapp-input').value = '';
+    renderParsedEntries();
+
+    // Redirect to appropriate tab
+    if (savedTypes.has('booking')) {
+      forceSwitchTab(tabBookings, bookingsSection);
+    } else if (savedTypes.has('selection')) {
+      forceSwitchTab(tabGalleries, galleriesSection);
+    } else if (savedTypes.has('album')) {
+      forceSwitchTab(tabAlbums, albumsSection);
+    }
+  };
+
+  const renderParsedEntries = () => {
+    const container = document.getElementById('ai-entries-container');
+    const resultsPane = document.getElementById('ai-parser-results-pane');
+    const countSpan = document.getElementById('ai-parsed-count');
+    if (!container || !resultsPane || !countSpan) return;
+
+    container.innerHTML = '';
+    countSpan.textContent = activeParsedEntries.length;
+
+    if (activeParsedEntries.length === 0) {
+      resultsPane.style.display = 'none';
+      return;
+    }
+
+    resultsPane.style.display = 'block';
+
+    activeParsedEntries.forEach((entry, idx) => {
+      const card = document.createElement('div');
+      card.className = 'grid-card parsed-entry-card';
+      card.setAttribute('data-index', idx);
+      card.style.border = '1px solid rgba(0,0,0,0.08)';
+      card.style.padding = '1.25rem';
+      card.style.borderRadius = 'var(--border-radius-md)';
+      card.style.background = 'white';
+      card.style.position = 'relative';
+      card.style.display = 'flex';
+      card.style.flexDirection = 'column';
+      card.style.gap = '1rem';
+
+      let headerStyle = '';
+      let badgeText = '';
+      if (entry.entryType === 'booking') {
+        badgeText = 'BOOKING';
+        headerStyle = 'background: rgba(212, 175, 55, 0.12); color: #b58900; border: 1px solid rgba(212, 175, 55, 0.25);';
+      } else if (entry.entryType === 'selection') {
+        badgeText = 'SELECTION';
+        headerStyle = 'background: rgba(33, 150, 243, 0.12); color: #1976d2; border: 1px solid rgba(33, 150, 243, 0.25);';
+      } else if (entry.entryType === 'album') {
+        badgeText = 'ALBUM';
+        headerStyle = 'background: rgba(156, 39, 176, 0.12); color: #9c27b0; border: 1px solid rgba(156, 39, 176, 0.25);';
+      }
+
+      // Card Header
+      const headerDiv = document.createElement('div');
+      headerDiv.style.display = 'flex';
+      headerDiv.style.justify = 'space-between';
+      headerDiv.style.alignItems = 'center';
+      headerDiv.style.borderBottom = '1px solid rgba(0,0,0,0.05)';
+      headerDiv.style.paddingBottom = '0.5rem';
+
+      headerDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <strong style="color: var(--text-primary);">#${idx + 1}</strong>
+          <span class="status-badge" style="font-size: 0.75rem; font-weight: 700; border-radius: 12px; padding: 0.2rem 0.60rem; ${headerStyle}">${badgeText}</span>
+        </div>
+        <button type="button" class="btn-remove-entry btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; border-color: rgba(244, 67, 54, 0.2); color: #d32f2f; background: rgba(244, 67, 54, 0.05);" data-index="${idx}">
+          Remove
+        </button>
+      `;
+      card.appendChild(headerDiv);
+
+      // Card Form Content
+      const formEl = document.createElement('form');
+      formEl.className = 'ai-entry-subform';
+      formEl.style.display = 'flex';
+      formEl.style.flexDirection = 'column';
+      formEl.style.gap = '1rem';
+
+      if (entry.entryType === 'booking') {
+        const details = entry.bookingDetails || {};
+        const valShoot = details.shootType || '';
+        let selectHtml = `
+          <select class="field-shoot-type" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md);">
+            <option value="Maternity" ${valShoot === 'Maternity' ? 'selected' : ''}>Maternity</option>
+            <option value="Newborn" ${valShoot === 'Newborn' ? 'selected' : ''}>Newborn</option>
+            <option value="Kids" ${valShoot.toLowerCase().startsWith('kids') ? 'selected' : ''}>Kids</option>
+            <option value="Other" ${(!['Maternity', 'Newborn'].includes(valShoot) && !valShoot.toLowerCase().startsWith('kids')) ? 'selected' : ''}>Other</option>
+          </select>
+        `;
+
+        let customDisplay = (!['Maternity', 'Newborn'].includes(valShoot) && !valShoot.toLowerCase().startsWith('kids') && valShoot) ? 'block' : 'none';
+        let ageDisplay = valShoot.toLowerCase().startsWith('kids') ? 'block' : 'none';
+        let ageVal = '';
+        if (valShoot.toLowerCase().startsWith('kids')) {
+          const ageMatch = valShoot.match(/\(([^)]+)\)/);
+          ageVal = ageMatch ? ageMatch[1] : '';
+        }
+
+        formEl.innerHTML = `
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div class="form-group">
+              <label>Client Name *</label>
+              <div style="position: relative;">
+                <input type="text" class="field-client-name" required value="${escapeHtml(details.clientName || '')}" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md);" autocomplete="off">
+                <ul class="autocomplete-list dynamic-autocomplete-list"></ul>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="text" class="field-client-phone" value="${escapeHtml(details.clientPhone || '')}" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md);">
+            </div>
+            <div class="form-group">
+              <label>Shoot Type *</label>
+              ${selectHtml}
+            </div>
+            <div class="form-group custom-shoot-type-container" style="display: ${customDisplay};">
+              <label>Custom Shoot Type</label>
+              <input type="text" class="field-custom-shoot-type" value="${escapeHtml(customDisplay === 'block' ? valShoot : '')}" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md);">
+            </div>
+            <div class="form-group kid-age-container" style="display: ${ageDisplay};">
+              <label>Kid Age (Months/Years)</label>
+              <input type="text" class="field-kid-age" value="${escapeHtml(ageVal)}" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md);">
+            </div>
+            <div class="form-group">
+              <label>Shoot Date *</label>
+              <input type="date" class="field-date" required value="${details.date || ''}" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md);">
+            </div>
+            <div class="form-group">
+              <label>Shoot Time *</label>
+              <input type="time" class="field-time" required value="${details.time || ''}" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md);">
+            </div>
+            <div class="form-group">
+              <label>Package *</label>
+              <input type="text" class="field-package" required value="${escapeHtml(details.package || '')}" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md);">
+            </div>
+            <div class="form-group">
+              <label>Advance Amount (₹)</label>
+              <input type="number" class="field-advance" value="${details.advance || 0}" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md);">
+            </div>
+            <div class="form-group">
+              <label>Payment Account</label>
+              <select class="field-account" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md);">
+                <option value="Cash" ${details.paymentAccount === 'Cash' ? 'selected' : ''}>Cash</option>
+                <option value="Rhythm" ${details.paymentAccount === 'Rhythm' ? 'selected' : ''}>Rhythm</option>
+                <option value="Purva" ${details.paymentAccount === 'Purva' ? 'selected' : ''}>Purva</option>
+                <option value="Bijal" ${details.paymentAccount === 'Bijal' ? 'selected' : ''}>Bijal</option>
+                <option value="Shilpa" ${details.paymentAccount === 'Shilpa' ? 'selected' : ''}>Shilpa</option>
+                <option value="Mahesh" ${details.paymentAccount === 'Mahesh' ? 'selected' : ''}>Mahesh</option>
+              </select>
+            </div>
+          </div>
+        `;
+      } else if (entry.entryType === 'selection') {
+        const details = entry.selectionDetails || {};
+        formEl.innerHTML = `
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div class="form-group">
+              <label>Client Name *</label>
+              <div style="position: relative;">
+                <input type="text" class="field-client-name" required value="${escapeHtml(details.clientName || '')}" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md);" autocomplete="off">
+                <ul class="autocomplete-list dynamic-autocomplete-list"></ul>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Photos Selected</label>
+              <input type="number" class="field-photos" value="${details.photosSelected || 0}" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md);">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Gallery Notes / Requirements</label>
+            <textarea class="field-notes" rows="2" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); font-family: var(--font-sans); resize: vertical;">${escapeHtml(details.notes || '')}</textarea>
+          </div>
+        `;
+      } else if (entry.entryType === 'album') {
+        const details = entry.albumDetails || {};
+        formEl.innerHTML = `
+          <div class="form-group">
+            <label>Client Name *</label>
+            <div style="position: relative;">
+              <input type="text" class="field-client-name" required value="${escapeHtml(details.clientName || '')}" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md);" autocomplete="off">
+              <ul class="autocomplete-list dynamic-autocomplete-list"></ul>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Album Specifications / Notes</label>
+            <textarea class="field-notes" rows="2" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); font-family: var(--font-sans); resize: vertical;">${escapeHtml(details.notes || '')}</textarea>
+          </div>
+        `;
+      }
+
+      // Add explanation/reasoning and individual card submit
+      const explanationDiv = document.createElement('div');
+      explanationDiv.style.background = 'rgba(0,0,0,0.02)';
+      explanationDiv.style.padding = '0.75rem 1rem';
+      explanationDiv.style.borderRadius = 'var(--border-radius-md)';
+      explanationDiv.style.fontSize = '0.8rem';
+      explanationDiv.style.color = 'var(--text-secondary)';
+      explanationDiv.style.border = '1px dashed rgba(0,0,0,0.05)';
+      explanationDiv.innerHTML = `<strong>AI Explanation:</strong> ${escapeHtml(entry.confidenceReasoning || '')}`;
+      formEl.appendChild(explanationDiv);
+
+      const actionDiv = document.createElement('div');
+      actionDiv.style.display = 'flex';
+      actionDiv.style.gap = '0.75rem';
+      actionDiv.style.marginTop = '0.5rem';
+      actionDiv.innerHTML = `
+        <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
+          📥 Save Entry
+        </button>
+      `;
+      formEl.appendChild(actionDiv);
+
+      card.appendChild(formEl);
+      container.appendChild(card);
+
+      // Attach Card-level event listeners
+      const nameInput = formEl.querySelector('.field-client-name');
+      const nameAutocomplete = formEl.querySelector('.dynamic-autocomplete-list');
+      if (nameInput && nameAutocomplete) {
+        setupAutocomplete(nameInput, nameAutocomplete);
+      }
+
+      if (entry.entryType === 'booking') {
+        const shootSelect = formEl.querySelector('.field-shoot-type');
+        const customContainer = formEl.querySelector('.custom-shoot-type-container');
+        const customInput = formEl.querySelector('.field-custom-shoot-type');
+        const ageContainer = formEl.querySelector('.kid-age-container');
+        const ageInput = formEl.querySelector('.field-kid-age');
+
+        if (shootSelect) {
+          shootSelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val === 'Other') {
+              customContainer.style.display = 'block';
+              if (customInput) customInput.required = true;
+              ageContainer.style.display = 'none';
+              if (ageInput) ageInput.value = '';
+            } else if (val === 'Kids') {
+              customContainer.style.display = 'none';
+              if (customInput) { customInput.required = false; customInput.value = ''; }
+              ageContainer.style.display = 'block';
+            } else {
+              customContainer.style.display = 'none';
+              if (customInput) { customInput.required = false; customInput.value = ''; }
+              ageContainer.style.display = 'none';
+              if (ageInput) ageInput.value = '';
+            }
+          });
+        }
+      }
+
+      // Individual Save Form submit handler
+      formEl.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+          const success = await saveIndividualEntry(idx, card);
+          if (success) {
+            activeParsedEntries.splice(idx, 1);
+            renderParsedEntries();
+          }
+        } catch (err) {
+          console.error("Save Individual Entry Error:", err);
+          showToast("Failed to save entry: " + err.message, "⚠️");
+        }
+      });
+    });
+
+    // Attach Remove Button events
+    container.querySelectorAll('.btn-remove-entry').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = parseInt(e.target.getAttribute('data-index'), 10);
+        activeParsedEntries.splice(idx, 1);
+        renderParsedEntries();
+        showToast("Entry removed", "🧹");
+      });
+    });
+  };
+
+  const initBulkParserActions = () => {
+    const btnSaveAll = document.getElementById('btn-ai-save-all');
+    if (btnSaveAll) {
+      btnSaveAll.addEventListener('click', saveAllEntries);
+    }
+    const btnClearAll = document.getElementById('btn-ai-clear-all');
+    if (btnClearAll) {
+      btnClearAll.addEventListener('click', () => {
+        activeParsedEntries = [];
+        document.getElementById('ai-whatsapp-input').value = '';
+        renderParsedEntries();
+        showToast("Review session cleared", "🧹");
+      });
+    }
+  };
+
+  const getDashboardDataJson = () => {
+    const cleanTasks = (tasks || []).map(t => ({
+      text: t.text,
+      sender: t.sender,
+      assignee: t.assignee,
+      status: t.status,
+      date: t.timestamp ? new Date(t.timestamp).toLocaleDateString() : ''
+    }));
+
+    const cleanBookings = (bookings || []).map(b => ({
+      clientName: b.clientName,
+      shootType: b.shootType,
+      date: b.date,
+      time: b.time,
+      package: b.package,
+      advance: b.advance,
+      paymentAccount: b.paymentAccount,
+      status: b.status,
+      refunded: b.refunded
+    }));
+
+    const cleanGalleries = (galleries || []).map(g => ({
+      clientName: g.clientName,
+      status: g.status,
+      photosSelected: g.photosSelected,
+      notes: g.notes,
+      arrivedDate: g.arrivedDate ? new Date(g.arrivedDate).toLocaleDateString() : '',
+      selectionDate: g.selectionDate ? new Date(g.selectionDate).toLocaleDateString() : '',
+      editedDate: g.editedDate ? new Date(g.editedDate).toLocaleDateString() : '',
+      deliveredDate: g.deliveredDate ? new Date(g.deliveredDate).toLocaleDateString() : ''
+    }));
+
+    const cleanAlbums = (albums || []).map(a => ({
+      clientName: a.clientName,
+      status: a.status,
+      notes: a.notes,
+      approvalDate: a.approvalDate ? new Date(a.approvalDate).toLocaleDateString() : '',
+      printingDate: a.printingDate ? new Date(a.printingDate).toLocaleDateString() : '',
+      arrivedDate: a.arrivedDate ? new Date(a.arrivedDate).toLocaleDateString() : '',
+      deliveredDate: a.deliveredDate ? new Date(a.deliveredDate).toLocaleDateString() : '',
+      deliveredMethod: a.deliveredMethod
+    }));
+
+    const cleanContacts = (contacts || []).map(c => ({
+      name: c.name,
+      phone: c.phone,
+      email: c.email,
+      notes: c.notes
+    }));
+
+    const cleanShoots = (shoots || []).map(s => ({
+      clientName: s.clientName,
+      date: s.date,
+      time: s.time,
+      photosCount: s.photosCount,
+      advanceAmount: s.advanceAmount,
+      advanceAccount: s.advanceAccount,
+      balanceAmount: s.balanceAmount,
+      balanceAccount: s.balanceAccount,
+      specialRequests: s.specialRequests,
+      albumIncluded: s.albumIncluded
+    }));
+
+    return JSON.stringify({
+      currentStudioPreferences: {
+        studioName: getStudioName(),
+        currencyCode: getCurrencyCode(),
+        defaultAdvance: getDefaultAdvance(),
+        extraPhotoRate: getExtraPhotoRate()
+      },
+      activeUserProfile: currentUser,
+      availableMembers: ['Priya', 'Purva', 'Bijal'],
+      tasks: cleanTasks,
+      bookings: cleanBookings,
+      galleries: cleanGalleries,
+      albums: cleanAlbums,
+      contacts: cleanContacts,
+      shoots: cleanShoots
+    });
+  };
+
+  const chatHistory = [];
+
+  const queryDashboardChat = async (userMessage) => {
+    if (!geminiApiKey) {
+      showToast("Gemini API key is not configured.", "⚠️");
+      return null;
+    }
+
+    const dataContext = getDashboardDataJson();
+
+    const systemInstruction = `You are a helpful and intelligent Personal Assistant for the Rhythm Clicks studio workflow dashboard.
+You have live access to the studio's data: bookings, galleries (photo selections), albums, shoots, tasks, contacts, and settings.
+The user will ask questions about this data. Analyze the provided JSON context and answer their questions clearly and concisely.
+
+Always format your response using clean GitHub-style Markdown:
+- Use markdown lists for multiple items.
+- Use markdown tables for data structures, logs, or lists of shoots/bookings to make them look extremely readable and organized.
+- Use bold text, headings, and color expressions where useful.
+- Answer relative questions accurately. For example, if today's date is 2026-06-19, answer relative questions (like "tomorrow" or "next month") accordingly.
+- Keep the tone professional, friendly, and helpful. Mention active client counts, statuses, or member assignments.
+
+Live Dashboard JSON Context:
+${dataContext}
+`;
+
+    const contents = [];
+    chatHistory.forEach(msg => {
+      contents.push({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }]
+      });
+    });
+    
+    contents.push({
+      role: 'user',
+      parts: [{ text: userMessage }]
+    });
+
+    const payload = {
+      contents: contents,
+      systemInstruction: {
+        parts: [{ text: systemInstruction }]
+      }
+    };
+
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${geminiApiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error?.message || `HTTP ${response.status}`);
+      }
+
+      const resJson = await response.json();
+      const rawText = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) throw new Error("No response returned from the model.");
+
+      return rawText.trim();
+    } catch (err) {
+      console.error("Gemini Chat Error:", err);
+      showToast("Failed to chat with AI: " + err.message, "⚠️");
+      return null;
+    }
+  };
+
+  const parseMarkdownToHtml = (md) => {
+    if (!md) return "";
+    let html = md;
+    
+    html = html
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
+      return `<pre><code>${code.trim()}</code></pre>`;
+    });
+
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    html = html.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*([\s\S]*?)\*/g, '<em>$1</em>');
+
+    const lines = html.split('\n');
+    let inTable = false;
+    let tableHtml = '';
+    const outputLines = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      if (line.startsWith('|') && line.endsWith('|')) {
+        const cells = line.split('|').map(c => c.trim()).filter((c, idx, arr) => idx > 0 && idx < arr.length - 1);
+        
+        if (!inTable) {
+          inTable = true;
+          tableHtml = '<table><thead><tr>';
+          cells.forEach(c => {
+            tableHtml += `<th>${c}</th>`;
+          });
+          tableHtml += '</tr></thead><tbody>';
+          if (i + 1 < lines.length && lines[i + 1].includes('---')) {
+            i++; 
+          }
+        } else {
+          tableHtml += '<tr>';
+          cells.forEach(c => {
+            tableHtml += `<td>${c}</td>`;
+          });
+          tableHtml += '</tr>';
+        }
+      } else {
+        if (inTable) {
+          tableHtml += '</tbody></table>';
+          outputLines.push(tableHtml);
+          tableHtml = '';
+          inTable = false;
+        }
+        outputLines.push(line);
+      }
+    }
+    if (inTable) {
+      tableHtml += '</tbody></table>';
+      outputLines.push(tableHtml);
+    }
+
+    html = outputLines.join('\n');
+
+    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+    let inList = false;
+    const finalLines = html.split('\n');
+    const finalOutput = [];
+
+    for (let line of finalLines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+        const itemText = trimmed.substring(2);
+        if (!inList) {
+          inList = true;
+          finalOutput.push('<ul>');
+        }
+        finalOutput.push(`<li>${itemText}</li>`);
+      } else {
+        if (inList) {
+          inList = false;
+          finalOutput.push('</ul>');
+        }
+        finalOutput.push(line);
+      }
+    }
+    if (inList) {
+      finalOutput.push('</ul>');
+    }
+
+    html = finalOutput.join('\n');
+    
+    html = html.split(/\n{2,}/).map(p => {
+      const trimmed = p.trim();
+      if (trimmed.startsWith('<h') || trimmed.startsWith('<ul') || trimmed.startsWith('<ol') || trimmed.startsWith('<table') || trimmed.startsWith('<pre')) {
+        return trimmed;
+      }
+      return `<p style="margin: 0 0 0.5rem 0;">${trimmed.replace(/\n/g, '<br>')}</p>`;
+    }).join('\n');
+
+    return html;
+  };
+
+  const scrollChatToBottom = () => {
+    const chatLogs = document.getElementById('ai-chat-logs');
+    if (chatLogs) {
+      chatLogs.scrollTop = chatLogs.scrollHeight;
+    }
+  };
+
+  const appendChatMessage = (role, text) => {
+    const chatLogs = document.getElementById('ai-chat-logs');
+    if (!chatLogs) return;
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `ai-chat-message ${role}`;
+
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'ai-avatar';
+    avatarDiv.textContent = role === 'user' ? 'U' : '✨';
+
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = 'ai-bubble';
+    
+    if (role === 'user') {
+      bubbleDiv.textContent = text;
+    } else {
+      bubbleDiv.innerHTML = parseMarkdownToHtml(text);
+    }
+
+    messageDiv.appendChild(avatarDiv);
+    messageDiv.appendChild(bubbleDiv);
+    chatLogs.appendChild(messageDiv);
+    
+    scrollChatToBottom();
+  };
+
+  const initAiChatEvents = () => {
+    const chatForm = document.getElementById('ai-chat-form');
+    const chatInput = document.getElementById('ai-chat-input');
+    const chatLoader = document.getElementById('ai-chat-loader');
+
+    if (chatForm && chatInput) {
+      chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        chatInput.value = '';
+        appendChatMessage('user', text);
+        chatHistory.push({ role: 'user', text: text });
+
+        if (chatLoader) chatLoader.style.display = 'flex';
+        scrollChatToBottom();
+
+        const responseText = await queryDashboardChat(text);
+        
+        if (chatLoader) chatLoader.style.display = 'none';
+
+        if (responseText) {
+          appendChatMessage('assistant', responseText);
+          chatHistory.push({ role: 'assistant', text: responseText });
+        } else {
+          appendChatMessage('assistant', "Sorry, I encountered an error checking the data. Please verify your Gemini API Key in Settings.");
+        }
+      });
+    }
+
+    document.querySelectorAll('#ai-chat-suggestions .ai-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        if (chatInput) {
+          chatInput.value = chip.textContent.substring(2).trim();
+          chatForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }
+      });
+    });
+  };
+
+  const initAiParserTrigger = () => {
+    const btnParse = document.getElementById('btn-ai-parse');
+    const textInput = document.getElementById('ai-whatsapp-input');
+    const loader = document.getElementById('ai-parser-loader');
+    const resultsPane = document.getElementById('ai-parser-results-pane');
+
+    if (btnParse && textInput) {
+      btnParse.addEventListener('click', async () => {
+        const text = textInput.value.trim();
+        if (!text) {
+          showToast("Please paste a WhatsApp message first.", "⚠️");
+          return;
+        }
+
+        if (resultsPane) resultsPane.style.display = 'none';
+        if (loader) loader.style.display = 'flex';
+
+        const parsedData = await parseWhatsAppWithGemini(text);
+
+        if (loader) loader.style.display = 'none';
+
+        if (parsedData) {
+          populateParserForm(parsedData);
+        } else {
+          showToast("Failed to analyze the message. Verify your API Key.", "⚠️");
+        }
+      });
+    }
+  };
+
+
   // Run settings and preferences initializations
   syncSettingsFields();
   initPreferencesListeners();
@@ -8565,5 +9582,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   initCalendarViewToggle();
   renderVisualCalendar();
   window.renderVisualCalendar = renderVisualCalendar;
+
+  // Run AI initializations
+  initAiAssistantPanes();
+  initAiParserTrigger();
+  initAiChatEvents();
+  initBulkParserActions();
 
 });
