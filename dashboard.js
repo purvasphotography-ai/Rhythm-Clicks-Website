@@ -397,6 +397,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     return localStorage.getItem('rhythm_clicks_whatsapp_album_template') || 'Hi {name}, your album has arrived at Rhythm Clicks Studio! 📸✨ It is ready for collection/delivery.';
   };
 
+  const getPhotoSelectorUrl = () => {
+    return localStorage.getItem('rhythm_clicks_photo_selector_url') || 'http://localhost:8020';
+  };
+
   const formatCurrency = (val) => {
     const code = getCurrencyCode();
     return new Intl.NumberFormat(getLocaleForCurrency(code), {
@@ -484,6 +488,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const inputTemplate = document.getElementById('settings-whatsapp-album-template');
     if (inputTemplate) inputTemplate.value = getWhatsAppAlbumTemplate();
 
+    const inputPhotoSelectorUrl = document.getElementById('settings-photo-selector-url');
+    if (inputPhotoSelectorUrl) inputPhotoSelectorUrl.value = getPhotoSelectorUrl();
+
+    const inputGeminiKey = document.getElementById('settings-gemini-api-key');
+    if (inputGeminiKey) inputGeminiKey.value = localStorage.getItem('gemini_api_key') || '';
+
     applyStudioName(getStudioName());
     updateFormLabelsCurrencySymbol();
     updateDatalistsCurrency();
@@ -541,6 +551,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 5. WhatsApp Album Template
         if (inputTemplate) {
           localStorage.setItem('rhythm_clicks_whatsapp_album_template', inputTemplate.value);
+        }
+
+        // Photo Selector URL
+        const inputPhotoSelectorUrl = document.getElementById('settings-photo-selector-url');
+        if (inputPhotoSelectorUrl) {
+          localStorage.setItem('rhythm_clicks_photo_selector_url', inputPhotoSelectorUrl.value.trim() || 'http://localhost:8020');
         }
 
         // 6. Google Gemini API Key
@@ -730,6 +746,47 @@ document.addEventListener('DOMContentLoaded', async () => {
   const renderDashboard = () => {
     renderMyTasks();
     renderSentTasks();
+  };
+
+  let urlParamsProcessed = false;
+
+  const checkUrlParams = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+    const client = urlParams.get('client');
+    const photosCount = parseInt(urlParams.get('photosCount'), 10);
+
+    if (action === 'complete_selection' && client) {
+      const clientLower = client.toLowerCase();
+      const gallery = galleries.find(g => g.clientName.toLowerCase().includes(clientLower) || clientLower.includes(g.clientName.toLowerCase()));
+      
+      if (!gallery) {
+        showToast(`Could not find gallery entry for client "${client}" to sync selection.`, "⚠️");
+        return;
+      }
+
+      // Clear search query parameters to avoid double trigger
+      const newUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+
+      const message = `Do you want to mark gallery "${gallery.clientName}" as Selections Done with ${photosCount || 0} photos?`;
+      if (confirm(message)) {
+        try {
+          await window.updateGallery(
+            gallery.id,
+            gallery.clientName,
+            gallery.notes || '',
+            'selected',
+            Date.now(),
+            null,
+            photosCount || 0
+          );
+        } catch (e) {
+          console.error("Error updating gallery sync: ", e);
+          showToast("Failed to update gallery selection status.", "⚠️");
+        }
+      }
+    }
   };
 
   const renderGalleries = () => {
@@ -927,14 +984,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const item = document.createElement('li');
       item.className = 'gallery-card';
+      let selectorButtonHtml = '';
+      if (gallery.notes) {
+        selectorButtonHtml = `
+          <button class="btn btn-secondary btn-open-photo-selector" data-client="${escapeHtml(gallery.clientName)}" data-numbers="${escapeHtml(gallery.notes)}" title="Open in Photo Selector" style="margin-right: 0.25rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: var(--border-radius-sm); display: inline-flex; align-items: center; gap: 4px; height: 30px;">
+            📸 Photo Selector
+          </button>
+        `;
+      }
+
       item.innerHTML = `
         <h4 class="gallery-title">${escapeHtml(gallery.clientName)}</h4>
         ${currentStatusHtml}
         ${historyDetailsHtml}
         ${gallery.notes ? `<p class="gallery-notes" style="margin-top: 4px;">${escapeHtml(gallery.notes)}</p>` : ''}
         ${photoSelectionHtml}
-        <div class="gallery-actions">
+        <div class="gallery-actions" style="display: flex; align-items: center;">
           ${actionBtn}
+          ${selectorButtonHtml}
           <button class="btn-edit-gallery" data-id="${gallery.id}" title="Edit gallery" style="margin-right: 0.25rem;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -996,6 +1063,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('edit-gallery-client-name').value = gallery.clientName;
         document.getElementById('edit-gallery-notes-input').value = gallery.notes || '';
         document.getElementById('edit-gallery-status-select').value = gallery.status;
+        
+        const modalOpenSelectorBtn = document.getElementById('edit-gallery-open-selector-btn');
+        if (modalOpenSelectorBtn) {
+          modalOpenSelectorBtn.setAttribute('data-client', gallery.clientName);
+          modalOpenSelectorBtn.setAttribute('data-numbers', gallery.notes || '');
+          modalOpenSelectorBtn.style.display = 'flex';
+        }
+
         if (document.getElementById('edit-gallery-photos-selected')) {
           document.getElementById('edit-gallery-photos-selected').value = gallery.photosSelected || 0;
         }
@@ -1028,6 +1103,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     });
     renderSearchPipeline();
+
+    if (!urlParamsProcessed && galleries.length > 0) {
+      urlParamsProcessed = true;
+      checkUrlParams();
+    }
   };
 
   const renderAlbums = () => {
@@ -9186,10 +9266,22 @@ ${text}
       actionDiv.style.display = 'flex';
       actionDiv.style.gap = '0.75rem';
       actionDiv.style.marginTop = '0.5rem';
+
+      let extraButtons = '';
+      if (entry.entryType === 'selection') {
+        const details = entry.selectionDetails || {};
+        extraButtons = `
+          <button type="button" class="btn btn-secondary btn-open-photo-selector" data-client="${escapeHtml(details.clientName || '')}" data-numbers="${escapeHtml(details.notes || '')}" style="padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
+            📸 Open in Photo Selector
+          </button>
+        `;
+      }
+
       actionDiv.innerHTML = `
         <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
           📥 Save Entry
         </button>
+        ${extraButtons}
       `;
       formEl.appendChild(actionDiv);
 
@@ -9651,5 +9743,48 @@ ${dataContext}
   initAiParserTrigger();
   initAiChatEvents();
   initBulkParserActions();
+
+  // Photo Selector Global click listener
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-open-photo-selector');
+    if (btn) {
+      e.preventDefault();
+      let client = '';
+      let numbers = '';
+      
+      const modal = btn.closest('#edit-gallery-modal');
+      if (modal) {
+        client = document.getElementById('edit-gallery-client-name').value;
+        numbers = document.getElementById('edit-gallery-notes-input').value;
+      } else {
+        const card = btn.closest('.ai-parsed-card') || btn.closest('.card') || btn.closest('.booking-card');
+        if (card) {
+          const clientInput = card.querySelector('.field-client-name');
+          const notesTextarea = card.querySelector('.field-notes');
+          if (clientInput) client = clientInput.value;
+          if (notesTextarea) numbers = notesTextarea.value;
+        }
+      }
+      
+      if (!client) client = btn.getAttribute('data-client') || '';
+      if (!numbers) numbers = btn.getAttribute('data-numbers') || '';
+      
+      const selectorBaseUrl = localStorage.getItem('rhythm_clicks_photo_selector_url') || 'http://localhost:8020';
+      const redirectDashboardUrl = window.location.href.split('?')[0];
+      
+      let targetUrlStr = '';
+      try {
+        const url = new URL(selectorBaseUrl);
+        url.searchParams.set('client', client);
+        url.searchParams.set('numbers', numbers);
+        url.searchParams.set('dashboard', redirectDashboardUrl);
+        targetUrlStr = url.toString();
+      } catch (err) {
+        const connector = selectorBaseUrl.includes('?') ? '&' : '?';
+        targetUrlStr = `${selectorBaseUrl}${connector}client=${encodeURIComponent(client)}&numbers=${encodeURIComponent(numbers)}&dashboard=${encodeURIComponent(redirectDashboardUrl)}`;
+      }
+      window.open(targetUrlStr, '_blank');
+    }
+  });
 
 });

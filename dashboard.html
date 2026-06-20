@@ -295,6 +295,11 @@
           </select>
         </div>
         
+        <!-- Open in Photo Selector -->
+        <button type="button" class="btn btn-secondary btn-open-photo-selector" id="edit-gallery-open-selector-btn" style="width: 100%; margin-top: 0.5rem; padding: 0.8rem; border-radius: var(--border-radius-md); font-weight: 600; display: none; align-items: center; justify-content: center; gap: 8px;">
+          📸 Open in Photo Selector
+        </button>
+
         <button type="submit" class="btn btn-primary login-submit-btn" style="margin-top: 0.5rem; padding: 0.8rem;">
           Save Changes
         </button>
@@ -1835,6 +1840,15 @@
               </div>
               <p style="margin: 0.4rem 0 0 0; font-size: 0.75rem; color: var(--text-light); line-height: 1.4;">
                 Required for AI Assistant. Get a key at <a href="https://aistudio.google.com/" target="_blank" style="color: #a88a3a; text-decoration: underline; font-weight: 600;">Google AI Studio</a>.
+              </p>
+            </div>
+
+            <!-- Photo Selector URL -->
+            <div>
+              <label for="settings-photo-selector-url" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">Photo Selector URL</label>
+              <input type="text" id="settings-photo-selector-url" placeholder="e.g., http://localhost:8020" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); background: rgba(255,255,255,0.7); font-family: var(--font-sans); font-size: 0.85rem; color: var(--text-primary);">
+              <p style="margin: 0.4rem 0 0 0; font-size: 0.75rem; color: var(--text-light); line-height: 1.4;">
+                The local address/port where the Python Photo Selector tool is running.
               </p>
             </div>
 
