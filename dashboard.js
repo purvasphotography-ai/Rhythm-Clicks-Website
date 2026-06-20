@@ -490,19 +490,75 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   const initPreferencesListeners = () => {
-    const inputName = document.getElementById('settings-studio-name');
-    if (inputName) {
-      inputName.addEventListener('input', (e) => {
-        const val = e.target.value.trim() || 'Rhythm Clicks';
-        localStorage.setItem('rhythm_clicks_studio_name', val);
-        applyStudioName(val);
-      });
-    }
+    const btnSaveSettings = document.getElementById('btn-save-settings');
+    if (btnSaveSettings) {
+      btnSaveSettings.addEventListener('click', () => {
+        const inputName = document.getElementById('settings-studio-name');
+        const selectCurrency = document.getElementById('settings-currency');
+        const inputAdvance = document.getElementById('settings-default-advance');
+        const inputExtraRate = document.getElementById('settings-extra-photo-rate');
+        const inputTemplate = document.getElementById('settings-whatsapp-album-template');
+        const inputGeminiKey = document.getElementById('settings-gemini-api-key');
 
-    const selectCurrency = document.getElementById('settings-currency');
-    if (selectCurrency) {
-      selectCurrency.addEventListener('change', (e) => {
-        localStorage.setItem('rhythm_clicks_currency', e.target.value);
+        let hasError = false;
+
+        // 1. Studio Name
+        const nameVal = inputName ? (inputName.value.trim() || 'Rhythm Clicks') : 'Rhythm Clicks';
+        localStorage.setItem('rhythm_clicks_studio_name', nameVal);
+        applyStudioName(nameVal);
+
+        // 2. Currency
+        if (selectCurrency) {
+          localStorage.setItem('rhythm_clicks_currency', selectCurrency.value);
+        }
+
+        // 3. Default Advance
+        if (inputAdvance) {
+          const advVal = parseInt(inputAdvance.value, 10);
+          if (!isNaN(advVal) && advVal >= 0) {
+            localStorage.setItem('rhythm_clicks_default_advance', advVal);
+          } else if (inputAdvance.value === '') {
+            localStorage.setItem('rhythm_clicks_default_advance', 0);
+          } else {
+            showToast("Default Advance must be a valid positive number", "⚠️");
+            hasError = true;
+          }
+        }
+
+        // 4. Extra Photo Rate
+        if (inputExtraRate) {
+          const rateVal = parseInt(inputExtraRate.value, 10);
+          if (!isNaN(rateVal) && rateVal >= 0) {
+            localStorage.setItem('rhythm_clicks_extra_photo_rate', rateVal);
+          } else if (inputExtraRate.value === '') {
+            localStorage.setItem('rhythm_clicks_extra_photo_rate', 0);
+          } else {
+            showToast("Extra Photo Rate must be a valid positive number", "⚠️");
+            hasError = true;
+          }
+        }
+
+        // 5. WhatsApp Album Template
+        if (inputTemplate) {
+          localStorage.setItem('rhythm_clicks_whatsapp_album_template', inputTemplate.value);
+        }
+
+        // 6. Google Gemini API Key
+        if (inputGeminiKey) {
+          geminiApiKey = inputGeminiKey.value.trim() || null;
+          if (geminiApiKey) {
+            localStorage.setItem('gemini_api_key', geminiApiKey);
+          } else {
+            localStorage.removeItem('gemini_api_key');
+          }
+          if (typeof checkAiAssistantStatus === 'function') {
+            checkAiAssistantStatus();
+          }
+        }
+
+        if (hasError) return;
+
+        // Apply visual updates across all rendering scopes
         updateFormLabelsCurrencySymbol();
         updateDatalistsCurrency();
         
@@ -511,41 +567,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (typeof renderAccounts === 'function') renderAccounts();
         if (typeof renderVisualCalendar === 'function') renderVisualCalendar();
         if (typeof renderGalleries === 'function') renderGalleries();
-        
-        showToast(`Currency updated to ${e.target.value}`, '⚙️');
+
+        showToast("Settings and preferences saved successfully!", "⚙️");
       });
     }
 
-    const inputAdvance = document.getElementById('settings-default-advance');
-    if (inputAdvance) {
-      inputAdvance.addEventListener('input', (e) => {
-        const val = parseInt(e.target.value, 10);
-        if (!isNaN(val) && val >= 0) {
-          localStorage.setItem('rhythm_clicks_default_advance', val);
-        } else if (e.target.value === '') {
-          localStorage.setItem('rhythm_clicks_default_advance', 0);
+    const inputGeminiKey = document.getElementById('settings-gemini-api-key');
+    const toggleGeminiKeyBtn = document.getElementById('toggle-gemini-key-btn');
+    if (toggleGeminiKeyBtn && inputGeminiKey) {
+      toggleGeminiKeyBtn.addEventListener('click', () => {
+        if (inputGeminiKey.type === 'password') {
+          inputGeminiKey.type = 'text';
+          toggleGeminiKeyBtn.textContent = '🙈';
+        } else {
+          inputGeminiKey.type = 'password';
+          toggleGeminiKeyBtn.textContent = '👁️';
         }
-      });
-    }
-
-    const inputExtraRate = document.getElementById('settings-extra-photo-rate');
-    if (inputExtraRate) {
-      inputExtraRate.addEventListener('input', (e) => {
-        const val = parseInt(e.target.value, 10);
-        if (!isNaN(val) && val >= 0) {
-          localStorage.setItem('rhythm_clicks_extra_photo_rate', val);
-          if (typeof renderGalleries === 'function') renderGalleries();
-        } else if (e.target.value === '') {
-          localStorage.setItem('rhythm_clicks_extra_photo_rate', 0);
-          if (typeof renderGalleries === 'function') renderGalleries();
-        }
-      });
-    }
-
-    const inputTemplate = document.getElementById('settings-whatsapp-album-template');
-    if (inputTemplate) {
-      inputTemplate.addEventListener('input', (e) => {
-        localStorage.setItem('rhythm_clicks_whatsapp_album_template', e.target.value);
       });
     }
   };
