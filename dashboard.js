@@ -484,11 +484,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const inputTemplate = document.getElementById('settings-whatsapp-album-template');
     if (inputTemplate) inputTemplate.value = getWhatsAppAlbumTemplate();
 
-    const inputPhotoSelectorUrl = document.getElementById('settings-photo-selector-url');
-    if (inputPhotoSelectorUrl) {
-      inputPhotoSelectorUrl.value = localStorage.getItem('rhythm_clicks_photo_selector_url') || 'http://localhost:8020';
-    }
-
     applyStudioName(getStudioName());
     updateFormLabelsCurrencySymbol();
     updateDatalistsCurrency();
@@ -504,7 +499,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const inputExtraRate = document.getElementById('settings-extra-photo-rate');
         const inputTemplate = document.getElementById('settings-whatsapp-album-template');
         const inputGeminiKey = document.getElementById('settings-gemini-api-key');
-        const inputPhotoSelectorUrl = document.getElementById('settings-photo-selector-url');
 
         let hasError = false;
 
@@ -560,12 +554,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (typeof checkAiAssistantStatus === 'function') {
             checkAiAssistantStatus();
           }
-        }
-
-        // 7. Photo Selector URL
-        if (inputPhotoSelectorUrl) {
-          const urlVal = inputPhotoSelectorUrl.value.trim() || 'http://localhost:8020';
-          localStorage.setItem('rhythm_clicks_photo_selector_url', urlVal);
         }
 
         if (hasError) return;
@@ -937,15 +925,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       photoSelectionHtml += `</div>`;
 
-      let openSelectorBtn = '';
-      if (gallery.notes) {
-        openSelectorBtn = `
-          <button class="btn btn-secondary btn-open-photo-selector" data-client="${escapeHtml(gallery.clientName)}" data-notes="${escapeHtml(gallery.notes)}" title="Open Selection in Photo Selector App" style="margin-right: 0.25rem; background: rgba(76, 175, 80, 0.08); color: #2E7D32; border: 1px solid rgba(76, 175, 80, 0.2); border-radius: 4px; padding: 4px 8px; font-size: 0.75rem; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; width: auto; vertical-align: middle;">
-            📸 Photo Selector
-          </button>
-        `;
-      }
-
       const item = document.createElement('li');
       item.className = 'gallery-card';
       item.innerHTML = `
@@ -955,7 +934,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         ${gallery.notes ? `<p class="gallery-notes" style="margin-top: 4px;">${escapeHtml(gallery.notes)}</p>` : ''}
         ${photoSelectionHtml}
         <div class="gallery-actions">
-          ${openSelectorBtn}
           ${actionBtn}
           <button class="btn-edit-gallery" data-id="${gallery.id}" title="Edit gallery" style="margin-right: 0.25rem;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -9175,11 +9153,6 @@ ${text}
             <label>Gallery Notes / Requirements</label>
             <textarea class="field-notes" rows="2" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--border-radius-md); font-family: var(--font-sans); resize: vertical;">${escapeHtml(details.notes || '')}</textarea>
           </div>
-          <div class="form-group" style="margin-top: 0.5rem;">
-            <button type="button" class="btn btn-secondary btn-open-photo-selector" data-client="${escapeHtml(details.clientName || '')}" data-notes="${escapeHtml(details.notes || '')}" style="display: inline-flex; align-items: center; gap: 6px; padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: var(--border-radius-sm); border: 1px solid rgba(0,0,0,0.15); background: #fff; cursor: pointer;">
-              🚀 Open in Photo Selector
-            </button>
-          </div>
         `;
       } else if (entry.entryType === 'album') {
         const details = entry.albumDetails || {};
@@ -9678,104 +9651,5 @@ ${dataContext}
   initAiParserTrigger();
   initAiChatEvents();
   initBulkParserActions();
-
-  // Global Event Delegation for opening Photo Selector
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.btn-open-photo-selector');
-    if (btn) {
-      // Find local input values if within an active editing form (like AI review card or edit gallery modal)
-      const card = btn.closest('.ai-review-card') || btn.closest('.login-card') || document;
-      const clientInput = card.querySelector('.field-client-name') || card.querySelector('#edit-gallery-client-name');
-      const notesInput = card.querySelector('.field-notes') || card.querySelector('#edit-gallery-notes-input');
-
-      let client = clientInput ? clientInput.value.trim() : btn.getAttribute('data-client') || '';
-      let notes = notesInput ? notesInput.value.trim() : btn.getAttribute('data-notes') || '';
-
-      if (!client) client = btn.getAttribute('data-client') || '';
-      if (!notes) notes = btn.getAttribute('data-notes') || '';
-
-      const baseUrl = localStorage.getItem('rhythm_clicks_photo_selector_url') || 'http://localhost:8020';
-      // Append the dashboard base origin so that Photo Selector can redirect/callback to this exact environment
-      const url = `${baseUrl}/?client=${encodeURIComponent(client)}&numbers=${encodeURIComponent(notes)}&dashboard=${encodeURIComponent(window.location.origin)}`;
-      window.open(url, '_blank');
-    }
-  });
-
-  // URL query parameter parsing for selection done callback
-  const processUrlParameters = () => {
-    const params = new URLSearchParams(window.location.search);
-    const action = params.get('action');
-    if (action === 'complete_selection') {
-      const clientName = params.get('client');
-      const photosCount = parseInt(params.get('photosCount'), 10) || 0;
-      if (!clientName) return;
-
-      // Clean up URL parameters immediately to prevent triggering on page reload
-      const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-      window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
-
-      let attempts = 0;
-      const interval = setInterval(async () => {
-        attempts++;
-        if (typeof galleries !== 'undefined' && (galleries.length > 0 || attempts > 20)) {
-          clearInterval(interval);
-          
-          const normalize = (name) => name ? String(name).toLowerCase().replace(/[^a-z0-9]/g, '').trim() : '';
-          const normTarget = normalize(clientName);
-          const gallery = galleries.find(g => normalize(g.clientName) === normTarget);
-
-          if (gallery) {
-            const confirmed = confirm(`Do you want to mark the gallery for client "${gallery.clientName}" as "Selections Done" with ${photosCount} photos?`);
-            if (confirmed) {
-              try {
-                const chosenTimestamp = Date.now();
-                const updateFields = {
-                  status: 'selected',
-                  photosSelected: photosCount,
-                  editedDate: null,
-                  deliveredDate: null,
-                  selectionDate: chosenTimestamp
-                };
-                if (!gallery.arrivedDate) {
-                  updateFields.arrivedDate = chosenTimestamp;
-                }
-                await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "galleries", gallery.id), updateFields);
-                showToast(`Gallery for <strong>${gallery.clientName}</strong> marked as Selections Done!`, '✅');
-                if (typeof renderGalleries === 'function') renderGalleries();
-              } catch (err) {
-                console.error("Failed to update gallery status via URL link:", err);
-                showToast("Failed to update gallery status.", "⚠️");
-              }
-            }
-          } else {
-            const confirmed = confirm(`No existing gallery found for client "${clientName}". Do you want to register a new gallery as "Selections Done" with ${photosCount} photos?`);
-            if (confirmed) {
-              await window.addGallery(clientName, "Imported from Photo Selector", Date.now(), photosCount);
-              // Wait a moment for it to sync, then mark it selected
-              let checkAttempts = 0;
-              const checkInterval = setInterval(async () => {
-                checkAttempts++;
-                const newGal = galleries.find(g => normalize(g.clientName) === normTarget);
-                if (newGal || checkAttempts > 10) {
-                  clearInterval(checkInterval);
-                  if (newGal) {
-                    const chosenTimestamp = Date.now();
-                    await firebaseFirestore.updateDoc(firebaseFirestore.doc(db, "galleries", newGal.id), {
-                      status: 'selected',
-                      selectionDate: chosenTimestamp,
-                      arrivedDate: chosenTimestamp
-                    });
-                    if (typeof renderGalleries === 'function') renderGalleries();
-                  }
-                }
-              }, 500);
-            }
-          }
-        }
-      }, 250);
-    }
-  };
-
-  processUrlParameters();
 
 });
