@@ -164,6 +164,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const bookingsSection = document.getElementById('bookings-section');
   const bookingsGrid = document.getElementById('bookings-grid');
   const addBookingBtn = document.getElementById('add-booking-btn');
+  const addBookingAiBtn = document.getElementById('add-booking-ai-btn');
   const bookingModal = document.getElementById('booking-modal');
   const closeBookingBtn = document.getElementById('close-booking-btn');
   const addBookingForm = document.getElementById('add-booking-form');
@@ -6015,6 +6016,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tabAlbums = document.getElementById('tab-albums');
   const tabContacts = document.getElementById('tab-contacts');
   const tabAccounts = document.getElementById('tab-accounts');
+  const tabAiAssistant = document.getElementById('tab-ai-assistant');
   const tabSettings = document.getElementById('tab-settings');
 
   const tasksSection = document.getElementById('tasks-section');
@@ -6024,6 +6026,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const albumsSection = document.getElementById('albums-section');
   const contactsSection = document.getElementById('contacts-section');
   const accountsSection = document.getElementById('accounts-section');
+  const aiAssistantSection = document.getElementById('ai-assistant-section');
   const settingsSection = document.getElementById('settings-section');
 
   const tabs = [
@@ -6035,6 +6038,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     { button: tabAlbums, section: albumsSection },
     { button: tabContacts, section: contactsSection },
     { button: tabAccounts, section: accountsSection },
+    { button: tabAiAssistant, section: aiAssistantSection },
     { button: tabSettings, section: settingsSection }
   ];
 
@@ -6813,6 +6817,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       bookingModal.style.display = 'flex';
       bookingModal.offsetHeight; // force reflow
       bookingModal.classList.remove('hidden');
+    });
+  }
+
+  if (addBookingAiBtn) {
+    addBookingAiBtn.addEventListener('click', () => {
+      forceSwitchTab(tabAiAssistant, aiAssistantSection);
+      // Automatically switch the AI panel to parser mode
+      const btnModeParser = document.getElementById('btn-mode-parser');
+      const btnModeChat = document.getElementById('btn-mode-chat');
+      const paneParser = document.getElementById('ai-pane-parser');
+      const paneChat = document.getElementById('ai-pane-chat');
+      if (btnModeParser && btnModeChat && paneParser && paneChat) {
+        btnModeParser.classList.add('active');
+        btnModeChat.classList.remove('active');
+        paneParser.style.display = 'block';
+        paneChat.style.display = 'none';
+      }
+      // Focus on the WhatsApp message parser textarea
+      const textInput = document.getElementById('ai-whatsapp-input');
+      if (textInput) {
+        setTimeout(() => { textInput.focus(); }, 300);
+      }
     });
   }
 
