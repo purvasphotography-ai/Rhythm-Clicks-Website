@@ -2,6 +2,48 @@
 const GALLERY_DATA = [
   {
     "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A9865.webp",
+    "caption": " A2A9865",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A5703.webp",
+    "caption": " A2A5703",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A5465.webp",
+    "caption": " A2A5465",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A5374.webp",
+    "caption": " A2A5374",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A5314.webp",
+    "caption": " A2A5314",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A4635.webp",
+    "caption": " A2A4635",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
+    "src": "assets/gallery/maternity/_A2A4379.webp",
+    "caption": " A2A4379",
+    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
+  },
+  {
+    "category": "maternity",
     "src": "assets/gallery/maternity/Maternity.webp",
     "caption": "Maternity",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
@@ -46,12 +88,6 @@ const GALLERY_DATA = [
     "category": "maternity",
     "src": "assets/gallery/maternity/_A2A2955.webp",
     "caption": " A2A2955",
-    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
-  },
-  {
-    "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A4379.webp",
-    "caption": " A2A4379",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
@@ -104,44 +140,8 @@ const GALLERY_DATA = [
   },
   {
     "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A4635.webp",
-    "caption": " A2A4635",
-    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
-  },
-  {
-    "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A5314.webp",
-    "caption": " A2A5314",
-    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
-  },
-  {
-    "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A5374.webp",
-    "caption": " A2A5374",
-    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
-  },
-  {
-    "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A5465.webp",
-    "caption": " A2A5465",
-    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
-  },
-  {
-    "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A5703.webp",
-    "caption": " A2A5703",
-    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
-  },
-  {
-    "category": "maternity",
     "src": "assets/gallery/maternity/_A2A9615_result.webp",
     "caption": " A2A9615 Result",
-    "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
-  },
-  {
-    "category": "maternity",
-    "src": "assets/gallery/maternity/_A2A9865.webp",
-    "caption": " A2A9865",
     "desc": "Elegant fine-art maternity session serving Ahmedabad and Gandhinagar."
   },
   {
@@ -296,6 +296,24 @@ const GALLERY_DATA = [
   },
   {
     "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A8388.webp",
+    "caption": " A2A8388",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A8377.webp",
+    "caption": " A2A8377",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
+    "src": "assets/gallery/toddler/_A2A8265.webp",
+    "caption": " A2A8265",
+    "desc": "Joyful children milestone portraits capturing natural play and expressions."
+  },
+  {
+    "category": "toddler",
     "src": "assets/gallery/toddler/Toddler.webp",
     "caption": "Toddler",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
@@ -358,24 +376,6 @@ const GALLERY_DATA = [
     "category": "toddler",
     "src": "assets/gallery/toddler/_A2A7192_result.webp",
     "caption": " A2A7192 Result",
-    "desc": "Joyful children milestone portraits capturing natural play and expressions."
-  },
-  {
-    "category": "toddler",
-    "src": "assets/gallery/toddler/_A2A8265.webp",
-    "caption": " A2A8265",
-    "desc": "Joyful children milestone portraits capturing natural play and expressions."
-  },
-  {
-    "category": "toddler",
-    "src": "assets/gallery/toddler/_A2A8377.webp",
-    "caption": " A2A8377",
-    "desc": "Joyful children milestone portraits capturing natural play and expressions."
-  },
-  {
-    "category": "toddler",
-    "src": "assets/gallery/toddler/_A2A8388.webp",
-    "caption": " A2A8388",
     "desc": "Joyful children milestone portraits capturing natural play and expressions."
   },
   {
@@ -524,14 +524,8 @@ const GALLERY_DATA = [
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_A2A1097_result.webp",
-    "caption": " A2A1097 Result",
-    "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
-  },
-  {
-    "category": "family",
-    "src": "assets/gallery/family/_A2A1185_result.webp",
-    "caption": " A2A1185 Result",
+    "src": "assets/gallery/family/_A2A2756.webp",
+    "caption": " A2A2756",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
@@ -542,8 +536,14 @@ const GALLERY_DATA = [
   },
   {
     "category": "family",
-    "src": "assets/gallery/family/_A2A2756.webp",
-    "caption": " A2A2756",
+    "src": "assets/gallery/family/_A2A1097_result.webp",
+    "caption": " A2A1097 Result",
+    "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
+  },
+  {
+    "category": "family",
+    "src": "assets/gallery/family/_A2A1185_result.webp",
+    "caption": " A2A1185 Result",
     "desc": "Warm, authentic portraits capturing deep emotional bonds and togetherness."
   },
   {
