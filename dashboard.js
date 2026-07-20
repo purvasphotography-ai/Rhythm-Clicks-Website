@@ -397,8 +397,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     return localStorage.getItem('rhythm_clicks_whatsapp_album_template') || 'Hi {name}, your album has arrived at Rhythm Clicks Studio! 📸✨ It is ready for collection/delivery.';
   };
 
+  const getDefaultPhotoSelectorUrl = () => {
+    const isOnline = window.location.hostname.includes('rhythmclicksstudio.com');
+    return isOnline ? 'https://rhythmclicksstudio.com/photo-selector/' : 'http://localhost:8020';
+  };
+
   const getPhotoSelectorUrl = () => {
-    return localStorage.getItem('rhythm_clicks_photo_selector_url') || 'http://localhost:8020';
+    return localStorage.getItem('rhythm_clicks_photo_selector_url') || getDefaultPhotoSelectorUrl();
   };
 
   const formatCurrency = (val) => {
@@ -556,7 +561,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Photo Selector URL
         const inputPhotoSelectorUrl = document.getElementById('settings-photo-selector-url');
         if (inputPhotoSelectorUrl) {
-          localStorage.setItem('rhythm_clicks_photo_selector_url', inputPhotoSelectorUrl.value.trim() || 'http://localhost:8020');
+          localStorage.setItem('rhythm_clicks_photo_selector_url', inputPhotoSelectorUrl.value.trim() || getDefaultPhotoSelectorUrl());
         }
 
         // 6. Google Gemini API Key
@@ -9769,7 +9774,7 @@ ${dataContext}
       if (!client) client = btn.getAttribute('data-client') || '';
       if (!numbers) numbers = btn.getAttribute('data-numbers') || '';
       
-      const selectorBaseUrl = localStorage.getItem('rhythm_clicks_photo_selector_url') || 'http://localhost:8020';
+      const selectorBaseUrl = localStorage.getItem('rhythm_clicks_photo_selector_url') || getDefaultPhotoSelectorUrl();
       const redirectDashboardUrl = window.location.href.split('?')[0];
       
       let targetUrlStr = '';

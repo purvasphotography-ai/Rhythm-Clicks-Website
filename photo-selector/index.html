@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Selector Online</title>
+    <!-- Modern typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f1f3f9;
+            --card-bg: #ffffff;
+            --card-border: rgba(0, 0, 0, 0.06);
+            --fg-color: #1e293b;
+            --fg-muted: #64748b;
+            --accent-color: #000000;
+            --accent-hover: #1e293b;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --input-bg: #ffffff;
+            --input-border: #cbd5e1;
+            --font-main: 'Inter', sans-serif;
+            --font-title: 'Outfit', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: linear-gradient(180deg, #f1f3f9 0%, #e2e8f0 100%);
+            background-attachment: fixed;
+            color: var(--fg-color);
+            line-height: 1.5;
+            padding: 2.5rem 1.5rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-family: var(--font-title);
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #000000;
+            margin-bottom: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .subtitle {
+            color: var(--fg-muted);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        /* Card Layout */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03), 0 1px 8px rgba(0, 0, 0, 0.01);
+            margin-bottom: 2rem;
+        }
+
+        .grid-two-cols {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 2.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-two-cols {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        .input-group input[type="text"] {
+            flex: 1;
+            background-color: #f8fafc;
+            cursor: default;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            border: 1px solid var(--input-border);
+            color: var(--fg-color);
+            box-shadow: none;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--fg-color);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        input[type="text"], textarea {
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            color: var(--fg-color);
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            font-family: var(--font-main);
+            transition: all 0.2s ease;
+            outline: none;
+            width: 100%;
+        }
+
+        input[type="text"]::placeholder, textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        input[type="text"]:focus:not([readonly]), textarea:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+        }
+
+        textarea {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Options Row */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 1.5rem;
+        }
+
+        .setting-section {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1.25rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .setting-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--fg-color);
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--fg-color);
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .option-label input[type="radio"], 
+        .option-label input[type="checkbox"] {
+            accent-color: #000000;
+            width: 1.1rem;
+            height: 1.1rem;
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.85rem 1.5rem;
+            font-family: var(--font-main);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background-color: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background-color: #059669;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Tabs Panel */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--input-border);
+            margin-bottom: 1.5rem;
+            gap: 0.5rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--fg-muted);
+            padding: 0.75rem 1.25rem;
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--fg-color);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Results table & items */
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            background-color: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--fg-color);
+            font-weight: 700;
+            padding: 0.75rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid var(--input-border);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            color: var(--fg-color);
+        }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .badge {
+            background: #e2e8f0;
+            color: #0f172a;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Unmatched/Missing list */
+        .missing-list {
+            background-color: #fef2f2;
+            border: 1px solid #fee2e2;
+            border-radius: 8px;
+            padding: 1.5rem;
+            min-height: 100px;
+        }
+
+        .missing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .missing-item {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 0.5rem;
+            border-radius: 6px;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            border: 1px solid #fca5a5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-weight: 600;
+        }
+
+        /* Footer bar with progress info */
+        .footer-action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--input-border);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .footer-action-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        .progress-container {
+            flex-grow: 1;
+        }
+
+        .progress-text {
+            font-size: 0.875rem;
+            color: var(--fg-muted);
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar-bg {
+            background-color: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #000000 0%, var(--success-color) 100%);
+            width: 0%;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.15s ease;
+        }
+
+        .success-banner {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>📸 Photo Selector Online</h1>
+            <p class="subtitle">Search, match, and copy/move RAW/JPEG photos directly on your hard drives from the browser.</p>
+        </header>
+
+        <!-- Success Banner Container -->
+        <div id="success-banner-container"></div>
+
+        <!-- Main Configuration Card -->
+        <div class="card">
+            <div class="grid-two-cols">
+                <!-- Left Column -->
+                <div>
+                    <div class="form-group">
+                        <label for="source-folder">Source Directory (Local HDD / Folder)</label>
+                        <div class="input-group">
+                            <input type="text" id="source-folder" readonly placeholder="Click Browse to select local drive folder...">
+                            <button type="button" class="btn-secondary" id="btn-browse-src" onclick="selectSourceDir()">Browse...</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0; height: calc(100% - 7.5rem);">
+                        <label for="photo-numbers">Photo Selection Numbers</label>
+                        <textarea id="photo-numbers" placeholder="# Paste client selections here&#10;# Example: 12, 45, 982, 1004&#10;1, 55, 100, 1234" style="height: calc(100% - 1.5rem); min-height: 250px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div style="display: flex; flex-direction: column; justify-content: space-between; gap: 1.5rem;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="client-name">Client Name (Optional)</label>
+                        <input type="text" id="client-name" placeholder="Example: John_Doe (searches folder under Source)">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <!-- Match Mode Section -->
+                        <div class="setting-section">
+                            <div class="setting-title">Match Mode</div>
+                            <div class="radio-group">
+                                <label class="option-label">
+                                    <input type="radio" name="match-mode" value="smart" checked> Smart Numeric
+                                </label>
+                                <label class="option-label">
+                                    <input type="radio" name="match-mode" value="substring"> Substring
+                                </label>
+                                <label class="option-label">
+                                    <input type="radio" name="match-mode" value="exact"> Exact
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Action & Subfolder Checkbox -->
+                        <div class="setting-section">
+                            <div>
+                                <div class="setting-title">Action</div>
+                                <div class="radio-group">
+                                    <label class="option-label">
+                                        <input type="radio" name="action-mode" value="copy" checked> Copy
+                                    </label>
+                                    <label class="option-label">
+                                        <input type="radio" name="action-mode" value="move"> Move
+                                    </label>
+                                </div>
+                            </div>
+                            <div style="margin-top: 0.75rem; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 0.75rem;">
+                                <label class="option-label">
+                                    <input type="checkbox" id="recursive-scan" checked> Scan Subfolders
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Formats Section -->
+                    <div class="setting-section">
+                        <div class="setting-title">File Formats</div>
+                        <div class="checkbox-group" style="flex-direction: row; gap: 1.5rem;">
+                            <label class="option-label">
+                                <input type="checkbox" name="file-format" value="raw" checked> RAW (CR3, ARW, ETC.)
+                            </label>
+                            <label class="option-label">
+                                <input type="checkbox" name="file-format" value="jpeg"> JPEG (.JPG, .JPEG)
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-block" id="btn-scan" onclick="scanAndPreview()">
+                        Scan & Preview Matches
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Folder Selection Choice Card -->
+        <div class="card" id="folder-selection-card" style="display: none; border: 1px solid var(--accent-color); background: rgba(0, 0, 0, 0.02);">
+            <h3 id="folder-selection-title" style="margin-bottom: 0.5rem; color: var(--accent-color); font-family: var(--font-title); font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                📁 Multiple Matching Folders Found
+            </h3>
+            <p id="folder-selection-desc" style="color: var(--fg-muted); margin-bottom: 1.25rem; font-size: 0.9rem;">
+                Select the correct folder for client <strong><span id="choices-client-name"></span></strong> to scan:
+            </p>
+            <div id="folder-selection-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Results Card -->
+        <div class="card" id="results-card" style="display: none;">
+            <div class="tabs">
+                <button class="tab-btn active" id="tab-matches-btn" onclick="switchTab('matches')">Matches Found (0)</button>
+                <button class="tab-btn" id="tab-missing-btn" onclick="switchTab('missing')">Missing Numbers (0)</button>
+            </div>
+
+            <!-- Matches Tab Content -->
+            <div id="tab-matches" class="tab-content active">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>File Name</th>
+                                <th>Size</th>
+                                <th>Matched Query</th>
+                                <th>Relative Path</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matches-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Missing Tab Content -->
+            <div id="tab-missing" class="tab-content">
+                <div class="missing-list">
+                    <p id="missing-status-text">No missing numbers. Everything matched perfectly!</p>
+                    <div class="missing-grid" id="missing-grid-container">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Destination Folder Section (shown after scan matches are ready) -->
+            <div id="execution-folder-section" style="border-top: 1px solid var(--input-border); margin-top: 1.5rem; padding-top: 1.5rem;">
+                <div style="margin-bottom: 1rem;">
+                    <label class="option-label" style="text-transform: none; font-size: 0.9rem; font-weight: 700;">
+                        <input type="checkbox" id="save-inside-source" checked onchange="updateDestDisplay()"> 
+                        Save selection folder inside the scanned source directory
+                    </label>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="dest-folder" style="color: var(--fg-color); font-size: 0.85rem;">Destination Directory (where matches will copy/move)</label>
+                    <div class="input-group" style="margin-top: 0.5rem;">
+                        <input type="text" id="dest-folder" readonly placeholder="Select a custom destination directory...">
+                        <button type="button" class="btn-secondary" id="btn-browse-dest" onclick="selectDestDir()">Browse...</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="footer-action-bar">
+                <div class="progress-container">
+                    <div class="progress-text">
+                        <span id="progress-status">Ready to process</span>
+                        <span id="progress-percentage">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+                <button class="btn btn-success" id="btn-execute" disabled>
+                    Copy Matches
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sourceDirHandle = null;
+        let destDirHandle = null;
+        let scanTargetDirHandle = null;
+        let currentMatches = [];
+        let clientName = '';
+        let dashboardUrl = '';
+
+        let PROGRESS = {
+            current: 0,
+            total: 0,
+            status: 'Idle',
+            running: false
+        };
+
+        // Check browser compatibility on start
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.showDirectoryPicker) {
+                const warningDiv = document.createElement('div');
+                warningDiv.style.background = '#fffbeb';
+                warningDiv.style.border = '1px solid #fef3c7';
+                warningDiv.style.color = '#b45309';
+                warningDiv.style.padding = '1.25rem';
+                warningDiv.style.borderRadius = '12px';
+                warningDiv.style.marginBottom = '1.5rem';
+                warningDiv.style.fontWeight = '500';
+                warningDiv.style.display = 'flex';
+                warningDiv.style.alignItems = 'center';
+                warningDiv.style.gap = '10px';
+                warningDiv.innerHTML = `
+                    <span style="font-size: 1.5rem;">⚠️</span>
+                    <div>
+                        <strong style="display:block; margin-bottom: 2px;">Unsupported Browser Detected</strong>
+                        Your current browser does not support folder writing APIs. Please open this app in 
+                        <strong>Google Chrome</strong>, <strong>Microsoft Edge</strong>, or <strong>Apple Safari</strong> on desktop/laptop.
+                    </div>
+                `;
+                document.querySelector('.container').prepend(warningDiv);
+                
+                document.getElementById('btn-browse-src').disabled = true;
+                document.getElementById('btn-browse-dest').disabled = true;
+                document.getElementById('btn-scan').disabled = true;
+            }
+
+            // Read URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            clientName = urlParams.get('client') || '';
+            const numbers = urlParams.get('numbers') || '';
+            dashboardUrl = urlParams.get('dashboard') || '';
+
+            if (clientName) {
+                document.getElementById('client-name').value = clientName;
+            }
+            if (numbers) {
+                document.getElementById('photo-numbers').value = numbers;
+            }
+
+            // Restore last selected folder text if available
+            const lastSrcName = localStorage.getItem('photo_selector_last_source_name');
+            if (lastSrcName) {
+                document.getElementById('source-folder').placeholder = `Re-select: ${lastSrcName}`;
+            }
+
+            // Load saved settings
+            if (localStorage.getItem('photo_selector_match_mode')) {
+                const savedMode = localStorage.getItem('photo_selector_match_mode');
+                const radio = document.querySelector(`input[name="match-mode"][value="${savedMode}"]`);
+                if (radio) radio.checked = true;
+            }
+            if (localStorage.getItem('photo_selector_action_mode')) {
+                const savedAction = localStorage.getItem('photo_selector_action_mode');
+                const radio = document.querySelector(`input[name="action-mode"][value="${savedAction}"]`);
+                if (radio) radio.checked = true;
+            }
+            if (localStorage.getItem('photo_selector_recursive') !== null) {
+                document.getElementById('recursive-scan').checked = localStorage.getItem('photo_selector_recursive') === 'true';
+            }
+            if (localStorage.getItem('photo_selector_save_inside') !== null) {
+                document.getElementById('save-inside-source').checked = localStorage.getItem('photo_selector_save_inside') === 'true';
+            }
+            if (localStorage.getItem('photo_selector_formats')) {
+                try {
+                    const formats = JSON.parse(localStorage.getItem('photo_selector_formats'));
+                    document.querySelectorAll('input[name="file-format"]').forEach(cb => {
+                        cb.checked = formats.includes(cb.value);
+                    });
+                } catch (e) {
+                    console.error("Error loading formats: ", e);
+                }
+            }
+
+            updateDestDisplay();
+            
+            // Listen to client-name input updates
+            document.getElementById('client-name').addEventListener('input', () => {
+                updateDestDisplay();
+            });
+        });
+
+        function updateDestDisplay() {
+            const saveInside = document.getElementById('save-inside-source').checked;
+            const destInput = document.getElementById('dest-folder');
+            const browseDestBtn = document.getElementById('btn-browse-dest');
+            
+            if (saveInside) {
+                browseDestBtn.disabled = true;
+                const cName = document.getElementById('client-name').value.trim() || clientName || 'Client';
+                destInput.value = `[Inside Scanned Folder] / ${cName} selection`;
+            } else {
+                browseDestBtn.disabled = false;
+                if (destDirHandle) {
+                    destInput.value = destDirHandle.name;
+                } else {
+                    destInput.value = '';
+                }
+            }
+        }
+
+        async function selectSourceDir() {
+            try {
+                sourceDirHandle = await window.showDirectoryPicker();
+                scanTargetDirHandle = sourceDirHandle;
+                document.getElementById('source-folder').value = sourceDirHandle.name;
+                localStorage.setItem('photo_selector_last_source_name', sourceDirHandle.name);
+                updateDestDisplay();
+            } catch (err) {
+                console.error("Source selection cancelled", err);
+            }
+        }
+
+        async function selectDestDir() {
+            try {
+                destDirHandle = await window.showDirectoryPicker();
+                document.getElementById('dest-folder').value = destDirHandle.name;
+                document.getElementById('save-inside-source').checked = false;
+                updateDestDisplay();
+            } catch (err) {
+                console.error("Dest selection cancelled", err);
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            if (tabName === 'matches') {
+                document.getElementById('tab-matches-btn').classList.add('active');
+                document.getElementById('tab-matches').classList.add('active');
+            } else {
+                document.getElementById('tab-missing-btn').classList.add('active');
+                document.getElementById('tab-missing').classList.add('active');
+            }
+        }
+
+        function parseInputNumbers(rawText) {
+            const lines = rawText.split('\n');
+            const cleanedLines = lines.map(line => line.split('#')[0].trim());
+            const cleanedText = cleanedLines.join(' ');
+            
+            const tokens = cleanedText.split(/[\s,;\t]+/);
+            const queries = [];
+            for (let t of tokens) {
+                t = t.trim();
+                if (!t) continue;
+                
+                const tNoExt = t.replace(/\.[a-zA-Z0-9]+$/, '');
+                const matches = [...tNoExt.matchAll(/\d+/g)];
+                if (matches.length > 0) {
+                    const lastMatch = matches[matches.length - 1];
+                    const endPos = lastMatch.index + lastMatch[0].length;
+                    t = tNoExt.substring(0, endPos);
+                } else {
+                    t = tNoExt;
+                }
+                
+                queries.push(t);
+            }
+            return [...new Set(queries)];
+        }
+
+        // Walks folder handle recursively and extracts matching files
+        async function scanFiles(dirHandle, extensions, recursive) {
+            const files = [];
+            
+            async function walk(handle, relativePath) {
+                try {
+                    for await (const entry of handle.values()) {
+                        if (entry.kind === 'file') {
+                            const ext = '.' + entry.name.split('.').pop().toLowerCase();
+                            if (extensions.includes(ext)) {
+                                files.push({
+                                    name: entry.name,
+                                    handle: entry,
+                                    parentHandle: handle,
+                                    path: relativePath ? `${relativePath}/${entry.name}` : entry.name
+                                });
+                            }
+                        } else if (entry.kind === 'directory' && recursive) {
+                            await walk(entry, relativePath ? `${relativePath}/${entry.name}` : entry.name);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error listing files: ", e);
+                }
+            }
+            
+            await walk(dirHandle, '');
+            return files;
+        }
+
+        // Recursively locate folder matches containing clientName
+        async function findClientFolders(dirHandle, clientName) {
+            const results = [];
+            const clientNameLower = clientName.toLowerCase();
+            
+            if (dirHandle.name.toLowerCase().includes(clientNameLower)) {
+                results.push({ name: dirHandle.name, handle: dirHandle, path: dirHandle.name });
+            }
+            
+            async function walk(handle, currentPath) {
+                try {
+                    for await (const entry of handle.values()) {
+                        if (entry.kind === 'directory') {
+                            const entryPath = `${currentPath}/${entry.name}`;
+                            if (entry.name.toLowerCase().includes(clientNameLower)) {
+                                results.push({ name: entry.name, handle: entry, path: entryPath });
+                            }
+                            const depth = currentPath.split('/').length;
+                            if (depth < 4) { // depth safeguard
+                                await walk(entry, entryPath);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error listing directories: ", e);
+                }
+            }
+            
+            await walk(dirHandle, dirHandle.name);
+            return results;
+        }
+
+        function runMatching(allFiles, queries, mode) {
+            const matched = [];
+            const unmatchedQueries = new Set(queries);
+            
+            const processedFiles = allFiles.map(fileInfo => {
+                const parts = fileInfo.name.split('.');
+                const ext = parts.pop();
+                const baseName = parts.join('.');
+                const numsInFile = baseName.match(/\d+/g) || [];
+                const intsInFile = numsInFile.map(n => parseInt(n, 10));
+                
+                return {
+                    ...fileInfo,
+                    base: baseName,
+                    nums: numsInFile,
+                    ints: intsInFile
+                };
+            });
+            
+            for (const q of queries) {
+                const qLower = q.toLowerCase();
+                const qIsDigit = /^\d+$/.test(q);
+                const qInt = qIsDigit ? parseInt(q, 10) : null;
+                let qMatched = false;
+                
+                for (const f of processedFiles) {
+                    let isMatch = false;
+                    
+                    if (mode === "exact") {
+                        if (f.base.toLowerCase() === qLower) {
+                            isMatch = true;
+                        }
+                    } else if (mode === "substring") {
+                        if (f.base.toLowerCase().includes(qLower)) {
+                            isMatch = true;
+                        }
+                    } else { // "smart" Match
+                        if (qIsDigit) {
+                            if (f.ints.includes(qInt)) {
+                                isMatch = true;
+                            }
+                        } else {
+                            if (f.base.toLowerCase().includes(qLower)) {
+                                isMatch = true;
+                            }
+                        }
+                    }
+                    
+                    if (isMatch) {
+                        if (!matched.some(item => item.handle === f.handle)) {
+                            matched.push({
+                                name: f.name,
+                                handle: f.handle,
+                                parentHandle: f.parentHandle,
+                                path: f.path,
+                                num: q
+                            });
+                        }
+                        qMatched = true;
+                    }
+                }
+                
+                if (qMatched) {
+                    unmatchedQueries.delete(q);
+                }
+            }
+            
+            matched.sort((a, b) => a.name.localeCompare(b.name));
+            return {
+                matches: matched,
+                missing: Array.from(unmatchedQueries).sort()
+            };
+        }
+
+        async function scanAndPreview() {
+            if (!sourceDirHandle) {
+                alert("Please select the Source Directory first!");
+                return;
+            }
+            
+            const clientNameInput = document.getElementById('client-name').value.trim();
+            const numbers = document.getElementById('photo-numbers').value;
+            const mode = document.querySelector('input[name="match-mode"]:checked').value;
+            const recursive = document.getElementById('recursive-scan').checked;
+            
+            const formats = [];
+            document.querySelectorAll('input[name="file-format"]:checked').forEach(cb => {
+                if (cb.value === 'raw') {
+                    formats.push('.cr3', '.arw', '.nef', '.cr2', '.dng', '.orf', '.rw2', '.pef');
+                } else if (cb.value === 'jpeg') {
+                    formats.push('.jpg', '.jpeg');
+                }
+            });
+
+            if (formats.length === 0) {
+                alert("Please select at least one File Format!");
+                return;
+            }
+
+            const btnScan = document.getElementById('btn-scan');
+            btnScan.disabled = true;
+            btnScan.innerText = "Scanning Folder...";
+            document.getElementById('folder-selection-card').style.display = 'none';
+            document.getElementById('success-banner-container').innerHTML = ''; // Clear previous success banner
+
+            // Save configurations
+            localStorage.setItem('photo_selector_match_mode', mode);
+            localStorage.setItem('photo_selector_action_mode', document.querySelector('input[name="action-mode"]:checked').value);
+            localStorage.setItem('photo_selector_recursive', recursive);
+            localStorage.setItem('photo_selector_save_inside', document.getElementById('save-inside-source').checked);
+            
+            const savedFormats = [];
+            document.querySelectorAll('input[name="file-format"]:checked').forEach(cb => {
+                savedFormats.push(cb.value);
+            });
+            localStorage.setItem('photo_selector_formats', JSON.stringify(savedFormats));
+
+            try {
+                const queries = parseInputNumbers(numbers);
+                if (queries.length === 0) {
+                    alert("Please enter at least one photo selection number.");
+                    btnScan.disabled = false;
+                    btnScan.innerText = "Scan & Preview Matches";
+                    return;
+                }
+
+                let scanDir = sourceDirHandle;
+                
+                if (clientNameInput) {
+                    const foundDirs = await findClientFolders(sourceDirHandle, clientNameInput);
+                    if (foundDirs.length === 0) {
+                        alert(`Could not find any folder matching '${clientNameInput}' under '${sourceDirHandle.name}'.`);
+                        btnScan.disabled = false;
+                        btnScan.innerText = "Scan & Preview Matches";
+                        return;
+                    } else if (foundDirs.length === 1) {
+                        scanDir = foundDirs[0].handle;
+                    } else {
+                        // Show folder selection list
+                        showFolderChoices(foundDirs);
+                        btnScan.disabled = false;
+                        btnScan.innerText = "Scan & Preview Matches";
+                        return;
+                    }
+                }
+
+                await performScan(scanDir, queries, formats, mode, recursive);
+
+            } catch (err) {
+                alert("Error during scan: " + err.message);
+                console.error(err);
+            } finally {
+                btnScan.disabled = false;
+                btnScan.innerText = "Scan & Preview Matches";
+            }
+        }
+
+        function showFolderChoices(folders) {
+            const isMultiple = folders.length > 1;
+            document.getElementById('folder-selection-title').innerHTML = isMultiple ? '📁 Multiple Matching Folders Found' : '📁 Matching Folder Found';
+            document.getElementById('folder-selection-desc').innerHTML = isMultiple
+                ? `Select the correct folder to scan:`
+                : `Confirm or select the folder to scan:`;
+            
+            const listContainer = document.getElementById('folder-selection-list');
+            listContainer.innerHTML = '';
+            
+            folders.forEach(item => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn-secondary';
+                btn.style.textAlign = 'left';
+                btn.style.padding = '1rem';
+                btn.style.width = '100%';
+                btn.style.display = 'block';
+                btn.style.whiteSpace = 'normal';
+                btn.style.wordBreak = 'break-all';
+                btn.style.borderRadius = '8px';
+                btn.style.cursor = 'pointer';
+                btn.style.transition = 'all 0.2s';
+                btn.innerHTML = `
+                    <div style="font-weight: 600; font-size: 1rem; color: var(--fg-color); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                        📁 ${item.name}
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--fg-muted); font-family: var(--font-mono);">${item.path}</div>
+                `;
+                btn.onclick = async () => {
+                    document.getElementById('folder-selection-card').style.display = 'none';
+                    const numbersRaw = document.getElementById('photo-numbers').value;
+                    const queries = parseInputNumbers(numbersRaw);
+                    
+                    const formats = [];
+                    document.querySelectorAll('input[name="file-format"]:checked').forEach(cb => {
+                        if (cb.value === 'raw') {
+                            formats.push('.cr3', '.arw', '.nef', '.cr2', '.dng', '.orf', '.rw2', '.pef');
+                        } else if (cb.value === 'jpeg') {
+                            formats.push('.jpg', '.jpeg');
+                        }
+                    });
+                    
+                    const mode = document.querySelector('input[name="match-mode"]:checked').value;
+                    const recursive = document.getElementById('recursive-scan').checked;
+                    
+                    await performScan(item.handle, queries, formats, mode, recursive);
+                };
+                listContainer.appendChild(btn);
+            });
+            
+            document.getElementById('folder-selection-card').style.display = 'block';
+            document.getElementById('folder-selection-card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function performScan(scanDir, queries, extensions, mode, recursive) {
+            scanTargetDirHandle = scanDir;
+
+            const allFiles = await scanFiles(scanDir, extensions, recursive);
+            const result = runMatching(allFiles, queries, mode);
+            
+            currentMatches = result.matches;
+
+            // Fetch sizes of matched files
+            for (let item of currentMatches) {
+                try {
+                    const f = await item.handle.getFile();
+                    item.size = (f.size / (1024 * 1024)).toFixed(1);
+                } catch (e) {
+                    item.size = '0.0';
+                }
+            }
+
+            displayScanResults({
+                matches: currentMatches,
+                missing: result.missing
+            });
+        }
+
+        function displayScanResults(data) {
+            // Display Results Card
+            document.getElementById('results-card').style.display = 'block';
+
+            // Update tab titles
+            document.getElementById('tab-matches-btn').innerText = `Matches Found (${currentMatches.length})`;
+            document.getElementById('tab-missing-btn').innerText = `Missing Numbers (${data.missing.length})`;
+
+            updateDestDisplay();
+
+            // Render Matches Table
+            const tbody = document.getElementById('matches-tbody');
+            tbody.innerHTML = '';
+            if (currentMatches.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--fg-muted);">No matching files found.</td></tr>';
+            } else {
+                currentMatches.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${item.name}</strong></td>
+                        <td>${item.size} MB</td>
+                        <td><span class="badge">${item.num}</span></td>
+                        <td style="color:var(--fg-muted); font-size:0.85rem;">${item.path}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // Render Missing List
+            const missingStatusText = document.getElementById('missing-status-text');
+            const missingGrid = document.getElementById('missing-grid-container');
+            missingGrid.innerHTML = '';
+            
+            if (data.missing.length === 0) {
+                missingStatusText.innerText = "✅ All numbers matched successfully! No missing photos.";
+            } else {
+                missingStatusText.innerText = `❌ The following ${data.missing.length} numbers were not found in the source folder:`;
+                data.missing.forEach(num => {
+                    const div = document.createElement('div');
+                    div.className = 'missing-item';
+                    div.innerHTML = `⚠️ <span>${num}</span>`;
+                    missingGrid.appendChild(div);
+                });
+            }
+
+            // Update Execute Button text & state
+            const action = document.querySelector('input[name="action-mode"]:checked').value;
+            const btnExecute = document.getElementById('btn-execute');
+            
+            if (currentMatches.length > 0) {
+                const totalSize = currentMatches.reduce((acc, item) => acc + parseFloat(item.size), 0).toFixed(1);
+                btnExecute.innerText = `${action === 'copy' ? 'Copy' : 'Move'} ${currentMatches.length} Files (${totalSize} MB)`;
+                btnExecute.disabled = false;
+            } else {
+                btnExecute.innerText = `Process Selection (0 files)`;
+                btnExecute.disabled = true;
+            }
+
+            // Scroll to results
+            document.getElementById('results-card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function executeTransfer(destDir, files, action) {
+            PROGRESS.running = true;
+            PROGRESS.total = files.length;
+            PROGRESS.current = 0;
+            PROGRESS.status = `Preparing to ${action} files...`;
+            updateProgressUI();
+
+            let successCount = 0;
+            const errors = [];
+
+            for (let i = 0; i < files.length; i++) {
+                const fileInfo = files[i];
+                const name = fileInfo.name;
+
+                try {
+                    PROGRESS.current = i + 1;
+                    PROGRESS.status = `${action === 'copy' ? 'Copying' : 'Moving'} ${name} (${i+1}/${files.length})...`;
+                    updateProgressUI();
+
+                    const fileObj = await fileInfo.handle.getFile();
+                    
+                    // Resolve name conflict in destination directory
+                    let targetName = name;
+                    let counter = 1;
+                    while (true) {
+                        try {
+                            await destDir.getFileHandle(targetName, { create: false });
+                            const parts = name.split('.');
+                            const ext = parts.pop();
+                            const base = parts.join('.');
+                            targetName = `${base}_${counter}.${ext}`;
+                            counter++;
+                        } catch (e) {
+                            break;
+                        }
+                    }
+
+                    const destHandle = await destDir.getFileHandle(targetName, { create: true });
+                    const writable = await destHandle.createWritable();
+                    await writable.write(fileObj);
+                    await writable.close();
+
+                    if (action === 'move') {
+                        await fileInfo.parentHandle.removeEntry(name);
+                    }
+
+                    successCount++;
+                } catch (e) {
+                    console.error(`Failed to process ${name}: `, e);
+                    errors.push(`Failed to process ${name}: ${e.message || e}`);
+                }
+            }
+
+            PROGRESS.running = false;
+            PROGRESS.status = 'Idle';
+            updateProgressUI();
+
+            return {
+                success: successCount,
+                total: files.length,
+                errors: errors
+            };
+        }
+
+        function updateProgressUI() {
+            const fill = document.getElementById('progress-fill');
+            const status = document.getElementById('progress-status');
+            const pct = document.getElementById('progress-percentage');
+
+            if (PROGRESS.running) {
+                const percent = PROGRESS.total > 0 ? Math.round((PROGRESS.current / PROGRESS.total) * 100) : 0;
+                fill.style.width = `${percent}%`;
+                pct.innerText = `${percent}%`;
+                status.innerText = PROGRESS.status || 'Processing...';
+            } else {
+                fill.style.width = '100%';
+                pct.innerText = '100%';
+                status.innerText = 'Complete';
+            }
+        }
+
+        document.getElementById('btn-execute').addEventListener('click', async () => {
+            const action = document.querySelector('input[name="action-mode"]:checked').value;
+            const saveInside = document.getElementById('save-inside-source').checked;
+            
+            let targetDestDirHandle = null;
+
+            if (saveInside) {
+                if (!scanTargetDirHandle) {
+                    alert("No scanned folder found to save selections inside!");
+                    return;
+                }
+                const cName = document.getElementById('client-name').value.trim() || clientName || 'Client';
+                const folderName = `${cName} selection`;
+                try {
+                    targetDestDirHandle = await scanTargetDirHandle.getDirectoryHandle(folderName, { create: true });
+                } catch (e) {
+                    alert(`Failed to create destination folder inside scanned folder: ${e.message}`);
+                    return;
+                }
+            } else {
+                if (!destDirHandle) {
+                    alert("Please select the Destination Folder first!");
+                    return;
+                }
+                targetDestDirHandle = destDirHandle;
+            }
+
+            if (!confirm(`Are you sure you want to ${action} ${currentMatches.length} files to:\n${targetDestDirHandle.name}?`)) {
+                return;
+            }
+
+            const btnExecute = document.getElementById('btn-execute');
+            const btnScan = document.getElementById('btn-scan');
+            btnExecute.disabled = true;
+            btnScan.disabled = true;
+
+            try {
+                const result = await executeTransfer(targetDestDirHandle, currentMatches, action);
+                
+                if (result.errors.length > 0) {
+                    alert(`Transfer complete with some errors:\n\n${result.errors.slice(0, 5).join('\n')}`);
+                } else {
+                    const actionPast = action === 'copy' ? 'copied' : 'moved';
+                    alert(`Success! Successfully ${actionPast} ${result.success} of ${result.total} files.`);
+
+                    // Show success banner
+                    let bannerHtml = `
+                        <div class="success-banner" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <span style="font-size: 1.25rem;">✨</span>
+                                <div>
+                                    <strong>Transfer Complete!</strong> Successfully ${actionPast} ${result.success} of ${result.total} files.
+                                </div>
+                            </div>
+                    `;
+                    if (dashboardUrl) {
+                        const syncUrl = getSyncUrl();
+                        bannerHtml += `
+                            <a href="${syncUrl}" class="btn btn-success" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 6px; box-shadow: none;">
+                                ✨ Sync Selections to Dashboard
+                            </a>
+                        `;
+                    }
+                    bannerHtml += `</div>`;
+                    document.getElementById('success-banner-container').innerHTML = bannerHtml;
+                    document.getElementById('success-banner-container').scrollIntoView({ behavior: 'smooth' });
+
+                    if (action === 'move') {
+                        currentMatches = [];
+                        document.getElementById('results-card').style.display = 'none';
+                    }
+                }
+            } catch (err) {
+                alert("Error executing transfer: " + err.message);
+            } finally {
+                btnScan.disabled = false;
+                btnExecute.disabled = false;
+            }
+        });
+
+        function getSyncUrl() {
+            if (!dashboardUrl) return '';
+            const cName = document.getElementById('client-name').value.trim() || clientName;
+            try {
+                const url = new URL(dashboardUrl);
+                url.searchParams.set('action', 'complete_selection');
+                url.searchParams.set('client', cName);
+                url.searchParams.set('photosCount', currentMatches.length);
+                return url.toString();
+            } catch (e) {
+                const connector = dashboardUrl.includes('?') ? '&' : '?';
+                return `${dashboardUrl}${connector}action=complete_selection&client=${encodeURIComponent(cName)}&photosCount=${currentMatches.length}`;
+            }
+        }
+    </script>
+</body>
+</html>
