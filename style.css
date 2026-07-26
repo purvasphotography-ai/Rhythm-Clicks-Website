@@ -2572,3 +2572,637 @@ footer {
     padding-bottom: calc(96px + env(safe-area-inset-bottom, 0));
   }
 }
+
+/* ==========================================================================
+   Janmashtami Promotion Styles (Cream & Gold Theme)
+   ========================================================================== */
+
+/* Popup Overlay */
+.janmashtami-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2000;
+  background-color: rgba(12, 27, 20, 0.75); /* Dark green tint overlay */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.janmashtami-popup.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Popup Content Card */
+.janmashtami-popup-content {
+  background: #faf6f0; /* Cream background */
+  border: 3px double #b38728; /* Double gold border */
+  border-radius: 24px;
+  max-width: 580px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25), 0 0 30px rgba(179, 135, 40, 0.1);
+  transform: translateY(40px) scale(0.95);
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  overflow: hidden;
+  color: #2d3748;
+}
+
+.janmashtami-popup.active .janmashtami-popup-content {
+  transform: translateY(0) scale(1);
+}
+
+/* Close Button */
+.janmashtami-popup-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(15, 56, 35, 0.08);
+  border: 1px solid rgba(179, 135, 40, 0.3);
+  color: #0f3823;
+  font-size: 1.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.janmashtami-popup-close:hover {
+  background: #0f3823;
+  color: #faf6f0;
+  transform: rotate(90deg);
+}
+
+/* Popup Banner Image */
+.janmashtami-popup-banner {
+  width: 100%;
+  height: 250px;
+  position: relative;
+  overflow: hidden;
+}
+
+.janmashtami-popup-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+.janmashtami-popup-banner::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: linear-gradient(to top, #faf6f0, transparent);
+}
+
+/* Popup Text Section */
+.janmashtami-popup-body {
+  padding: 25px 35px 35px;
+  text-align: center;
+}
+
+.janmashtami-popup-tag {
+  display: inline-block;
+  background: rgba(15, 56, 35, 0.06);
+  border: 1px solid rgba(179, 135, 40, 0.3);
+  color: #0f3823;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.janmashtami-popup-body h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  color: #0f3823; /* Forest green */
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+}
+
+.janmashtami-popup-body p {
+  color: #4a5568;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 25px;
+  font-family: 'Outfit', sans-serif;
+}
+
+.janmashtami-popup-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.janmashtami-btn-gold {
+  background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fcf6ba 75%, #bf953f 100%);
+  color: #0f3823 !important;
+  font-weight: 700;
+  border: 1px solid #b38728;
+  box-shadow: 0 4px 15px rgba(179, 135, 40, 0.2);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.janmashtami-btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(179, 135, 40, 0.35);
+  background: linear-gradient(135deg, #fcf6ba 0%, #bf953f 50%, #fcf6ba 100%);
+}
+
+.janmashtami-btn-outline {
+  border: 1px solid rgba(15, 56, 35, 0.3);
+  background: transparent;
+  color: #0f3823 !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.janmashtami-btn-outline:hover {
+  background: rgba(15, 56, 35, 0.05);
+  border-color: #0f3823;
+  transform: translateY(-2px);
+}
+
+/* Dedicated Landing Page Custom Styles */
+.janmashtami-page {
+  background: #fdfbf7 !important; /* Creamy canvas background */
+  color: #2d3748 !important;
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+}
+
+.janmashtami-page header.scrolled {
+  background: rgba(253, 251, 247, 0.96) !important;
+  border-bottom: 1px solid rgba(179, 135, 40, 0.15);
+}
+
+.janmashtami-page header .nav-link,
+.janmashtami-page header .btn-secondary {
+  color: #0f3823 !important;
+}
+
+.janmashtami-hero {
+  padding: 160px 0 80px;
+  text-align: center;
+  position: relative;
+  background: radial-gradient(circle at top, #faf3e6 0%, #fdfbf7 70%);
+}
+
+.janmashtami-gold-text {
+  background: linear-gradient(135deg, #a87e22 0%, #dfb76c 50%, #8a6515 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  font-weight: 700;
+}
+
+.janmashtami-hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 15px;
+  color: #0f3823; /* Forest green */
+}
+
+.janmashtami-hero p {
+  font-size: 1.15rem;
+  color: #4a5568;
+  max-width: 650px;
+  margin: 0 auto 35px;
+  line-height: 1.6;
+}
+
+/* Subtitle and headings */
+.janmashtami-page .section-header h2 {
+  color: #0f3823 !important;
+}
+
+.janmashtami-page .subtitle {
+  color: #b38728 !important;
+}
+
+/* Package Grid and Redesign */
+.janmashtami-packages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+}
+
+@media (min-width: 992px) {
+  .janmashtami-packages-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.janmashtami-package-card {
+  background: #ffffff;
+  border: 1px solid rgba(179, 135, 40, 0.2);
+  border-radius: 20px;
+  padding: 40px 30px;
+  box-shadow: 0 10px 30px rgba(15, 56, 35, 0.03);
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-top: 4px solid #b38728; /* Gold top border */
+}
+
+.janmashtami-package-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(179, 135, 40, 0.12);
+  border-color: rgba(179, 135, 40, 0.4);
+}
+
+.janmashtami-card-num {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #730819;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: 2px solid #ffffff;
+}
+
+.janmashtami-package-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: #0f3823;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.janmashtami-package-card .desc {
+  font-size: 0.88rem;
+  color: #718096;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.janmashtami-price-badge {
+  background: radial-gradient(circle, #730819 0%, #8c1c2b 100%);
+  color: #ffffff;
+  font-size: 1.6rem;
+  font-weight: 700;
+  padding: 6px 28px;
+  border-radius: 30px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 10px rgba(115, 8, 25, 0.25);
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.janmashtami-package-details {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 30px;
+  width: 100%;
+  text-align: left;
+}
+
+.janmashtami-package-details li {
+  padding: 8px 0 8px 28px;
+  position: relative;
+  font-size: 0.95rem;
+  color: #4a5568;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.janmashtami-package-details li::before {
+  content: ' ';
+  position: absolute;
+  left: 2px;
+  top: 10px;
+  width: 16px;
+  height: 16px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* Custom bullet icon rules */
+.janmashtami-package-details li.bullet-time::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b38728' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16 14'/%3E%3C/svg%3E");
+}
+.janmashtami-package-details li.bullet-pics::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b38728' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z'/%3E%3Ccircle cx='12' cy='13' r='4'/%3E%3C/svg%3E");
+}
+.janmashtami-package-details li.bullet-outfit::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b38728' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.85 5.68a2 2 0 0 0 2 1.71h1.78l-.92 8.24A2 2 0 0 0 8 23.38h8a2 2 0 0 0 2.01-2.06l-.92-8.24h1.78a2 2 0 0 0 2-1.71l.85-5.68a2 2 0 0 0-1.34-2.23z'/%3E%3C/svg%3E");
+}
+.janmashtami-package-details li.bullet-age::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b38728' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
+}
+.janmashtami-package-details li.bullet-mom::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b38728' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
+}
+.janmashtami-package-details li.bullet-video::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b38728' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='23 7 16 12 23 17 23 7'/%3E%3Crect x='1' y='5' width='15' height='14' rx='2' ry='2'/%3E%3C/svg%3E");
+}
+
+/* Session Details Block */
+.janmashtami-session-details {
+  background: #ffffff;
+  border: 1px solid rgba(179, 135, 40, 0.15);
+  border-radius: 20px;
+  padding: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 20px;
+  margin-top: 50px;
+  box-shadow: 0 8px 25px rgba(15, 56, 35, 0.02);
+  text-align: center;
+}
+
+.janmashtami-detail-item {
+  flex: 1;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.janmashtami-detail-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(15, 56, 35, 0.05);
+  border: 1px solid rgba(179, 135, 40, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f3823;
+  margin-bottom: 5px;
+}
+
+.janmashtami-detail-item strong {
+  font-size: 0.95rem;
+  color: #0f3823;
+}
+
+.janmashtami-detail-item span {
+  font-size: 0.8rem;
+  color: #718096;
+}
+
+/* Add-ons styling */
+.janmashtami-addons-wrapper {
+  background: #ffffff;
+  border: 1px solid rgba(179, 135, 40, 0.15);
+  border-radius: 20px;
+  padding: 35px;
+  margin-top: 30px;
+  box-shadow: 0 8px 25px rgba(15, 56, 35, 0.02);
+}
+
+.janmashtami-addons-wrapper h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: #0f3823;
+  margin-bottom: 25px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.janmashtami-addons-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .janmashtami-addons-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.janmashtami-addon-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 15px 20px;
+  background: #faf8f5;
+  border-radius: 15px;
+  border-left: 4px solid #b38728;
+}
+
+.janmashtami-addon-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(179, 135, 40, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b38728;
+  flex-shrink: 0;
+}
+
+.janmashtami-addon-text h4 {
+  font-size: 1.05rem;
+  color: #0f3823;
+  margin-bottom: 2px;
+}
+
+.janmashtami-addon-text p {
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+/* Terms and Conditions */
+.janmashtami-terms-wrapper {
+  background: #faf8f5;
+  border: 1px solid rgba(179, 135, 40, 0.15);
+  border-radius: 20px;
+  padding: 40px;
+  margin-top: 60px;
+}
+
+.janmashtami-terms-wrapper h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: #0f3823;
+  margin-bottom: 30px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+}
+
+.janmashtami-terms-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px 40px;
+}
+
+@media (min-width: 768px) {
+  .janmashtami-terms-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.janmashtami-term-item {
+  position: relative;
+  padding-left: 28px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #4a5568;
+}
+
+.janmashtami-term-item::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #b38728;
+  font-weight: 700;
+  font-size: 1rem;
+  top: -1px;
+}
+
+/* Mini Showcase Gallery */
+.janmashtami-gallery-title {
+  text-align: center;
+  margin-top: 80px;
+  margin-bottom: 40px;
+}
+
+.janmashtami-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 60px;
+}
+
+.janmashtami-gallery-item {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(179, 135, 40, 0.15);
+  box-shadow: 0 8px 20px rgba(15, 56, 35, 0.02);
+  aspect-ratio: 3 / 2;
+  cursor: pointer;
+  position: relative;
+}
+
+.janmashtami-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+  display: block;
+}
+
+.janmashtami-gallery-item:hover img {
+  transform: scale(1.05);
+}
+
+.janmashtami-gallery-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 56, 35, 0.3);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: opacity 0.3s ease;
+}
+
+.janmashtami-gallery-item:hover .janmashtami-gallery-overlay {
+  opacity: 1;
+}
+
+/* Main Booking Footer Section */
+.janmashtami-booking-footer {
+  text-align: center;
+  padding: 60px 0;
+  background: radial-gradient(circle, #faf3e6 0%, #fdfbf7 100%);
+  border-top: 1px solid rgba(179, 135, 40, 0.15);
+  margin-top: 80px;
+}
+
+.janmashtami-booking-footer h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  color: #0f3823;
+  margin-bottom: 25px;
+}
+
+.janmashtami-booking-details {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-bottom: 35px;
+}
+
+.janmashtami-booking-info-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  color: #0f3823;
+  font-weight: 600;
+}
+
+.janmashtami-booking-info-item a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.janmashtami-booking-info-item a:hover {
+  color: #b38728;
+}
+
+.janmashtami-booking-info-item svg {
+  width: 20px;
+  height: 20px;
+  color: #b38728;
+}
