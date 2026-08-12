@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Selection & Delivery Guide | Rhythm Clicks Studio</title>
+  <meta name="description" content="Official client photo selection portal for Rhythm Clicks Studio in Gandhinagar & Ahmedabad. Easily find your photo filenames and submit in sequence.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://rhythmclicksstudio.com/selection.html">
+
+  <!-- Favicons matching rhythmclicksstudio.com -->
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192x192.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="selection.css">
+</head>
+<body>
+
+  <!-- Ambient Liquid Glass Blobs matching rhythmclicksstudio.com -->
+  <div class="glass-blob glass-blob-1"></div>
+  <div class="glass-blob glass-blob-2"></div>
+  <div class="glass-blob glass-blob-3"></div>
+
+  <!-- ========================================================================
+       Header / Navigation
+       ======================================================================== -->
+  <header class="header">
+    <div class="container nav-content">
+      <a href="index.html" class="brand" title="Rhythm Clicks Studio Homepage">
+        <img 
+          src="assets/logo.webp" 
+          alt="Rhythm Clicks Studio Logo" 
+          class="brand-logo-img"
+          onerror="this.style.display='none'; document.getElementById('brandFallback').style.display='block';"
+        >
+        <div class="brand-text-fallback" id="brandFallback" style="display: none;">
+          <h1 data-i18n="nav_studio">Rhythm Clicks Studio</h1>
+          <span data-i18n="nav_tagline">Photo Selection Portal</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#workflow" class="nav-link" data-i18n="nav_how_it_works">Step-by-Step Guide</a></li>
+        <li><a href="#visual-details" class="nav-link">Finding Filename</a></li>
+        <li><a href="#video-guide" class="nav-link" data-i18n="nav_video_guide">Video Tutorial</a></li>
+        <li><a href="#builder" class="nav-link" data-i18n="nav_builder">Selection Tool</a></li>
+        <li><a href="#timelines" class="nav-link" data-i18n="nav_timelines">Timelines</a></li>
+        <li><a href="#faq" class="nav-link" data-i18n="nav_faq">FAQs</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <!-- Trilingual Switcher -->
+        <div class="lang-switcher" id="langSwitcher" role="group" aria-label="Language Selector">
+          <button class="lang-btn active" data-lang="en" id="btnLangEn">EN</button>
+          <button class="lang-btn" data-lang="hi" id="btnLangHi">हिन्दी</button>
+          <button class="lang-btn" data-lang="gu" id="btnLangGu">ગુજરાતી</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       Hero Section
+       ======================================================================== -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-badge" data-i18n="hero_badge">✨ Official Client Selection Guide</div>
+      <h1 class="hero-title" data-i18n="hero_title">How to Select Your Photos for Editing</h1>
+      <p class="hero-subtitle" data-i18n="hero_subtitle">
+        Welcome to <strong>Rhythm Clicks Studio</strong>. Follow our simple step-by-step workflow to open your gallery, tap the Info (ⓘ) icon to find only the <strong>Filename</strong> (e.g. <code>_CS_0548.jpg</code>), and submit your final list in sequence in 1-click via WhatsApp.
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="#builder" class="btn-primary" data-i18n="hero_btn_builder">Open Selection Tool</a>
+        <a href="#video-guide" class="btn-secondary" data-i18n="hero_btn_video">Watch Video Walkthrough</a>
+      </div>
+
+      <!-- Quick Stats Banner -->
+      <div class="stats-banner">
+        <div class="stat-item">
+          <div class="stat-value" data-i18n="stat_selection_time">30 Days</div>
+          <div class="stat-label" data-i18n="stat_selection_label">Selection Window</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" data-i18n="stat_editing_time">Approx. 20 Days</div>
+          <div class="stat-label" data-i18n="stat_editing_label">Professional Editing</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" data-i18n="stat_format">30 Days</div>
+          <div class="stat-label" data-i18n="stat_format_label">Download Link Validity</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Step by Step Workflow Section
+       ======================================================================== -->
+  <section class="section" id="workflow">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="nav_how_it_works">Step-by-Step Guide</span>
+        <h2 class="section-title" data-i18n="steps_section_title">Simple 4-Step Selection Process</h2>
+        <p class="section-subtitle" data-i18n="steps_section_subtitle">
+          Follow these visual steps to submit your final selection in clean sequence.
+        </p>
+      </div>
+
+      <div class="steps-grid">
+        <!-- Step 1 -->
+        <div class="step-card">
+          <div class="step-number-badge" data-i18n="step_1_num">01</div>
+          <h3 data-i18n="step_1_title">Open Your Gallery Link</h3>
+          <p data-i18n="step_1_desc">
+            Click the private gallery link sent by Rhythm Clicks Studio on your WhatsApp or Email. You can open it on your phone or computer.
+          </p>
+          <ul class="step-bullets">
+            <li data-i18n="step_1_bullet_1">Browse albums (e.g. Newborn, Maternity, Family, Milestones).</li>
+            <li data-i18n="step_1_bullet_2">Click on any photo you like to view it.</li>
+          </ul>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card highlight-step">
+          <div class="step-number-badge" data-i18n="step_2_num">02</div>
+          <h3 data-i18n="step_2_title">Tap Info (ⓘ) & Note the 'Filename'</h3>
+          <p data-i18n="step_2_desc">
+            Tap the <strong>'ⓘ Info'</strong> icon to open the Details panel. Look strictly at the <strong>Filename</strong> line (e.g. <code>_CS_0548.jpg</code>).
+          </p>
+          <ul class="step-bullets">
+            <li data-i18n="step_2_bullet_1">⚠️ We ONLY need the Filename (e.g. _CS_0548.jpg).</li>
+            <li data-i18n="step_2_bullet_2">You do not need dimensions, camera, or file size.</li>
+          </ul>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card">
+          <div class="step-number-badge" data-i18n="step_3_num">03</div>
+          <h3 data-i18n="step_3_title">Add Numbers to Our Tool</h3>
+          <p data-i18n="step_3_desc">
+            Type or paste the filenames into our online tool below. It automatically numbers them in sequence (1, 2, 3...) and prevents duplicate entries.
+          </p>
+          <ul class="step-bullets">
+            <li data-i18n="step_3_bullet_1">Enter single numbers or paste comma-separated lists.</li>
+            <li data-i18n="step_3_bullet_2">Auto-arranges in clean sequence for the editing team.</li>
+          </ul>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-card">
+          <div class="step-number-badge" data-i18n="step_4_num">04</div>
+          <h3 data-i18n="step_4_title">Send via WhatsApp or Copy</h3>
+          <p data-i18n="step_4_desc">
+            Click <strong>'Share with WhatsApp'</strong> or <strong>'Copy Formatted List'</strong>. Rhythm Clicks Studio will confirm receipt and begin editing!
+          </p>
+          <ul class="step-bullets">
+            <li data-i18n="step_4_bullet_1">Instant confirmation message from our studio.</li>
+            <li data-i18n="step_4_bullet_2">Professional retouching begins right away.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Visual Gallery Details Simulation (Exact Video Screen Demonstration)
+       ======================================================================== -->
+  <section class="section" id="visual-details" style="background: var(--bg-secondary); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Visual Demonstration</span>
+        <h2 class="section-title" data-i18n="mockup_title">Where to Find the 'Filename' in Your Gallery</h2>
+        <p class="section-subtitle" data-i18n="mockup_subtitle">
+          As demonstrated in the video, open the Details (ⓘ) menu and look at the Filename line:
+        </p>
+      </div>
+
+      <!-- Exact Video Screenshot Card -->
+      <div class="video-mockup-card">
+        <!-- Top Toolbar -->
+        <div class="mockup-top-bar">
+          <div class="mockup-brand-tag">
+            <span style="font-family: var(--font-serif); font-weight: 700; color: var(--accent-gold-light); font-size: 1.05rem;">Rhythm Clicks Studio</span>
+          </div>
+          <div class="mockup-icons">
+            <span>🔗</span>
+            <span class="mockup-info-icon" title="Details Icon">ⓘ</span>
+            <span>🔊</span>
+            <span>⚙️</span>
+          </div>
+        </div>
+
+        <!-- Video Title & Studio Header -->
+        <div class="mockup-header-content">
+          <h3 style="font-size: 1.25rem; font-weight: 600; color: #fff;">Photo Selection Process</h3>
+          <span style="color: #94A3B8; font-size: 0.9rem;">Rhythm Clicks Studio • Gandhinagar & Ahmedabad</span>
+        </div>
+
+        <!-- Details Panel UI -->
+        <div class="mockup-details-panel">
+          <div class="details-heading">Details</div>
+
+          <div class="details-table">
+            <div class="details-row">
+              <span class="d-label">Date</span>
+              <span class="d-val">2/7/2022, 7:16:35 PM</span>
+            </div>
+
+            <!-- Filename Highlight Row -->
+            <div class="details-row highlight-filename-row">
+              <div class="d-label-group">
+                <span class="d-label" style="color: #fff; font-weight: 600;" data-i18n="mockup_file_label">Filename</span>
+                <span class="copy-only-pill">⭐️ ONLY COPY THIS</span>
+              </div>
+              <strong class="d-val filename-val" data-i18n="mockup_img_name">_CS_0548.jpg</strong>
+            </div>
+
+            <div class="details-row">
+              <span class="d-label">Dimensions</span>
+              <span class="d-val">5760 X 4264</span>
+            </div>
+            <div class="details-row">
+              <span class="d-label">File size</span>
+              <span class="d-val">11.97 MB</span>
+            </div>
+            <div class="details-row">
+              <span class="d-label">Creator</span>
+              <span class="d-val">PURVA PATEL</span>
+            </div>
+            <div class="details-row">
+              <span class="d-label">Copyright</span>
+              <span class="d-val">RHYTHM CLICKS STUDIO</span>
+            </div>
+          </div>
+
+          <!-- Bottom Visual Callout -->
+          <div class="mockup-callout-footer">
+            <div class="callout-pointer-badge" data-i18n="mockup_info_badge">
+              👉 Copy ONLY this Filename (e.g. _CS_0548.jpg) for your selection
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Video Tutorial Section
+       ======================================================================== -->
+  <section class="section" id="video-guide">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="nav_video_guide">Video Tutorial</span>
+        <h2 class="section-title" data-i18n="video_section_title">Watch the Video Tutorial</h2>
+        <p class="section-subtitle" data-i18n="video_section_subtitle">
+          See how simple it is to open the photo details and find the exact Filename (_CS_XXXX.jpg).
+        </p>
+      </div>
+
+      <div class="video-grid">
+        <!-- YouTube Short Embed -->
+        <div class="video-frame-wrapper">
+          <iframe 
+            src="https://www.youtube-nocookie.com/embed/LLbcjqwrWls?rel=0&modestbranding=1" 
+            title="How to select photos from gallery tutorial" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+          </iframe>
+        </div>
+
+        <!-- Video Tips Side -->
+        <div class="video-content-side">
+          <div class="video-tip-card">
+            <div class="tip-icon">ℹ️</div>
+            <div class="tip-text">
+              <h4 data-i18n="video_tip_1_title">1. Tap (i) / Details Icon</h4>
+              <p data-i18n="video_tip_1_desc">Tap the (i) info icon at the top of the photo to open the Details screen.</p>
+            </div>
+          </div>
+
+          <div class="video-tip-card highlight-tip">
+            <div class="tip-icon" style="background: var(--accent-gold-soft); color: var(--accent-gold);">🎯</div>
+            <div class="tip-text">
+              <h4 data-i18n="video_tip_2_title">2. Copy ONLY the Filename</h4>
+              <p data-i18n="video_tip_2_desc">Under 'Details', look for <strong>'Filename'</strong> (e.g., <code>_CS_0548.jpg</code>). You only need this name—ignore file size, date, or camera settings.</p>
+            </div>
+          </div>
+
+          <div class="video-tip-card">
+            <div class="tip-icon">🔢</div>
+            <div class="tip-text">
+              <h4 data-i18n="video_tip_3_title">3. Submit Sequentially</h4>
+              <p data-i18n="video_tip_3_desc">Add your numbers into our selection builder below to auto-format them in sequential order (1, 2, 3...) for WhatsApp.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Interactive Photo Selection Builder (Sequential)
+       ======================================================================== -->
+  <section class="section" id="builder">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="nav_builder">Selection Tool</span>
+        <h2 class="section-title" data-i18n="builder_section_title">Interactive Photo Selection Tool</h2>
+        <p class="section-subtitle" data-i18n="builder_section_subtitle">
+          Type or paste your filenames below. The tool formats them in sequence (1, 2, 3...) ready to send via WhatsApp or copy directly!
+        </p>
+      </div>
+
+      <div class="builder-box">
+        <!-- Client Name Input -->
+        <div class="form-row">
+          <label class="form-label" for="clientNameInput" data-i18n="builder_client_name_label">Client Name / Session Name:</label>
+          <input 
+            type="text" 
+            id="clientNameInput" 
+            class="form-input" 
+            placeholder="e.g., Priya - Maternity / Baby Aarav" 
+            data-i18n-placeholder="builder_client_name_placeholder"
+          >
+        </div>
+
+        <!-- Photo Number Input & Add Button -->
+        <div class="form-row">
+          <label class="form-label" for="photoInput" data-i18n="builder_input_label">Add Filename(s) or Photo Numbers:</label>
+          <div class="input-add-group">
+            <input 
+              type="text" 
+              id="photoInput" 
+              class="form-input" 
+              placeholder="Type filename (e.g. _CS_0548.jpg or 0548) & press Enter" 
+              data-i18n-placeholder="builder_input_placeholder"
+            >
+            <button type="button" class="btn-add" id="btnAddPhoto" data-i18n="builder_btn_add">+ Add Photo</button>
+          </div>
+
+          <div class="builder-quick-actions">
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+              <button type="button" class="btn-link-action" id="btnOpenPasteModal" data-i18n="builder_btn_paste">📋 Paste Multiple Filenames</button>
+              <button type="button" class="btn-link-action" id="btnSortPhotos" data-i18n="builder_btn_sort">🔢 Sort in Sequence</button>
+            </div>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Separate filenames with comma or space</span>
+          </div>
+        </div>
+
+        <!-- Selected Tags Container (Sequential List) -->
+        <div class="selected-container">
+          <div class="selected-header">
+            <h4>
+              <span data-i18n="builder_selected_heading">Selected Photos in Sequence</span>
+              <span class="count-badge" id="photoCountBadge">0 Photos</span>
+            </h4>
+            <button type="button" class="btn-clear" id="btnClearAll" data-i18n="builder_clear_all">Clear All</button>
+          </div>
+
+          <div class="photo-tags-grid" id="photoTagsGrid">
+            <div class="empty-state" id="emptyStateMsg" data-i18n="builder_empty_state">
+              No filenames added yet. Start typing above to build your sequential list!
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 Primary Action Buttons: WhatsApp & Copy -->
+        <div class="export-actions-grid two-btn-grid">
+          <button type="button" class="btn-whatsapp action-btn-large" id="btnSendWhatsApp">
+            <span style="font-size: 1.3rem;">💬</span>
+            <span data-i18n="builder_whatsapp_btn">Share with WhatsApp</span>
+          </button>
+
+          <button type="button" class="btn-copy action-btn-large" id="btnCopyTemplate">
+            <span style="font-size: 1.2rem;">📋</span>
+            <span data-i18n="builder_copy_btn">Copy Formatted List</span>
+          </button>
+        </div>
+
+        <!-- Standard Reply Template Format Preview Box -->
+        <div class="template-preview-box">
+          <h5 data-i18n="template_box_title">Official WhatsApp Message Format</h5>
+          <p data-i18n="template_box_desc">This is the exact sequence format sent to Rhythm Clicks Studio:</p>
+          <pre class="template-code" id="templateCodePreview">📸 Photo Selection & Delivery Details
+Studio: Rhythm Clicks Studio
+Client Name: [Your Name]
+Selected Photo Numbers:
+1. _CS_0548.jpg
+2. _CS_0550.jpg
+3. ...</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Timelines & Milestone Tracker
+       ======================================================================== -->
+  <section class="section" id="timelines">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="nav_timelines">Timelines & Delivery</span>
+        <h2 class="section-title" data-i18n="timeline_section_title">Important Timelines & Policies</h2>
+        <p class="section-subtitle" data-i18n="timeline_section_subtitle">
+          Please note our studio timelines to keep post-production on track.
+        </p>
+      </div>
+
+      <div class="timeline-cards-grid">
+        <!-- Card 1 -->
+        <div class="timeline-card">
+          <span class="timeline-badge green" data-i18n="timeline_card_1_badge">✅ Selection Window</span>
+          <h3 data-i18n="timeline_card_1_title">30-Day Photo Selection</h3>
+          <p data-i18n="timeline_card_1_desc">
+            Please make your selection within <strong>30 days</strong>. We cannot proceed with editing after this period without rescheduling.
+          </p>
+          <div class="timeline-highlight" data-i18n="timeline_card_1_highlight">⏱️ Limit: 30 Days from gallery delivery</div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="timeline-card">
+          <span class="timeline-badge amber" data-i18n="timeline_card_2_badge">⏳ Post-Production</span>
+          <h3 data-i18n="timeline_card_2_title">20-Day Professional Editing</h3>
+          <p data-i18n="timeline_card_2_desc">
+            Professional editing takes approximately <strong>20 days</strong> to complete once the selection is confirmed.
+          </p>
+          <div class="timeline-highlight" data-i18n="timeline_card_2_highlight">🎨 Turnaround: Approx. 20 Days</div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="timeline-card">
+          <span class="timeline-badge blue" data-i18n="timeline_card_3_badge">💾 Storage & Download</span>
+          <h3 data-i18n="timeline_card_3_title">30-Day Active Gallery Link</h3>
+          <p data-i18n="timeline_card_3_desc">
+            The gallery link is active for <strong>30 days only</strong>. Please download and save your files immediately to avoid losing access.
+          </p>
+          <div class="timeline-highlight" data-i18n="timeline_card_3_highlight">⚠️ Storage: Cloud link expires in 30 Days</div>
+        </div>
+      </div>
+
+      <!-- Milestone Calculator -->
+      <div class="calc-box">
+        <h4 data-i18n="calc_title">📅 Estimate Your Milestone Dates</h4>
+        <p data-i18n="calc_desc">
+          Select the date you received your gallery link from Rhythm Clicks Studio to see your exact deadlines:
+        </p>
+
+        <div class="calc-input-wrapper">
+          <label for="calcGalleryDate" data-i18n="calc_input_label">Gallery Link Received Date:</label>
+          <input type="date" id="calcGalleryDate" class="calc-date-input">
+        </div>
+
+        <div class="calc-results-grid">
+          <div class="calc-res-item">
+            <span data-i18n="calc_res_selection">Selection Deadline (30 Days):</span>
+            <strong id="resSelectionDate">-- / -- / ----</strong>
+          </div>
+          <div class="calc-res-item">
+            <span data-i18n="calc_res_editing">Est. Edited Delivery (~20 Days):</span>
+            <strong id="resEditingDate">-- / -- / ----</strong>
+          </div>
+          <div class="calc-res-item">
+            <span data-i18n="calc_res_expiry">Gallery Expiry Date:</span>
+            <strong id="resExpiryDate">-- / -- / ----</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       FAQ Section
+       ======================================================================== -->
+  <section class="section" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="nav_faq">Frequently Asked Questions</span>
+        <h2 class="section-title" data-i18n="faq_section_title">Frequently Asked Questions</h2>
+        <p class="section-subtitle" data-i18n="faq_section_subtitle">
+          Got questions? Here are quick answers to assist your selection process.
+        </p>
+      </div>
+
+      <div class="faq-grid">
+        <!-- Q1 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <span data-i18n="faq_q1">What information should I copy from the gallery?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p data-i18n="faq_a1">You only need the <strong>Filename</strong> (e.g. <code>_CS_0548.jpg</code>). You do not need the date, dimensions, file size, or camera model.</p>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <span data-i18n="faq_q2">Can I select photos from my smartphone?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p data-i18n="faq_a2">Yes! Tap the 'ⓘ Info' button at the top on your phone screen to see the filename. However, viewing on a computer screen gives a bigger view to check expressions.</p>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <span data-i18n="faq_q3">What happens if I miss the 30-day selection period?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p data-i18n="faq_a3">As per our studio policy, galleries expire and move to archival storage. We cannot proceed with editing after 30 days without an archive retrieval fee.</p>
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <span data-i18n="faq_q4">Can I choose extra photos beyond my package?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p data-i18n="faq_a4">Yes! Simply add all desired filenames in sequence. Extra retouched photos are billed at our standard studio rates.</p>
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <span data-i18n="faq_q5">How will I receive the final edited photos?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p data-i18n="faq_a5">You will receive a high-resolution download link valid for 30 days to download your print and web-ready photos.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Footer & Direct Studio Contact
+       ======================================================================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-box">
+        <h3 data-i18n="footer_title">Need assistance with your selection?</h3>
+        <p data-i18n="footer_desc">The Rhythm Clicks Studio team (Gandhinagar & Ahmedabad) is here to help you Mon-Sat (10:00 AM - 7:00 PM).</p>
+        <div class="footer-btns">
+          <a href="tel:+919712701002" class="btn-secondary" data-i18n="footer_btn_call">📞 Call +91 97127 01002</a>
+          <a href="https://wa.me/919712701002?text=Hello%20Rhythm%20Clicks%20Studio%2C%20I%20need%20assistance%20with%20my%20photo%20selection" target="_blank" class="btn-whatsapp" data-i18n="footer_btn_whatsapp">💬 WhatsApp Support</a>
+        </div>
+      </div>
+
+      <div class="footer-copy">
+        <p data-i18n="footer_copyright">© 2026 Rhythm Clicks Studio. Gandhinagar & Ahmedabad. All Rights Reserved.</p>
+        <p style="margin-top: 6px;"><a href="index.html" style="color: var(--accent-gold); text-decoration: underline;">www.rhythmclicksstudio.com</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       Paste Modal (Bulk Input)
+       ======================================================================== -->
+  <div class="modal-overlay" id="pasteModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 data-i18n="builder_paste_modal_title">Paste Multiple Filenames</h3>
+        <p data-i18n="builder_paste_modal_desc">Paste filenames separated by commas, spaces, or lines (e.g. _CS_0548.jpg, _CS_0550.jpg, 0562, 0580):</p>
+      </div>
+
+      <textarea 
+        class="modal-textarea" 
+        id="bulkPasteTextarea" 
+        placeholder="_CS_0548.jpg, _CS_0550.jpg&#10;_CS_0592.jpg, _CS_0610.jpg"
+      ></textarea>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnCancelPaste" data-i18n="builder_paste_modal_cancel">Cancel</button>
+        <button type="button" class="btn-primary" id="btnConfirmPaste" data-i18n="builder_paste_modal_confirm">Add All in Sequence</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="selection-translations.js"></script>
+  <script src="selection.js"></script>
+</body>
+</html>
