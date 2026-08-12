@@ -189,7 +189,7 @@ function renderPhotoTags() {
 }
 
 // ============================================================================
-// Sequential Template Formatter (Client Name & Numbers Only)
+// Sequential Template Formatter (Complete Studio Format)
 // ============================================================================
 function generateFormattedTemplate() {
   const clientName = state.clientName.trim() || '[Client Name]';
@@ -200,10 +200,19 @@ function generateFormattedTemplate() {
     : '1. _CS_0548.jpg\n2. _CS_0550.jpg\n3. ... [Add your filenames above]';
 
   return `📸 Photo Selection & Delivery Details
-Studio: Rhythm Clicks Studio
+Please share the photo numbers of your selected images so we can begin the editing process. You can reply using the template below, or simply send us a text/Excel file with the numbers.
+
+Selection Guide Link: https://rhythmclicksstudio.com/selection.html
+
+👇 Please copy, fill, and reply with this template:
 Client Name: ${clientName}
 Selected Photo Numbers:
-${photoList}`;
+${photoList}
+
+⏳ Important Timelines:
+• ✅ Selection: Please make your selection within 30 days. We cannot proceed with editing after this period.
+• ⏳ Editing: Professional editing takes approximately 20 days to complete once the selection is confirmed.
+• 💾 Downloads: The gallery link is active for 30 days only. Please download and save your files immediately to avoid losing access.`;
 }
 
 function updateTemplatePreview() {
