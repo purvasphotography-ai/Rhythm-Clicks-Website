@@ -115,11 +115,12 @@ const translations = {
 
     // Calculator Section
     calc_title: "📅 Estimate Your Milestone Dates",
-    calc_desc: "Select the date you received your gallery link from Rhythm Clicks Studio to see your exact deadlines:",
-    calc_input_label: "Gallery Link Received Date:",
+    calc_desc: "Professional editing takes ~20 days from the date your selection is submitted to us. Calculate your exact deadlines below:",
+    calc_input_gallery_label: "1. Gallery Link Received Date:",
+    calc_input_submission_label: "2. Selection Submission Date:",
     calc_res_selection: "Selection Deadline (30 Days):",
-    calc_res_editing: "Est. Edited Delivery (~20 Days):",
-    calc_res_expiry: "Gallery Expiry Date:",
+    calc_res_editing: "Est. Edited Delivery (~20 Days from Submission):",
+    calc_res_expiry: "Final Download Link Active (30 Days):",
 
     // Template Preview Box
     template_box_title: "Official WhatsApp Message Format",
@@ -271,11 +272,12 @@ const translations = {
 
     // Calculator Section
     calc_title: "📅 अपनी महत्वपूर्ण तारीखें जांचें",
-    calc_desc: "रिदम क्लिक्स स्टूडियो से गैलरी लिंक मिलने की तारीख चुनें और अपनी समय सीमा देखें:",
-    calc_input_label: "गैलरी लिंक मिलने की तारीख:",
+    calc_desc: "एडिटिंग का 20 दिन का समय आपके द्वारा सिलेक्शन भेजने की तारीख से शुरू होता है। अपनी तारीखें देखें:",
+    calc_input_gallery_label: "1. गैलरी लिंक मिलने की तारीख:",
+    calc_input_submission_label: "2. सिलेक्शन भेजने की तारीख:",
     calc_res_selection: "सिलेक्शन की अंतिम तारीख (30 दिन):",
-    calc_res_editing: "अनुमानित फाइनल डिलीवरी (~20 दिन):",
-    calc_res_expiry: "गैलरी एक्सपायरी तारीख:",
+    calc_res_editing: "अनुमानित फाइनल डिलीवरी (सिलेक्शन से ~20 दिन):",
+    calc_res_expiry: "डाउनलोड लिंक की वैधता (30 दिन):",
 
     // Template Preview Box
     template_box_title: "मैसेज भेजने का आधिकारिक प्रारूप (WhatsApp Template)",
@@ -418,7 +420,7 @@ const translations = {
     timeline_card_2_badge: "⏳ સ્ટુડિયો પોસ્ટ-પ્રોડક્શન",
     timeline_card_2_title: "આશરે 20 દિવસનું પ્રોફેશનલ એડિટિંગ",
     timeline_card_2_desc: "સિલેક્શન કન્ફર્મ થયા પછી અમારા નિષ્ણાત આર્ટિસ્ટ દ્વારા એડિટિંગ પૂર્ણ કરવા માટે આશરે <strong>20 દિવસ</strong> લાગે છે.",
-    timeline_card_2_highlight: "🎨 એડિટિંગ સમયગાળો: આશરે 20 દિવસ",
+    timeline_card_2_highlight: "🎨 એડિટિંગ સમયગાળો: આશરે 20 દિવસ (સિલેક્શન મળ્યાથી)",
 
     timeline_card_3_badge: "💾 અંતિમ ડાઉનલોડ અને સ્ટોરેજ",
     timeline_card_3_title: "30 દિવસ માટે જ ગેલેરી લિંક સક્રિય",
@@ -427,11 +429,12 @@ const translations = {
 
     // Calculator Section
     calc_title: "📅 તમારી મહત્વપૂર્ણ તારીખો તપાસો",
-    calc_desc: "રિધમ ક્લિક્સ સ્ટુડિયો તરફથી ગેલેરી લિંક મળી હોય તે તારીખ પસંદ કરી તમારી અંતિમ તારીખો તપાસો:",
-    calc_input_label: "ગેલેરી લિંક મળ્યાની તારીખ:",
+    calc_desc: "એડિટિંગ માટે આશરે 20 દિવસનો સમય તમે જ્યારે સિલેક્શન સબમિટ કરો ત્યારથી ગણાય છે. તમારી તારીખો ગણો:",
+    calc_input_gallery_label: "1. ગેલેરી લિંક મળ્યાની તારીખ:",
+    calc_input_submission_label: "2. સિલેક્શન મોકલ્યાની તારીખ:",
     calc_res_selection: "સિલેક્શનની છેલ્લી તારીખ (30 દિવસ):",
-    calc_res_editing: "અંદાજિત ફાઇનલ ડિલિવરી (~20 દિવસ):",
-    calc_res_expiry: "ગેલેરી એક્સપાયરી તારીખ:",
+    calc_res_editing: "અંદાજિત ફાઇનલ ડિલિવરી (સિલેક્શનથી ~20 દિવસ):",
+    calc_res_expiry: "ડાઉનલોડ લિંકની માન્યતા (30 દિવસ):",
 
     // Template Preview Box
     template_box_title: "મેસેજ મોકલવાનું સત્તાવાર ફોર્મેટ (WhatsApp Template)",

@@ -37,6 +37,7 @@ const elements = {
   btnCopyTemplate: document.getElementById('btnCopyTemplate'),
   templateCodePreview: document.getElementById('templateCodePreview'),
   calcGalleryDate: document.getElementById('calcGalleryDate'),
+  calcSubmitDate: document.getElementById('calcSubmitDate'),
   resSelectionDate: document.getElementById('resSelectionDate'),
   resEditingDate: document.getElementById('resEditingDate'),
   resExpiryDate: document.getElementById('resExpiryDate'),
@@ -253,27 +254,32 @@ function formatDate(dateObj) {
 }
 
 function updateMilestoneDates() {
-  const dateVal = elements.calcGalleryDate.value;
-  if (!dateVal) return;
+  const galleryDateVal = elements.calcGalleryDate.value;
+  const submitDateVal = elements.calcSubmitDate ? elements.calcSubmitDate.value : null;
 
-  const baseDate = new Date(dateVal);
-  if (isNaN(baseDate.getTime())) return;
+  if (galleryDateVal) {
+    const galleryBase = new Date(galleryDateVal);
+    if (!isNaN(galleryBase.getTime())) {
+      // 1. Selection Deadline: +30 Days from Gallery Link Received Date
+      const selectionDeadline = new Date(galleryBase);
+      selectionDeadline.setDate(galleryBase.getDate() + 30);
+      elements.resSelectionDate.textContent = formatDate(selectionDeadline);
+    }
+  }
 
-  // 1. Selection Deadline: +30 Days
-  const selectionDeadline = new Date(baseDate);
-  selectionDeadline.setDate(baseDate.getDate() + 30);
+  // 2. Editing Turnaround: ~20 Days from Selection Submission Date
+  const submissionBase = submitDateVal ? new Date(submitDateVal) : new Date();
+  if (!isNaN(submissionBase.getTime())) {
+    const editingDelivery = new Date(submissionBase);
+    editingDelivery.setDate(submissionBase.getDate() + 20);
 
-  // 2. Editing Finished: Selection Deadline + 20 Days
-  const editingFinished = new Date(selectionDeadline);
-  editingFinished.setDate(selectionDeadline.getDate() + 20);
+    // 3. Final Downloads Link Expiry: Delivery + 30 Days
+    const finalExpiry = new Date(editingDelivery);
+    finalExpiry.setDate(editingDelivery.getDate() + 30);
 
-  // 3. Final Gallery Expiry: Editing + 30 Days
-  const finalExpiry = new Date(editingFinished);
-  finalExpiry.setDate(editingFinished.getDate() + 30);
-
-  elements.resSelectionDate.textContent = formatDate(selectionDeadline);
-  elements.resEditingDate.textContent = formatDate(editingFinished);
-  elements.resExpiryDate.textContent = formatDate(finalExpiry);
+    elements.resEditingDate.textContent = formatDate(editingDelivery);
+    elements.resExpiryDate.textContent = formatDate(finalExpiry);
+  }
 }
 
 // ============================================================================
@@ -361,8 +367,11 @@ function initEventListeners() {
   elements.btnSendWhatsApp.addEventListener('click', sendViaWhatsApp);
   elements.btnCopyTemplate.addEventListener('click', copyTemplateToClipboard);
 
-  // Calculator Date Change
+  // Calculator Date Changes
   elements.calcGalleryDate.addEventListener('change', updateMilestoneDates);
+  if (elements.calcSubmitDate) {
+    elements.calcSubmitDate.addEventListener('change', updateMilestoneDates);
+  }
 
   // FAQ Accordion Toggles
   elements.faqItems.forEach(item => {

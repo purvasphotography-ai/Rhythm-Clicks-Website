@@ -448,12 +448,18 @@ Selected Photo Numbers:
       <div class="calc-box">
         <h4 data-i18n="calc_title">📅 Estimate Your Milestone Dates</h4>
         <p data-i18n="calc_desc">
-          Select the date you received your gallery link from Rhythm Clicks Studio to see your exact deadlines:
+          Professional editing takes ~20 days from the date your selection is submitted to us. Calculate your exact deadlines below:
         </p>
 
-        <div class="calc-input-wrapper">
-          <label for="calcGalleryDate" data-i18n="calc_input_label">Gallery Link Received Date:</label>
-          <input type="date" id="calcGalleryDate" class="calc-date-input">
+        <div class="calc-input-wrapper-grid">
+          <div class="calc-input-group">
+            <label for="calcGalleryDate" data-i18n="calc_input_gallery_label">1. Gallery Link Received Date:</label>
+            <input type="date" id="calcGalleryDate" class="calc-date-input">
+          </div>
+          <div class="calc-input-group">
+            <label for="calcSubmitDate" data-i18n="calc_input_submission_label">2. Selection Submission Date:</label>
+            <input type="date" id="calcSubmitDate" class="calc-date-input">
+          </div>
         </div>
 
         <div class="calc-results-grid">
@@ -461,12 +467,12 @@ Selected Photo Numbers:
             <span data-i18n="calc_res_selection">Selection Deadline (30 Days):</span>
             <strong id="resSelectionDate">-- / -- / ----</strong>
           </div>
-          <div class="calc-res-item">
-            <span data-i18n="calc_res_editing">Est. Edited Delivery (~20 Days):</span>
-            <strong id="resEditingDate">-- / -- / ----</strong>
+          <div class="calc-res-item highlight-res-item">
+            <span data-i18n="calc_res_editing">Est. Edited Delivery (~20 Days from Submission):</span>
+            <strong id="resEditingDate" style="color: var(--accent-gold); font-size: 1.2rem;">-- / -- / ----</strong>
           </div>
           <div class="calc-res-item">
-            <span data-i18n="calc_res_expiry">Gallery Expiry Date:</span>
+            <span data-i18n="calc_res_expiry">Final Download Link Active (30 Days):</span>
             <strong id="resExpiryDate">-- / -- / ----</strong>
           </div>
         </div>
