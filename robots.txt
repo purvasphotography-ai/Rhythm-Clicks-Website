@@ -1,4 +1,5 @@
 User-agent: *
+Disallow: /maternity-packages.html
 Allow: /
 
 Sitemap: https://rhythmclicksstudio.com/sitemap.xml
