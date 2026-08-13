@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maternity Photography Packages | Rhythm Clicks Studio</title>
+  <meta name="description" content="Capture your beautiful motherhood journey. View outdoor maternity photography packages, premium gown collection, and session details in Ahmedabad & Gandhinagar.">
+  
+  <!-- Favicon Links -->
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    /* Inline overrides and additions for the Maternity Packages layout */
+    .mobile-nav.open {
+      display: block !important;
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .maternity-hero {
+      padding: 10rem 0 6rem 0;
+      background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.04) 0%, rgba(255,255,255,0) 60%);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .maternity-hero-content h1 {
+      font-family: var(--font-serif);
+      font-size: 3.5rem;
+      font-weight: 500;
+      line-height: 1.2;
+      margin-bottom: var(--spacing-xs);
+      letter-spacing: -0.02em;
+    }
+    
+    .maternity-hero-content p {
+      font-family: var(--font-sans);
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto var(--spacing-md);
+      font-size: 1.15rem;
+    }
+    
+    .maternity-hero-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+      margin-top: 3rem;
+      align-items: center;
+    }
+    
+    @media (min-width: 992px) {
+      .maternity-hero-grid {
+        grid-template-columns: 1fr 1fr;
+        text-align: left;
+      }
+      .maternity-hero-content p {
+        margin: 0 0 var(--spacing-md) 0;
+      }
+    }
+    
+    .maternity-hero-image-wrapper {
+      position: relative;
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+      box-shadow: var(--box-shadow-hover);
+    }
+    
+    .maternity-hero-image-wrapper img {
+      width: 100%;
+      height: 550px;
+      object-fit: cover;
+      transition: transform var(--transition-slow);
+    }
+    
+    .maternity-hero-image-wrapper:hover img {
+      transform: scale(1.03);
+    }
+    
+    /* Package Card Image additions */
+    .package-card-img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      border-radius: var(--border-radius-md);
+      margin-bottom: 2rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .package-features li {
+      margin-bottom: 0.9rem;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+    
+    .package-features li strong {
+      color: var(--text-primary);
+    }
+    
+    .package-features li::before {
+      content: '✓';
+      color: var(--text-primary) !important;
+      font-weight: 900;
+    }
+    
+    /* Gowns Showcase Section */
+    .gowns-section {
+      background-color: var(--bg-secondary);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-lg) var(--spacing-md);
+      margin: var(--spacing-lg) 0;
+    }
+    
+    .gowns-intro {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .gowns-intro h2 {
+      font-family: var(--font-serif);
+      font-size: 2.5rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    
+    .gowns-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+    
+    @media (min-width: 768px) {
+      .gowns-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    .gown-card {
+      background: var(--bg-card);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+      box-shadow: var(--box-shadow);
+      border: 1px solid var(--glass-border);
+      text-align: center;
+      padding: var(--spacing-sm);
+    }
+    
+    .gown-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+    
+    .gown-card h4 {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .gown-card p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    /* Accordion styles (T&C) */
+    .faq-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    details {
+      background: var(--bg-card);
+      border: 1px solid var(--accent-light);
+      border-radius: var(--border-radius-md);
+      margin-bottom: 1rem;
+      padding: 1.25rem;
+      transition: all var(--transition-fast);
+      box-shadow: var(--box-shadow);
+    }
+    
+    details[open] {
+      border-color: var(--text-primary);
+    }
+    
+    summary {
+      font-family: var(--font-sans);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    
+    summary::-webkit-details-marker {
+      display: none;
+    }
+    
+    summary::after {
+      content: '+';
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--text-light);
+      transition: transform var(--transition-fast);
+    }
+    
+    details[open] summary::after {
+      content: '−';
+    }
+    
+    details p {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      border-top: 1px solid var(--accent-extra-light);
+      padding-top: 1rem;
+    }
+    
+    .tc-highlight {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    /* Call to Action Booking */
+    .booking-cta {
+      text-align: center;
+      padding: var(--spacing-lg) 0;
+      border-top: 1px solid var(--accent-light);
+      margin-top: var(--spacing-lg);
+    }
+    
+    .booking-cta h3 {
+      font-family: var(--font-serif);
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .booking-cta p {
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+    
+    .cta-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn-whatsapp {
+      background-color: #25D366;
+      color: white !important;
+      border: 1px solid #25D366;
+    }
+    
+    .btn-whatsapp:hover {
+      background-color: #128C7E;
+      border-color: #128C7E;
+      transform: translateY(-2px);
+    }
+    
+    .btn-call {
+      background-color: var(--accent-black);
+      color: white !important;
+      border: 1px solid var(--accent-black);
+    }
+    
+    .btn-call:hover {
+      background-color: var(--text-secondary);
+      border-color: var(--text-secondary);
+      transform: translateY(-2px);
+    }
+    
+    /* Sticky Contact Bar for Mobile */
+    .sticky-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--glass-border);
+      padding: 1rem var(--spacing-sm);
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+      box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+    }
+    
+    @media (min-width: 768px) {
+      .sticky-bar {
+        display: none;
+      }
+    }
+    
+    .sticky-bar .btn {
+      flex: 1;
+      text-align: center;
+      padding: 0.8rem;
+      font-size: 0.9rem;
+      border-radius: var(--border-radius-sm);
+    }
+    
+    body {
+      padding-bottom: 80px; /* Space for mobile sticky footer */
+    }
+    
+    @media (min-width: 768px) {
+      body {
+        padding-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body class="maternity-packages-page">
+
+  <!-- Ambient Blobs -->
+  <div class="glass-blob glass-blob-1" style="background: rgba(212, 175, 55, 0.05); filter: blur(100px); width: 450px; height: 450px;"></div>
+  <div class="glass-blob glass-blob-2" style="background: rgba(136, 136, 136, 0.04); filter: blur(120px); width: 500px; height: 500px;"></div>
+
+  <!-- --- Header / Navigation --- -->
+  <header id="header" class="scrolled">
+    <div class="container nav-container">
+      <a href="index.html" class="logo" id="nav-logo">
+        <img src="assets/logo.webp" alt="Rhythm Clicks Studio Logo" width="130" height="130">
+      </a>
+      
+      <nav class="nav-menu">
+        <ul>
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="index.html#about" class="nav-link">About</a></li>
+          <li><a href="index.html#portfolio" class="nav-link">Portfolio</a></li>
+          <li><a href="janmashtami.html" class="nav-link" style="color: #b38728; font-weight: 600;">Janmashtami Special</a></li>
+          <li><a href="index.html#contact" class="nav-link">Book Now</a></li>
+        </ul>
+      </nav>
+      
+      <div class="nav-cta">
+        <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20a%20Maternity%20Photoshoot%20session." class="btn btn-primary" target="_blank" rel="noopener">Book Session</a>
+      </div>
+      
+      <button class="hamburger" id="hamburger-toggle" aria-label="Toggle Navigation">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- --- Mobile Drawer --- -->
+  <div class="mobile-nav" id="mobile-menu" style="background: #ffffff;">
+    <ul>
+      <li><a href="index.html" class="nav-link mobile-link">Home</a></li>
+      <li><a href="index.html#about" class="nav-link mobile-link">About</a></li>
+      <li><a href="index.html#portfolio" class="nav-link mobile-link">Portfolio</a></li>
+      <li><a href="janmashtami.html" class="nav-link mobile-link" style="color: #b38728; font-weight: 600;">Janmashtami Special</a></li>
+      <li><a href="index.html#contact" class="nav-link mobile-link">Book Now</a></li>
+    </ul>
+    <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20a%20Maternity%20Photoshoot%20session." class="btn btn-primary mobile-link" style="text-align: center;" target="_blank" rel="noopener">Book Session</a>
+  </div>
+
+  <!-- --- Hero Section --- -->
+  <section class="maternity-hero">
+    <div class="container">
+      <div class="maternity-hero-grid">
+        <div class="maternity-hero-content">
+          <h1>MATERNITY<br><span style="font-family: var(--font-sans); font-size: 1.6rem; letter-spacing: 0.1em; color: var(--text-light); text-transform: uppercase;">Photography Packages</span></h1>
+          <p>Celebrate the beauty, joy, and anticipation of motherhood. We provide custom posing, artistic lighting, and full wardrobe access to ensure your milestones are preserved as fine-art masterpieces.</p>
+          <div style="display: flex; gap: 15px;">
+            <a href="#packages" class="btn btn-primary">View Packages</a>
+            <a href="#terms" class="btn btn-outline">Shoot Details & T&C</a>
+          </div>
+        </div>
+        <div class="maternity-hero-image-wrapper">
+          <img src="assets/gallery/maternity/_A2A5465.webp" alt="Maternity shoot in rust orange gown by Rhythm Clicks Studio" width="600" height="550">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- --- Packages Section --- -->
+  <section id="packages" class="section-padding">
+    <div class="container">
+      
+      <div style="text-align: center; margin-bottom: 4rem;">
+        <span class="subtitle">Curated Offerings</span>
+        <h2 style="font-family: var(--font-serif); font-size: 2.8rem; font-weight: 500; margin-top: 10px;">Outdoor Sessions</h2>
+        <p style="color: var(--text-secondary); max-width: 600px; margin: 10px auto 0;">All outdoor shoots are scheduled during the golden hours (sunrise or sunset) for optimal ethereal lighting.</p>
+      </div>
+
+      <div class="packages-grid">
+        
+        <!-- Package 4 -->
+        <div class="package-card">
+          <img src="assets/gallery/master-edits/_RCS0788.webp" alt="Maternity Package 4 sunset theme" class="package-card-img">
+          <div class="package-header">
+            <span class="package-icon">✨</span>
+            <h3>Package 4</h3>
+            <div class="package-price">₹6,500 <span>/ Session</span></div>
+          </div>
+          <ul class="package-features">
+            <li><strong>2 Costume</strong> changes</li>
+            <li><strong>10 Fully Edited</strong> high-resolution photos</li>
+            <li><strong>45 Minutes</strong> session time</li>
+            <li>Partner & family posing included</li>
+            <li>Private online selection gallery</li>
+            <li>Location styling consultation</li>
+          </ul>
+          <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Package%204%20(6500)." class="btn btn-outline" target="_blank" rel="noopener">Book Package 4</a>
+        </div>
+
+        <!-- Package 5 (Popular) -->
+        <div class="package-card popular">
+          <img src="assets/gallery/maternity/_A2A5465.webp" alt="Maternity Package 5 rust theme" class="package-card-img">
+          <div class="package-header">
+            <span class="package-icon">⭐</span>
+            <h3>Package 5</h3>
+            <div class="package-price">₹9,000 <span>/ Session</span></div>
+          </div>
+          <ul class="package-features">
+            <li><strong>3 Costume</strong> changes</li>
+            <li><strong>Premium Gown Collection</strong> included</li>
+            <li><strong>15 Fully Edited</strong> high-resolution photos</li>
+            <li><strong>90 Minutes</strong> session time</li>
+            <li><strong>1 Signature Master Edit</strong> (painterly composite)</li>
+            <li><strong>12 × 8 Premium Photobook</strong></li>
+            <li>Partner & family posing included</li>
+            <li>Private online selection gallery</li>
+          </ul>
+          <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Package%205%20(9000)." class="btn btn-primary" target="_blank" rel="noopener">Book Package 5</a>
+        </div>
+
+        <!-- Package 6 -->
+        <div class="package-card">
+          <img src="assets/gallery/maternity/_A2A9865.webp" alt="Maternity Package 6 pink theme" class="package-card-img">
+          <div class="package-header">
+            <span class="package-icon">👑</span>
+            <h3>Package 6</h3>
+            <div class="package-price">₹12,500 <span>/ Session</span></div>
+          </div>
+          <ul class="package-features">
+            <li><strong>Indoor & Outdoor</strong> session</li>
+            <li><strong>4 Outfit</strong> changes</li>
+            <li><strong>Premium Gown Collection</strong> included</li>
+            <li><strong>1 Premium Setup</strong> & background choice</li>
+            <li><strong>25 Fully Edited</strong> high-res soft copies</li>
+            <li><strong>120 Minutes</strong> session time</li>
+            <li><strong>2 Signature Master Edits</strong></li>
+            <li><strong>12 × 18 Premium Photobook</strong></li>
+            <li>Private online selection gallery</li>
+          </ul>
+          <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Package%206%20(12500)." class="btn btn-outline" target="_blank" rel="noopener">Book Package 6</a>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- --- Gown Section --- -->
+  <section class="container">
+    <div class="gowns-section">
+      <div class="gowns-intro">
+        <span class="subtitle" style="color: var(--text-light);">Exclusive Wardrobe</span>
+        <h2>Our Premium Maternity Gowns</h2>
+        <p style="color: var(--text-secondary); max-width: 600px; margin: 10px auto 0;">Complimentary wardrobe access is included in Package 5 and Package 6 to help you look and feel like royalty.</p>
+      </div>
+      
+      <div class="gowns-grid">
+        <div class="gown-card">
+          <span class="gown-icon">👗</span>
+          <h4>Ethereal Tulle & Ruffles</h4>
+          <p>Voluminous trails and layered pastel ruffles that catch the wind beautifully during outdoor sunset shoots.</p>
+        </div>
+        <div class="gown-card">
+          <span class="gown-icon">🌸</span>
+          <h4>Fine-Art White Lace</h4>
+          <p>Classic boho-chic white lace gowns, ideal for vintage setups, floral frames, and soft silhouette backdrops.</p>
+        </div>
+        <div class="gown-card">
+          <span class="gown-icon">🍂</span>
+          <h4>Vibrant Rust & Emerald</h4>
+          <p>Richly colored satin and chiffon gowns designed to pop gracefully against natural outdoor greenery.</p>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 2rem; font-size: 0.95rem; color: var(--text-secondary);">
+        * Gown fittings and styling adjustments are done at our boutique studio prior to the session.
+      </div>
+    </div>
+  </section>
+
+  <!-- --- Terms & Conditions Section --- -->
+  <section id="terms" class="section-padding">
+    <div class="container">
+      
+      <div style="text-align: center; margin-bottom: 3.5rem;">
+        <span class="subtitle">Studio Policies</span>
+        <h2 style="font-family: var(--font-serif); font-size: 2.5rem; font-weight: 500; margin-top: 10px;">Shoot Details & Guidelines</h2>
+        <p style="color: var(--text-secondary); max-width: 600px; margin: 10px auto 0;">Clear policies to ensure a smooth, professional, and relaxed experience for your special day.</p>
+      </div>
+
+      <div class="faq-container">
+        
+        <details open>
+          <summary>Booking & Deposit Terms</summary>
+          <p>To officially lock your date and slot, a <span class="tc-highlight">50% non-refundable advance deposit</span> is required. The remaining 50% balance must be settled on the day of the photoshoot immediately after the session concludes. No booking is confirmed without the advance payment.</p>
+        </details>
+
+        <details>
+          <summary>Wardrobe & Personal Prep</summary>
+          <p>Curated gown styling is included in Packages 5 & 6. Clients are requested to bring their own matching basic undergarments (like skin-colored seamless cups or strapless bras). Hair and makeup should be pre-arranged unless you request a professional artist add-on through our studio.</p>
+        </details>
+
+        <details>
+          <summary>Photo Selection & Delivery Timelines</summary>
+          <p>We believe in delivering perfection. Unedited raw files are the copyright of the studio and are not shared. A selection gallery link containing proof sheets will be sent within 5 days of your shoot. The fully retouched, high-resolution soft copies will be delivered <span class="tc-highlight">within 25 to 30 days</span> of your final selections. Printed photobooks take an additional 10-15 days for layout printing and shipping.</p>
+        </details>
+
+        <details>
+          <summary>Rescheduling & Cancellations</summary>
+          <p>Maternity timelines can sometimes be unpredictable. If you need to reschedule due to health concerns or severe weather warnings, please inform us at least <span class="tc-highlight">48 hours in advance</span>. We will accommodate one reschedule without penalties, subject to available slots in our calendar.</p>
+        </details>
+
+        <details>
+          <summary>Image Copyright & Promotions</summary>
+          <p>Rhythm Clicks Studio retains the absolute copyright of all images captured. We reserve the right to share selected photos on our digital portfolio and social media handles for advertising purposes. If you wish to keep your shoot completely private, a privacy charge equal to 20% of the package cost will apply at the time of booking.</p>
+        </details>
+        
+      </div>
+
+    </div>
+  </section>
+
+  <!-- --- Booking CTA Section --- -->
+  <section class="container">
+    <div class="booking-cta">
+      <h3>Ready to reserve your date?</h3>
+      <p>Slots are limited. We recommend booking your session when you are in your 28th to 34th week of pregnancy.</p>
+      
+      <div class="cta-buttons">
+        <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20a%20Maternity%20Photoshoot%20session." class="btn btn-primary btn-whatsapp" target="_blank" rel="noopener">
+          💬 Message on WhatsApp
+        </a>
+        <a href="tel:+919712701002" class="btn btn-outline btn-call">
+          📞 Call 97127 01002
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- --- Mobile Sticky Footer --- -->
+  <div class="sticky-bar">
+    <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20a%20Maternity%20Photoshoot%20session." class="btn btn-whatsapp" target="_blank" rel="noopener">
+      WhatsApp
+    </a>
+    <a href="tel:+919712701002" class="btn btn-call">
+      Call Studio
+    </a>
+  </div>
+
+  <!-- Main JavaScript File -->
+  <script src="app.js" defer></script>
+</body>
+</html>
