@@ -87,61 +87,7 @@
     .maternity-hero-image-wrapper:hover img {
       transform: scale(1.03);
     }
-    
-    /* Tabs Control */
-    .tabs-wrapper {
-      text-align: center;
-      margin-bottom: 4rem;
-    }
-    
-    .tabs-container {
-      display: inline-flex;
-      background: var(--bg-secondary);
-      padding: 6px;
-      border-radius: 40px;
-      border: 1px solid var(--glass-border);
-      box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
-    }
-    
-    .tab-btn {
-      padding: 0.8rem 2.2rem;
-      border-radius: 35px;
-      border: none;
-      background: none;
-      font-family: var(--font-sans);
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all var(--transition-fast);
-      outline: none;
-    }
-    
-    .tab-btn.active {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.06);
-    }
-    
-    .tab-content {
-      display: none;
-    }
-    
-    .tab-content.active {
-      display: block;
-      animation: tabFadeIn 0.5s ease-out forwards;
-    }
-    
-    @keyframes tabFadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+
     
     /* Package Card Image additions */
     .package-card-img {
@@ -462,158 +408,148 @@
     </div>
   </section>
 
-  <!-- --- Packages & Tabs Section --- -->
+  <!-- --- Packages Section --- -->
   <section id="packages" class="section-padding">
     <div class="container">
       
-      <div class="tabs-wrapper">
-        <span class="subtitle">Curated Offerings</span>
-        <h2 style="font-family: var(--font-serif); font-size: 2.8rem; font-weight: 500; margin-top: 10px; margin-bottom: 2rem;">Choose Session Location</h2>
-        
-        <div class="tabs-container">
-          <button class="tab-btn active" id="tab-btn-indoor" onclick="switchSessionTab('indoor')">Indoor Studio</button>
-          <button class="tab-btn" id="tab-btn-outdoor" onclick="switchSessionTab('outdoor')">Outdoor Scenic</button>
+      <!-- INDOOR PACKAGES SECTION -->
+      <div style="text-align: center; margin-bottom: 4rem;">
+        <span class="subtitle">Curated Indoor Pricing</span>
+        <h2 style="font-family: var(--font-serif); font-size: 2.8rem; font-weight: 500; margin-top: 10px;">Indoor Studio Packages</h2>
+        <p style="color: var(--text-secondary); max-width: 600px; margin: 10px auto 0;">Shot in our boutique styled studio featuring premium setups, backgrounds, and comfortable temperature control.</p>
+      </div>
+      
+      <div class="packages-grid" style="margin-bottom: 6rem;">
+        <!-- Package 1 (Indoor) -->
+        <div class="package-card">
+          <img src="assets/gallery/master-edits/_RCS0947.webp" alt="Maternity Indoor Package 1 fairy setup" class="package-card-img">
+          <div class="package-header">
+            <span class="package-icon">✨</span>
+            <h3>Package 1</h3>
+            <div class="package-price">₹5,500 <span>/ Session</span></div>
+          </div>
+          <ul class="package-features">
+            <li><strong>2 Costume</strong> changes & 2 backgrounds</li>
+            <li><strong>10 Fully Edited</strong> high-resolution photos</li>
+            <li><strong>45 Minutes</strong> session time</li>
+            <li>Partner & family posing included</li>
+            <li>Private online selection gallery</li>
+            <li>Studio setup & props included</li>
+          </ul>
+          <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Indoor%20Package%201%20(5500)." class="btn btn-outline" target="_blank" rel="noopener">Book Package 1</a>
+        </div>
+
+        <!-- Package 2 (Indoor - Popular) -->
+        <div class="package-card popular">
+          <img src="assets/gallery/maternity/_A2A4635.webp" alt="Maternity Indoor Package 2 white gown" class="package-card-img">
+          <div class="package-header">
+            <span class="package-icon">⭐</span>
+            <h3>Package 2</h3>
+            <div class="package-price">₹8,000 <span>/ Session</span></div>
+          </div>
+          <ul class="package-features">
+            <li><strong>3 Costume</strong> changes</li>
+            <li><strong>Premium Gown Collection</strong> included</li>
+            <li><strong>1 Setup</strong> & 2 background choices</li>
+            <li><strong>15 Fully Edited</strong> high-resolution softcopies</li>
+            <li><strong>90 Minutes</strong> session time</li>
+            <li><strong>1 Signature Master Edit</strong> (painterly composite) <span class="complimentary-tag">Complimentary</span></li>
+            <li><strong>12 × 8 Premium Photobook</strong> <span class="complimentary-tag">Complimentary</span></li>
+            <li>Partner & family posing included</li>
+          </ul>
+          <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Indoor%20Package%202%20(8000)." class="btn btn-primary" target="_blank" rel="noopener">Book Package 2</a>
+        </div>
+
+        <!-- Package 3 (Indoor) -->
+        <div class="package-card">
+          <img src="assets/gallery/maternity/_A2A9865.webp" alt="Maternity Indoor Package 3 peacock chair setup" class="package-card-img">
+          <div class="package-header">
+            <span class="package-icon">👑</span>
+            <h3>Package 3</h3>
+            <div class="package-price">₹10,500 <span>/ Session</span></div>
+          </div>
+          <ul class="package-features">
+            <li><strong>4 Costume</strong> changes</li>
+            <li><strong>Premium Gown Collection</strong> included</li>
+            <li><strong>1 Setup</strong> & 3 background choices</li>
+            <li><strong>25 Fully Edited</strong> high-res soft copies</li>
+            <li><strong>120 Minutes</strong> session time</li>
+            <li><strong>2 Signature Master Edits</strong> <span class="complimentary-tag">Complimentary</span></li>
+            <li><strong>12 × 18 Premium Photobook</strong> <span class="complimentary-tag">Complimentary</span></li>
+            <li>Private online selection gallery</li>
+          </ul>
+          <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Indoor%20Package%203%20(10500)." class="btn btn-outline" target="_blank" rel="noopener">Book Package 3</a>
         </div>
       </div>
 
-      <!-- INDOOR PACKAGES CONTENT -->
-      <div class="tab-content active" id="indoor-session-content">
-        <div style="text-align: center; margin-bottom: 3rem; margin-top: -1.5rem;">
-          <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">Shot in our boutique styled studio featuring premium setups, backgrounds, and comfortable temperature control.</p>
-        </div>
-        
-        <div class="packages-grid">
-          <!-- Package 1 (Indoor) -->
-          <div class="package-card">
-            <img src="assets/gallery/master-edits/_RCS0947.webp" alt="Maternity Indoor Package 1 fairy setup" class="package-card-img">
-            <div class="package-header">
-              <span class="package-icon">✨</span>
-              <h3>Package 1</h3>
-              <div class="package-price">₹5,500 <span>/ Session</span></div>
-            </div>
-            <ul class="package-features">
-              <li><strong>2 Costume</strong> changes & 2 backgrounds</li>
-              <li><strong>10 Fully Edited</strong> high-resolution photos</li>
-              <li><strong>45 Minutes</strong> session time</li>
-              <li>Partner & family posing included</li>
-              <li>Private online selection gallery</li>
-              <li>Studio setup & props included</li>
-            </ul>
-            <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Indoor%20Package%201%20(5500)." class="btn btn-outline" target="_blank" rel="noopener">Book Package 1</a>
-          </div>
-
-          <!-- Package 2 (Indoor - Popular) -->
-          <div class="package-card popular">
-            <img src="assets/gallery/maternity/_A2A4635.webp" alt="Maternity Indoor Package 2 white gown" class="package-card-img">
-            <div class="package-header">
-              <span class="package-icon">⭐</span>
-              <h3>Package 2</h3>
-              <div class="package-price">₹8,000 <span>/ Session</span></div>
-            </div>
-            <ul class="package-features">
-              <li><strong>3 Costume</strong> changes</li>
-              <li><strong>Premium Gown Collection</strong> included</li>
-              <li><strong>1 Setup</strong> & 2 background choices</li>
-              <li><strong>15 Fully Edited</strong> high-resolution softcopies</li>
-              <li><strong>90 Minutes</strong> session time</li>
-              <li><strong>1 Signature Master Edit</strong> (painterly composite) <span class="complimentary-tag">Complimentary</span></li>
-              <li><strong>12 × 8 Premium Photobook</strong> <span class="complimentary-tag">Complimentary</span></li>
-              <li>Partner & family posing included</li>
-            </ul>
-            <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Indoor%20Package%202%20(8000)." class="btn btn-primary" target="_blank" rel="noopener">Book Package 2</a>
-          </div>
-
-          <!-- Package 3 (Indoor) -->
-          <div class="package-card">
-            <img src="assets/gallery/maternity/_A2A9865.webp" alt="Maternity Indoor Package 3 peacock chair setup" class="package-card-img">
-            <div class="package-header">
-              <span class="package-icon">👑</span>
-              <h3>Package 3</h3>
-              <div class="package-price">₹10,500 <span>/ Session</span></div>
-            </div>
-            <ul class="package-features">
-              <li><strong>4 Costume</strong> changes</li>
-              <li><strong>Premium Gown Collection</strong> included</li>
-              <li><strong>1 Setup</strong> & 3 background choices</li>
-              <li><strong>25 Fully Edited</strong> high-res soft copies</li>
-              <li><strong>120 Minutes</strong> session time</li>
-              <li><strong>2 Signature Master Edits</strong> <span class="complimentary-tag">Complimentary</span></li>
-              <li><strong>12 × 18 Premium Photobook</strong> <span class="complimentary-tag">Complimentary</span></li>
-              <li>Private online selection gallery</li>
-            </ul>
-            <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Indoor%20Package%203%20(10500)." class="btn btn-outline" target="_blank" rel="noopener">Book Package 3</a>
-          </div>
-        </div>
+      <!-- OUTDOOR PACKAGES SECTION -->
+      <div style="text-align: center; margin-bottom: 4rem; border-top: 1px solid var(--accent-extra-light); padding-top: var(--spacing-lg);">
+        <span class="subtitle">Curated Outdoor Pricing</span>
+        <h2 style="font-family: var(--font-serif); font-size: 2.8rem; font-weight: 500; margin-top: 10px;">Outdoor Scenic Packages</h2>
+        <p style="color: var(--text-secondary); max-width: 600px; margin: 10px auto 0;">Shot in scenic nature during golden hours (sunrise or sunset) for optimal dramatic lighting and landscape background depth.</p>
       </div>
 
-      <!-- OUTDOOR PACKAGES CONTENT -->
-      <div class="tab-content" id="outdoor-session-content">
-        <div style="text-align: center; margin-bottom: 3rem; margin-top: -1.5rem;">
-          <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">Shot in scenic nature during golden hours (sunrise or sunset) for optimal dramatic lighting and landscape background depth.</p>
+      <div class="packages-grid">
+        <!-- Package 4 (Outdoor) -->
+        <div class="package-card">
+          <img src="assets/gallery/master-edits/_RCS0788.webp" alt="Maternity Outdoor Package 4 sunset theme" class="package-card-img">
+          <div class="package-header">
+            <span class="package-icon">✨</span>
+            <h3>Package 4</h3>
+            <div class="package-price">₹6,500 <span>/ Session</span></div>
+          </div>
+          <ul class="package-features">
+            <li><strong>2 Costume</strong> changes</li>
+            <li><strong>10 Fully Edited</strong> high-resolution photos</li>
+            <li><strong>45 Minutes</strong> session time</li>
+            <li>Partner & family posing included</li>
+            <li>Private online selection gallery</li>
+            <li>Location styling consultation</li>
+          </ul>
+          <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Outdoor%20Package%204%20(6500)." class="btn btn-outline" target="_blank" rel="noopener">Book Package 4</a>
         </div>
-        
-        <div class="packages-grid">
-          <!-- Package 4 (Outdoor) -->
-          <div class="package-card">
-            <img src="assets/gallery/master-edits/_RCS0788.webp" alt="Maternity Outdoor Package 4 sunset theme" class="package-card-img">
-            <div class="package-header">
-              <span class="package-icon">✨</span>
-              <h3>Package 4</h3>
-              <div class="package-price">₹6,500 <span>/ Session</span></div>
-            </div>
-            <ul class="package-features">
-              <li><strong>2 Costume</strong> changes</li>
-              <li><strong>10 Fully Edited</strong> high-resolution photos</li>
-              <li><strong>45 Minutes</strong> session time</li>
-              <li>Partner & family posing included</li>
-              <li>Private online selection gallery</li>
-              <li>Location styling consultation</li>
-            </ul>
-            <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Outdoor%20Package%204%20(6500)." class="btn btn-outline" target="_blank" rel="noopener">Book Package 4</a>
-          </div>
 
-          <!-- Package 5 (Outdoor - Popular) -->
-          <div class="package-card popular">
-            <img src="assets/gallery/maternity/_A2A5465.webp" alt="Maternity Outdoor Package 5 rust theme" class="package-card-img">
-            <div class="package-header">
-              <span class="package-icon">⭐</span>
-              <h3>Package 5</h3>
-              <div class="package-price">₹9,000 <span>/ Session</span></div>
-            </div>
-            <ul class="package-features">
-              <li><strong>3 Costume</strong> changes</li>
-              <li><strong>Premium Gown Collection</strong> included</li>
-              <li><strong>15 Fully Edited</strong> high-resolution photos</li>
-              <li><strong>90 Minutes</strong> session time</li>
-              <li><strong>1 Signature Master Edit</strong> (painterly composite) <span class="complimentary-tag">Complimentary</span></li>
-              <li><strong>12 × 8 Premium Photobook</strong> <span class="complimentary-tag">Complimentary</span></li>
-              <li>Partner & family posing included</li>
-              <li>Private online selection gallery</li>
-            </ul>
-            <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Outdoor%20Package%205%20(9000)." class="btn btn-primary" target="_blank" rel="noopener">Book Package 5</a>
+        <!-- Package 5 (Outdoor - Popular) -->
+        <div class="package-card popular">
+          <img src="assets/gallery/maternity/_A2A5465.webp" alt="Maternity Outdoor Package 5 rust theme" class="package-card-img">
+          <div class="package-header">
+            <span class="package-icon">⭐</span>
+            <h3>Package 5</h3>
+            <div class="package-price">₹9,000 <span>/ Session</span></div>
           </div>
+          <ul class="package-features">
+            <li><strong>3 Costume</strong> changes</li>
+            <li><strong>Premium Gown Collection</strong> included</li>
+            <li><strong>15 Fully Edited</strong> high-resolution photos</li>
+            <li><strong>90 Minutes</strong> session time</li>
+            <li><strong>1 Signature Master Edit</strong> (painterly composite) <span class="complimentary-tag">Complimentary</span></li>
+            <li><strong>12 × 8 Premium Photobook</strong> <span class="complimentary-tag">Complimentary</span></li>
+            <li>Partner & family posing included</li>
+            <li>Private online selection gallery</li>
+          </ul>
+          <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Outdoor%20Package%205%20(9000)." class="btn btn-primary" target="_blank" rel="noopener">Book Package 5</a>
+        </div>
 
-          <!-- Package 6 (Outdoor) -->
-          <div class="package-card">
-            <img src="assets/gallery/maternity/_A2A9865.webp" alt="Maternity Outdoor Package 6 pink theme" class="package-card-img">
-            <div class="package-header">
-              <span class="package-icon">👑</span>
-              <h3>Package 6</h3>
-              <div class="package-price">₹12,500 <span>/ Session</span></div>
-            </div>
-            <ul class="package-features">
-              <li><strong>Indoor & Outdoor</strong> session</li>
-              <li><strong>4 Outfit</strong> changes</li>
-              <li><strong>Premium Gown Collection</strong> included</li>
-              <li><strong>1 Premium Setup</strong> & background choice</li>
-              <li><strong>25 Fully Edited</strong> high-res soft copies</li>
-              <li><strong>120 Minutes</strong> session time</li>
-              <li><strong>2 Signature Master Edits</strong> <span class="complimentary-tag">Complimentary</span></li>
-              <li><strong>12 × 18 Premium Photobook</strong> <span class="complimentary-tag">Complimentary</span></li>
-              <li>Private online selection gallery</li>
-            </ul>
-            <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Outdoor%20Package%206%20(12500)." class="btn btn-outline" target="_blank" rel="noopener">Book Package 6</a>
+        <!-- Package 6 (Outdoor) -->
+        <div class="package-card">
+          <img src="assets/gallery/maternity/_A2A9865.webp" alt="Maternity Outdoor Package 6 pink theme" class="package-card-img">
+          <div class="package-header">
+            <span class="package-icon">👑</span>
+            <h3>Package 6</h3>
+            <div class="package-price">₹12,500 <span>/ Session</span></div>
           </div>
+          <ul class="package-features">
+            <li><strong>Indoor & Outdoor</strong> session</li>
+            <li><strong>4 Outfit</strong> changes</li>
+            <li><strong>Premium Gown Collection</strong> included</li>
+            <li><strong>1 Premium Setup</strong> & background choice</li>
+            <li><strong>25 Fully Edited</strong> high-res soft copies</li>
+            <li><strong>120 Minutes</strong> session time</li>
+            <li><strong>2 Signature Master Edits</strong> <span class="complimentary-tag">Complimentary</span></li>
+            <li><strong>12 × 18 Premium Photobook</strong> <span class="complimentary-tag">Complimentary</span></li>
+            <li>Private online selection gallery</li>
+          </ul>
+          <a href="https://wa.me/919712701002?text=Hi%20Rhythm%20Clicks%20Studio!%20I'd%20like%20to%20book%20Maternity%20Outdoor%20Package%206%20(12500)." class="btn btn-outline" target="_blank" rel="noopener">Book Package 6</a>
         </div>
       </div>
 
@@ -725,25 +661,6 @@
   <!-- Main JavaScript File -->
   <script src="app.js" defer></script>
   
-  <!-- Interactive Tab Switcher script -->
-  <script>
-    function switchSessionTab(sessionType) {
-      // Remove active class from all buttons
-      const buttons = document.querySelectorAll('.tab-btn');
-      buttons.forEach(btn => btn.classList.remove('active'));
-      
-      // Add active class to clicked button
-      const activeBtn = document.getElementById('tab-btn-' + sessionType);
-      if (activeBtn) activeBtn.classList.add('active');
-      
-      // Hide all contents
-      const contents = document.querySelectorAll('.tab-content');
-      contents.forEach(content => content.classList.remove('active'));
-      
-      // Show chosen content
-      const activeContent = document.getElementById(sessionType + '-session-content');
-      if (activeContent) activeContent.classList.add('active');
-    }
-  </script>
+
 </body>
 </html>
